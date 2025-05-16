@@ -127,6 +127,9 @@ void LoginScene::OnKeyDown(int keyCode) {
         if (keyCode >= ALLEGRO_KEY_A && keyCode <= ALLEGRO_KEY_Z && pass.size() < MAX_PASS) {
             pass += keyCode - ALLEGRO_KEY_A + 'a';
         }
+        if (keyCode >= ALLEGRO_KEY_0 && keyCode <= ALLEGRO_KEY_9 && name.size() < MAX_NAME) {
+            pass += keyCode - ALLEGRO_KEY_0;
+        }
         if (keyCode == ALLEGRO_KEY_BACKSPACE) {
             pass.pop_back();
         }
