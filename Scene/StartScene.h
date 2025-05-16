@@ -6,6 +6,7 @@
 #define INC_2025_I2P2_TOWERDEFENSE_WITH_ANSWER_STARTSCENE_H
 
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_font.h>
 #include <memory>
 
 #include "Engine/IScene.hpp"
@@ -16,5 +17,9 @@ public:
     void Terminate() override;
     void PlayOnClick(int stage);
     void SettingsOnClick(int stage);
+    void Update(float deltaTime) override;
+    void Draw() const override;
+    float elapsed;
+    ALLEGRO_FONT* font;
 };
 #endif   // INC_2025_I2P2_TOWERDEFENSE_WITH_ANSWER_STARTSCENE_H

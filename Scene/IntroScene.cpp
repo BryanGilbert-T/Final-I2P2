@@ -41,7 +41,7 @@ void IntroScene::Update(float deltaTime) {
     elapsedTime += deltaTime;
 
     if (elapsedTime > 5) {
-        Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+        Engine::GameEngine::GetInstance().ChangeScene("start");
     }
 }
 void IntroScene::Draw() const {

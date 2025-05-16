@@ -6,7 +6,9 @@
 #include <allegro5/allegro_audio.h>
 #include <functional>
 #include <memory>
+#include <cmath>
 #include <string>
+#include <iostream>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
@@ -14,29 +16,47 @@
 #include "Engine/Resources.hpp"
 #include "PlayScene.hpp"
 #include "Scene/StartScene.h"
+
+#include <allegro5/allegro_ttf.h>
+
 #include "UI/Component/ImageButton.hpp"
 #include "UI/Component/Label.hpp"
 #include "UI/Component/Slider.hpp"
 
 // TODO HACKATHON-2 (1/3): You can imitate the 2 files: 'StartScene.hpp', 'StartScene.cpp' to implement your SettingsScene.
 void StartScene::Initialize() {
-    int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
-    int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
     Engine::ImageButton *btn;
+    elapsed = 0.0;
 
-    AddNewObject(new Engine::Label("Tower Defense", "pirulen.ttf", 120, halfW, halfH / 3 + 50, 10, 255, 255, 255, 0.5, 0.5));
+    font = al_load_font("Resource/fonts/pirulen.ttf", 24, 0);
+    if (!font) {
+        std::cout<<"ERROR: failed to load pirulen.ttf\n";
+        std::exit(1);
+    }
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH / 2 + 200, 400, 100);
-    btn->SetOnClickCallback(std::bind(&StartScene::PlayOnClick, this, 1));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Play", "pirulen.ttf", 48, halfW, halfH / 2 + 250, 0, 0, 0, 255, 0.5, 0.5));
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH * 3 / 2 - 50, 400, 100);
-    btn->SetOnClickCallback(std::bind(&StartScene::SettingsOnClick, this, 2));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Settings", "pirulen.ttf", 48, halfW, halfH * 3 / 2, 0, 0, 0, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("Sun Wu Kuo", "pirulen.ttf", 120, halfW, halfH / 3 + 50, 10, 255, 255, 255, 0.5, 0.5));
+
+}
+void StartScene::Update(float deltaTime) {
+    IScene::Update(deltaTime);
+    elapsed += deltaTime;
+    std::cout << elapsed << std::endl;
+}
+void StartScene::Draw() const {
+    IScene::Draw();
+    auto& eng = Engine::GameEngine::GetInstance();
+    int w = eng.getVirtW();
+    int h = eng.getVirtH();
+    float freq = 0.5f;
+    float alpha = (std::sin(elapsed * 2 * M_PI * freq) + 1) * 0.5f;
+    ALLEGRO_COLOR tint = al_map_rgba_f(1,1,1,alpha);
+    al_draw_text(font, tint, w/2, h*0.9, ALLEGRO_ALIGN_CENTER,
+        "Press any key");
 }
 void StartScene::Terminate() {
     IScene::Terminate();
