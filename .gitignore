@@ -2,7 +2,7 @@
 .idea
 .vscode
 
-# CmakebuildDebug
+# Cmakebuild
 /cmake-build-debug/
 
 # Linked files
