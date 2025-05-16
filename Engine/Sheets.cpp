@@ -1,5 +1,5 @@
 #include <sha256/sha256.h>
-#include <curl/curl.h>
+#include <curl/include/curl.h>
 #include <nlohmann/json.hpp>
 #include <iomanip>
 #include <sstream>
