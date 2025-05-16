@@ -3,7 +3,7 @@
 .vscode
 
 # CmakebuildDebug
-.cmake-build-debug
+/cmake-build-debug/
 
 # Linked files
 # But keep allegro for convenience
