@@ -16,6 +16,8 @@ namespace Engine {
     /// </summary>
     class GameEngine final {
     private:
+        int VIRT_W, VIRT_H;
+        ALLEGRO_BITMAP* buffer;
         // Allegro5 settings, frames per second, screen width, screen height, maximum simultaneous audio samples.
         int fps{}, screenW{}, screenH{}, reserveSamples{};
         // Determines whether to free memory between scenes.
@@ -77,6 +79,14 @@ namespace Engine {
         void changeScene(const std::string &name);
 
     public:
+        int getVirtW() { return VIRT_W; }
+        int getVirtH() { return VIRT_H; }
+        void setVirtW(int val) {
+            VIRT_W = val;
+        }
+        void setVirtH(int val) {
+            VIRT_H = val;
+        }
         // Note: We'll ignore C++11's move constructor, move assignment operator in this project for simplicity.
         /// <summary>
         /// Copy constructor is deleted, no copying allowed.

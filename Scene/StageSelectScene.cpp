@@ -14,8 +14,8 @@
 #include "UI/Component/Slider.hpp"
 
 void StageSelectScene::Initialize() {
-    int w = Engine::GameEngine::GetInstance().GetScreenSize().x;
-    int h = Engine::GameEngine::GetInstance().GetScreenSize().y;
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
     Engine::ImageButton *btn;

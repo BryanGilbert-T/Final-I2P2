@@ -40,11 +40,21 @@ namespace Engine {
         if (!al_install_mouse()) throw Allegro5Exception("failed to install mouse");
 
         // Setup game display.
+        ALLEGRO_MONITOR_INFO mon_info;
+        al_get_monitor_info(0, &mon_info);
+
+        // Compute width and height
+        screenW = mon_info.x2 - mon_info.x1;
+        screenH = mon_info.y2 - mon_info.y1;
+
+        al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
         display = al_create_display(screenW, screenH);
         if (!display) throw Allegro5Exception("failed to create display");
         al_set_window_title(display, title);
         // Set alpha blending mode.
         al_set_blender(ALLEGRO_ADD, ALLEGRO_ALPHA, ALLEGRO_INVERSE_ALPHA);
+
+        buffer = al_create_bitmap(VIRT_W, VIRT_H);
 
         // Load and set window icon.
         if (icon) {
@@ -104,27 +114,33 @@ namespace Engine {
                     LOG(VERBOSE) << "Key with keycode " << event.keyboard.keycode << " up";
                     activeScene->OnKeyUp(event.keyboard.keycode);
                     break;
-                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN:
+                case ALLEGRO_EVENT_MOUSE_BUTTON_DOWN: {
                     // Event for mouse key down.
+                    auto p = GameEngine::GetInstance().GetMousePosition();
                     LOG(VERBOSE) << "Mouse button " << event.mouse.button << " down at (" << event.mouse.x << ", " << event.mouse.y << ")";
-                    activeScene->OnMouseDown(event.mouse.button, event.mouse.x, event.mouse.y);
+                    activeScene->OnMouseDown(event.mouse.button, p.x, p.y);
                     break;
-                case ALLEGRO_EVENT_MOUSE_BUTTON_UP:
+                }
+                case ALLEGRO_EVENT_MOUSE_BUTTON_UP: {
                     // Event for mouse key up.
+                    auto p = GameEngine::GetInstance().GetMousePosition();
                     LOG(VERBOSE) << "Mouse button " << event.mouse.button << " down at (" << event.mouse.x << ", " << event.mouse.y << ")";
-                    activeScene->OnMouseUp(event.mouse.button, event.mouse.x, event.mouse.y);
+                    activeScene->OnMouseUp(event.mouse.button, p.x, p.y);
                     break;
-                case ALLEGRO_EVENT_MOUSE_AXES:
+                }
+                case ALLEGRO_EVENT_MOUSE_AXES: {
+                    auto p = GameEngine::GetInstance().GetMousePosition();
                     if (event.mouse.dx != 0 || event.mouse.dy != 0) {
                         // Event for mouse move.
                         LOG(VERBOSE) << "Mouse move to (" << event.mouse.x << ", " << event.mouse.y << ")";
-                        activeScene->OnMouseMove(event.mouse.x, event.mouse.y);
+                        activeScene->OnMouseMove(p.x, p.y);
                     } else if (event.mouse.dz != 0) {
                         // Event for mouse scroll.
                         LOG(VERBOSE) << "Mouse scroll at (" << event.mouse.x << ", " << event.mouse.y << ") with delta " << event.mouse.dz;
                         activeScene->OnMouseScroll(event.mouse.x, event.mouse.y, event.mouse.dz);
                     }
                     break;
+                }
                 case ALLEGRO_EVENT_MOUSE_LEAVE_DISPLAY:
                     LOG(VERBOSE) << "Mouse leave display.";
                     ALLEGRO_MOUSE_STATE state;
@@ -167,7 +183,34 @@ namespace Engine {
         activeScene->Update(deltaTime);
     }
     void GameEngine::draw() const {
+        al_set_target_bitmap(buffer);
+        al_clear_to_color(al_map_rgb(0, 0, 0));
         activeScene->Draw();
+
+        // 4) Compute scale & letterbox for the real screen
+        al_set_target_backbuffer(display);
+        al_clear_to_color(al_map_rgb(0, 0, 0));    // black bars
+
+        int disp_w = screenW;   // or al_get_display_width(display)
+        int disp_h = screenH;   // or al_get_display_height(display)
+        float scale_x = float(disp_w) / VIRT_W;
+        float scale_y = float(disp_h) / VIRT_H;
+        float scale   = std::min(scale_x, scale_y);
+
+        float out_w    = VIRT_W * scale;
+        float out_h    = VIRT_H * scale;
+        float offset_x = (disp_w - out_w) * 0.5f;
+        float offset_y = (disp_h - out_h) * 0.5f;
+
+        // 5) Blit the buffer, letting Allegro linearly filter the up-scale
+        al_draw_scaled_bitmap(
+            buffer,
+            0, 0, VIRT_W, VIRT_H,  // source
+            offset_x, offset_y,    // destination position
+            out_w, out_h,          // destination size
+            0                      // flags
+        );
+
         al_flip_display();
     }
     void GameEngine::destroy() {
@@ -197,8 +240,8 @@ namespace Engine {
         LOG(INFO) << "Game Initializing...";
         // Update Allegro5 configs.
         this->fps = fps;
-        this->screenW = screenW;
-        this->screenH = screenH;
+        setVirtW(screenW);
+        setVirtH(screenH);
         this->reserveSamples = reserveSamples;
         this->title = title;
         this->icon = icon;
@@ -251,9 +294,16 @@ namespace Engine {
         return screenH;
     }
     Point GameEngine::GetMousePosition() const {
-        ALLEGRO_MOUSE_STATE state;
-        al_get_mouse_state(&state);
-        return Point(state.x, state.y);
+        ALLEGRO_MOUSE_STATE st;
+        al_get_mouse_state(&st);
+        float dispW = screenW, dispH = screenH;
+        float scale = std::min(dispW / VIRT_W, dispH / VIRT_H);
+        float outW  = VIRT_W * scale, outH = VIRT_H * scale;
+        float offX  = (dispW - outW) * 0.5f;
+        float offY  = (dispH - outH) * 0.5f;
+        int vx = int((st.x - offX) / scale);
+        int vy = int((st.y - offY) / scale);
+        return Point(vx, vy);
     }
     bool GameEngine::IsKeyDown(int keyCode) const {
         ALLEGRO_KEYBOARD_STATE state;
