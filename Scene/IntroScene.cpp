@@ -5,7 +5,9 @@
 #include "IntroScene.h"
 #include <allegro5/allegro_audio.h>
 #include <functional>
+#include <iostream>
 #include <memory>
+#include <ostream>
 #include <string>
 
 #include "Engine/AudioHelper.hpp"
@@ -26,20 +28,54 @@ void IntroScene::Initialize() {
     int halfH = h / 2;
     Engine::ImageButton *btn;
 
-    AddNewObject(new Engine::Label("Tower Defense", "pirulen.ttf", 120, halfW, halfH / 3 + 50, 10, 255, 255, 255, 0.5, 0.5));
+    cur = al_load_bitmap("Resource/images/play/benjamin.png");
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH / 2 + 200, 400, 100);
-    btn->SetOnClickCallback(std::bind(&IntroScene::PlayOnClick, this, 1));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Play", "pirulen.ttf", 48, halfW, halfH / 2 + 250, 0, 0, 0, 255, 0.5, 0.5));
-
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH * 3 / 2 - 50, 400, 100);
-    btn->SetOnClickCallback(std::bind(&IntroScene::SettingsOnClick, this, 2));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Settings", "pirulen.ttf", 48, halfW, halfH * 3 / 2, 0, 0, 0, 255, 0.5, 0.5));
+    elapsedTime = 0;
 }
 void IntroScene::Terminate() {
+    if (cur) al_destroy_bitmap(cur);
     IScene::Terminate();
+}
+void IntroScene::Update(float deltaTime) {
+    IScene::Update(deltaTime);
+    elapsedTime += deltaTime;
+
+    if (elapsedTime > 5) {
+        Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+    }
+}
+void IntroScene::Draw() const {
+    IScene::Draw();
+
+    float alpha = 0.0f;
+    if      (elapsedTime <  0.0f) alpha = 0.0f;
+    else if (elapsedTime <= 1.0f) alpha = elapsedTime / 1.0f;
+    else if (elapsedTime <= 4.0f) alpha = 1.0f;
+    else if (elapsedTime <= 5.0f) alpha = (5.0f - elapsedTime) / 1.0f;
+    else                           alpha = 0.0f;
+
+    float scale = 2.0;
+
+    int benW = al_get_bitmap_width(cur);
+    int benH = al_get_bitmap_height(cur);
+    float dstW  = benW * scale;
+    float dstH  = benH * scale;
+
+    // center on screen
+    auto& eng = Engine::GameEngine::GetInstance();
+    int  vw  = eng.getVirtW();
+    int  vh  = eng.getVirtH();
+    float x  = (vw - dstW) * 0.5f;
+    float y  = (vh - dstH) * 0.5f;
+    
+
+    // draw tinted (white tint + alpha)
+    ALLEGRO_COLOR tint = al_map_rgba_f(1, 1, 1, alpha);
+    al_draw_tinted_scaled_bitmap(cur, tint,
+        0, 0, benW, benH,
+        x, y, dstW, dstH, 0);
+
+    // now draw any UI you added (label, buttons…)
 }
 void IntroScene::PlayOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("stage-select");

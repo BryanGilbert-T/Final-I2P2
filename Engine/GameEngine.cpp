@@ -49,7 +49,7 @@ namespace Engine {
 
         std::cout << screenW << " " << screenH << std::endl;
 
-        // al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
+        al_set_new_display_flags(ALLEGRO_FULLSCREEN_WINDOW);
         display = al_create_display(screenW, screenH);
         if (!display) throw Allegro5Exception("failed to create display");
         al_set_window_title(display, title);

@@ -16,5 +16,10 @@ public:
     void Terminate() override;
     void PlayOnClick(int stage);
     void SettingsOnClick(int stage);
+    void Update(float deltaTime) override;
+    void Draw() const override;
+private:
+    float elapsedTime;
+    ALLEGRO_BITMAP* cur;
 };
 #endif   // INC_2025_I2P2_TOWERDEFENSE_WITH_ANSWER_INTROSCENE_H

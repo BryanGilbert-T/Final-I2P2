@@ -133,7 +133,7 @@ CMAKE_INSTALL_PREFIX:PATH=C:/Program Files (x86)/2025_I2P2_TowerDefense
 CMAKE_LINKER:FILEPATH=C:/llvm-mingw-20240417-msvcrt-x86_64/bin/ld.lld.exe
 
 //make program
-CMAKE_MAKE_PROGRAM:FILEPATH=C:/PROGRA~1/JETBRA~1/CLION2~1.1/bin/ninja/win/x64/ninja.exe
+CMAKE_MAKE_PROGRAM:FILEPATH=C:/Program Files/JetBrains/CLion 2025.1/bin/ninja/win/x64/ninja.exe
 
 //Flags used by the linker during the creation of modules during
 // all build types.
