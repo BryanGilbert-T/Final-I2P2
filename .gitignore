@@ -2,6 +2,9 @@
 .idea
 .vscode
 
+# CmakebuildDebug
+.cmake-build-debug
+
 # Linked files
 # But keep allegro for convenience
 *.dll
