@@ -23,7 +23,7 @@
 #include "UI/Component/Label.hpp"
 #include "UI/Component/Slider.hpp"
 
-// TODO HACKATHON-2 (1/3): You can imitate the 2 files: 'StartScene.hpp', 'StartScene.cpp' to implement your SettingsScene.
+// TODO Arwen : Leaderboard and Setting Scene
 void StartScene::Initialize() {
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -45,7 +45,6 @@ void StartScene::Initialize() {
 void StartScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     elapsed += deltaTime;
-    std::cout << elapsed << std::endl;
 }
 void StartScene::Draw() const {
     IScene::Draw();
@@ -58,6 +57,11 @@ void StartScene::Draw() const {
     al_draw_text(font, tint, w/2, h*0.9, ALLEGRO_ALIGN_CENTER,
         "Press any key");
 }
+void StartScene::OnKeyDown(int keyCode) {
+    IScene::OnKeyDown(keyCode);
+    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+}
+
 void StartScene::Terminate() {
     IScene::Terminate();
 }

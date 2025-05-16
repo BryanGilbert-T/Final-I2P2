@@ -17,6 +17,7 @@ public:
     void Terminate() override;
     void PlayOnClick(int stage);
     void SettingsOnClick(int stage);
+    void OnKeyDown(int keyCode) override;
     void Update(float deltaTime) override;
     void Draw() const override;
     float elapsed;
