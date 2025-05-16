@@ -9,6 +9,7 @@
 #include <cmath>
 #include <string>
 #include <iostream>
+#include <fstream>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
@@ -57,9 +58,19 @@ void StartScene::Draw() const {
     al_draw_text(font, tint, w/2, h*0.9, ALLEGRO_ALIGN_CENTER,
         "Press any key");
 }
+bool is_empty(const std::string& path) {
+    std::ifstream f(path);
+    if (!f) throw std::runtime_error("Cannot open file");
+    return f.peek() == std::ifstream::traits_type::eof();
+}
+
 void StartScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
-    Engine::GameEngine::GetInstance().ChangeScene("stage-select");
+    if (is_empty("Resource/account.txt")) {
+        Engine::GameEngine::GetInstance().ChangeScene("login");
+    } else {
+        Engine::GameEngine::GetInstance().ChangeScene("boarding");
+    }
 }
 
 void StartScene::Terminate() {
