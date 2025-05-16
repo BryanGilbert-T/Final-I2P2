@@ -1,19 +1,10 @@
-#include <openssl/sha.h>
+#include <sha256/sha256.h>
 #include <curl/curl.h>
 #include <nlohmann/json.hpp>
 #include <iomanip>
 #include <sstream>
 #include <iostream>
 
-// -------------- SHA256 helper --------------
-std::string sha256(const std::string& s) {
-    unsigned char hash[SHA256_DIGEST_LENGTH];
-    SHA256(reinterpret_cast<const unsigned char*>(s.data()), s.size(), hash);
-    std::ostringstream out;
-    out << std::hex << std::setfill('0');
-    for (auto c : hash) out << std::setw(2) << int(c);
-    return out.str();
-}
 
 // -------------- HTTP helper --------------
 size_t write_cb(void* ptr, size_t sz, size_t nm, void* usr) {

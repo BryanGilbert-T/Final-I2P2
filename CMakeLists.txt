@@ -5,6 +5,11 @@ set(CMAKE_CXX_STANDARD 17)
 
 include_directories(.)
 include_directories(Resource)
+include_directories(2025_I2P2_TowerDefense
+        PRIVATE
+        ${CMAKE_SOURCE_DIR}/Resource/include
+)
+
 
 file(COPY Resource/audios DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 file(COPY Resource/fonts DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
@@ -19,6 +24,23 @@ add_executable(2025_I2P2_TowerDefense
     Bullet/FireBullet.hpp
     Bullet/LaserBullet.cpp
     Bullet/LaserBullet.hpp
+
+    # Vendors
+    Resource/sha256/sha256.cpp
+    Resource/sha256/sha256.h
+    Resource/nlohmann/json.hpp
+    Resource/curl/curl.h
+    Resource/curl/curlver.h
+    Resource/curl/websockets.h
+    Resource/curl/urlapi.h
+    Resource/curl/typecheck-gcc.h
+    Resource/curl/system.h
+    Resource/curl/easy.h
+    Resource/curl/stdcheaders.h
+    Resource/curl/options.h
+    Resource/curl/multi.h
+    Resource/curl/mprintf.h
+    Resource/curl/header.h
 
     # TODO HACKATHON-3 (3/3): Add the new enemy source files here
     Enemy/Enemy.cpp
