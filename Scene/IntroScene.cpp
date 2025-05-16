@@ -67,7 +67,7 @@ void IntroScene::Draw() const {
     int  vh  = eng.getVirtH();
     float x  = (vw - dstW) * 0.5f;
     float y  = (vh - dstH) * 0.5f;
-    
+
 
     // draw tinted (white tint + alpha)
     ALLEGRO_COLOR tint = al_map_rgba_f(1, 1, 1, alpha);
