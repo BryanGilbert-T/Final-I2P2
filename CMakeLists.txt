@@ -29,18 +29,18 @@ add_executable(2025_I2P2_TowerDefense
     Resource/sha256/sha256.cpp
     Resource/sha256/sha256.h
     Resource/nlohmann/json.hpp
-    Resource/curl/curl.h
-    Resource/curl/curlver.h
-    Resource/curl/websockets.h
-    Resource/curl/urlapi.h
-    Resource/curl/typecheck-gcc.h
-    Resource/curl/system.h
-    Resource/curl/easy.h
-    Resource/curl/stdcheaders.h
-    Resource/curl/options.h
-    Resource/curl/multi.h
-    Resource/curl/mprintf.h
-    Resource/curl/header.h
+    Resource/curl/include/curl.h
+    Resource/curl/include/curlver.h
+    Resource/curl/include/websockets.h
+    Resource/curl/include/urlapi.h
+    Resource/curl/include/typecheck-gcc.h
+    Resource/curl/include/system.h
+    Resource/curl/include/easy.h
+    Resource/curl/include/stdcheaders.h
+    Resource/curl/include/options.h
+    Resource/curl/include/multi.h
+    Resource/curl/include/mprintf.h
+    Resource/curl/include/header.h
 
     # TODO HACKATHON-3 (3/3): Add the new enemy source files here
     Enemy/Enemy.cpp
