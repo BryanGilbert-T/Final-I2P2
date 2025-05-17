@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 const std::string project_id = "sunwukong-5bd64";
 
@@ -141,6 +142,18 @@ int authUser(const std::string& name, const std::string& password) {
 
     std::map<std::string, std::string> result = getUser(name);
     if (result.empty()) return -1;
-    if (result["password"] == hash) return 1;
-    else return 0;
+    if (result["pass"] == hash) {
+        // Later
+        // std::ofstream ofs("Resource/account.txt");
+        // if (ofs) {
+        //     ofs << result["name"] << " "
+        //         << result["stage"] << " "
+        //         << result["px"] << " "
+        //         << result["py"] << " "
+        //         << result["coin"] << " "
+        //         << result["hp"] << "\n";
+        //     ofs.close();
+        // }
+        return 1;
+    } else return 0;
 }

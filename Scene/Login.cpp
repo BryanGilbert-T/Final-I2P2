@@ -3,6 +3,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <iostream>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
@@ -17,12 +18,21 @@
 
 const int MAX_NAME = 12;
 const int MAX_PASS = 36;
-// TODO Arwen
+const float APPEAR_DURATION = 3.0;
+// TODO Arwen - cantikin
 void LoginScene::Initialize() {
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
+    elapsed = 0;
+    NotFoundTimeStamp = -5;
+    WrongPasswordTimeStamp = -5;
+
+    AddNewObject(NotFoundLabel = new Engine::Label("Name Not Found", "pirulen.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(WrongPasswordLabel = new Engine::Label("Wrong Password", "pirulen.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
+    NotFoundLabel->Visible = false;
+    WrongPasswordLabel->Visible = false;
 
     font = al_load_font("Resource/fonts/pirulen.ttf", 72, 0);
 
@@ -60,12 +70,65 @@ void LoginScene::Login(int stage) {
 
     int status = authUser(name, pass);
     if (status == -1) { // no such name in database
+        this->RaiseNotFound();
         return;
-    } else if (status == 0) { // password incorrect
+    } if (status == 0) { // password incorrect
+        this->RaiseWrongPassword();
         return;
     }
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
+void LoginScene::RaiseNotFound() {
+    // kalo blm punya nama di database
+    NotFoundTimeStamp = elapsed;
+    NotFoundLabel->Visible = true;
+}
+void LoginScene::RaiseWrongPassword() {
+    // kalo salah password
+    WrongPasswordTimeStamp = elapsed;
+    WrongPasswordLabel->Visible = true;
+}
+void LoginScene::Update(float deltaTime) {
+    IScene::Update(deltaTime);
+    elapsed += deltaTime;
+
+    const float y_start = -140;
+    const float y_end = 90;
+
+    float dtNotFound = elapsed - NotFoundTimeStamp;
+    if (dtNotFound >= 0 && dtNotFound < APPEAR_DURATION) {
+        float y;
+        if (dtNotFound < 1.0f) { // move down
+            y = y_start + (dtNotFound / 1.0f) * (y_end - y_start); // y_start -> y_end
+        } else if (dtNotFound < APPEAR_DURATION - 1.0f) { // stay
+            y = y_end;
+        } else if (dtNotFound < APPEAR_DURATION) { // move up
+            y = y_end - ((dtNotFound - (APPEAR_DURATION - 1.0f)) / 1.0f) * (y_end - y_start); // y_end -> y_start
+        }
+        NotFoundLabel->Position.y = y;
+        NotFoundLabel->Visible = true;
+    } else {
+        NotFoundLabel->Visible = false;
+    }
+
+    // Animate WrongPassword label
+    float dtWrong = elapsed - WrongPasswordTimeStamp;
+    if (dtWrong >= 0 && dtWrong < APPEAR_DURATION) {
+        float y;
+        if (dtWrong < 1.0f) { // move down
+            y = y_start + (dtWrong / 1.0f) * (y_end - y_start); // y_start -> y_end
+        } else if (dtWrong < APPEAR_DURATION - 1.0f) { // stay
+            y = y_end;
+        } else if (dtWrong < APPEAR_DURATION) { // move up
+            y = y_end - ((dtWrong - (APPEAR_DURATION - 1.0f)) / 1.0f) * (y_end - y_start); // y_end -> y_start
+        }
+        WrongPasswordLabel->Position.y = y;
+        WrongPasswordLabel->Visible = true;
+    } else {
+        WrongPasswordLabel->Visible = false;
+    }
+}
+
 void LoginScene::Draw() const {
     IScene::Draw();
 
