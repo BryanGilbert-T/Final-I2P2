@@ -57,8 +57,8 @@ void LoginScene::Terminate() {
 void LoginScene::Login(int stage) {
     if (name.empty()) return;
     if (pass.empty()) return;
-
-    Engine::GameEngine::GetInstance().ChangeScene("boarding");
+    authUser(name, pass);
+    // Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 void LoginScene::Draw() const {
     IScene::Draw();

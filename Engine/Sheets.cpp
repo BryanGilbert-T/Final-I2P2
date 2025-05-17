@@ -7,83 +7,152 @@
 
 const std::string API = "https://script.google.com/macros/s/AKfycbxEOi5h8_zZB6kgFtiCrdjurJzgCq5FwfHPuO_XiJF3e-o-G_Ml1NldINYh_GPPGtm11A/exec";
 
-// -------------- HTTP helper --------------
-size_t write_cb(void* ptr, size_t sz, size_t nm, void* usr) {
+//— Low-level write callback to collect response into a std::string
+static size_t write_cb(void* ptr, size_t sz, size_t nm, void* usr) {
     std::string& resp = *static_cast<std::string*>(usr);
-    resp.append((char*)ptr, sz*nm);
-    return sz*nm;
+    resp.append(reinterpret_cast<char*>(ptr), sz * nm);
+    return sz * nm;
 }
 
-nlohmann::json http_json(const std::string& url,
-                         const nlohmann::json* postBody=nullptr)
-{
+//— Send a URL-encoded form POST, parse JSON (empty on errors)
+static nlohmann::json http_post_form(const std::string& url,
+                                     const std::string& formBody) {
     CURL* curl = curl_easy_init();
+    if (!curl) { std::cerr<<"curl init failed\n"; return {}; }
+
     std::string resp;
-    curl_slist* hdrs = nullptr;
-    hdrs = curl_slist_append(hdrs, "Content-Type: application/json");
-
-    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
-    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+    curl_easy_setopt(curl, CURLOPT_URL,        url.c_str());
+    curl_easy_setopt(curl, CURLOPT_POST,       1L);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, formBody.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &resp);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA,     &resp);
 
-    if (postBody) {
-        auto s = postBody->dump();
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, s.c_str());
-    }
+    // disable SSL checks for testing
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-    if (curl_easy_perform(curl)!=CURLE_OK) {
-        std::cerr<<"CURL request failed\n";
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cerr<<"curl_easy_perform failed: "
+                 << curl_easy_strerror(res) <<"\n";
+        curl_easy_cleanup(curl);
+        return {};
     }
-    curl_slist_free_all(hdrs);
     curl_easy_cleanup(curl);
-    return nlohmann::json::parse(resp);
+
+    std::cout<<"[http_post_form] raw response:\n"<<resp<<"\n";
+    if (resp.empty()) {
+        std::cerr<<"empty response\n";
+        return {};
+    }
+    try {
+        return nlohmann::json::parse(resp);
+    } catch (nlohmann::json::parse_error& e) {
+        std::cerr<<"JSON parse error: "<<e.what()<<"\n";
+        return {};
+    }
 }
 
-void createUser(std::string name, std::string pass) {
-    auto createReq = nlohmann::json{
-          {"action",        "createUser"},
-          {"username",      name},
-          {"password_hash", sha256(pass)},
-          {"stage",         1},
-          {"px",            0},
-          {"py",            0},
-          {"coin",          0},
-          {"hp",            100}
-    };
-    auto r = http_json(API, &createReq);
-    std::cout<<"createUser → "<<r.dump()<<"\n";
+//— Simple GET + JSON parse (for findUser)
+static nlohmann::json http_get(const std::string& url) {
+    CURL* curl = curl_easy_init();
+    if (!curl) { std::cerr<<"curl init failed\n"; return {}; }
+
+    std::string resp;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA,     &resp);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cerr<<"curl_easy_perform failed: "
+                 << curl_easy_strerror(res) <<"\n";
+        curl_easy_cleanup(curl);
+        return {};
+    }
+    curl_easy_cleanup(curl);
+
+    std::cout<<"[http_get] raw response:\n"<<resp<<"\n";
+    if (resp.empty()) {
+        std::cerr<<"empty response\n";
+        return {};
+    }
+    try {
+        return nlohmann::json::parse(resp);
+    } catch (nlohmann::json::parse_error& e) {
+        std::cerr<<"JSON parse error: "<<e.what()<<"\n";
+        return {};
+    }
 }
 
-void findUser(std::string name) {
-    std::string url2 = API
-     + "?action=getUser&username="
-     + curl_easy_escape(nullptr, name.c_str(), 0);
-    auto r = http_json(url2, nullptr);
-    std::cout<<"getUser → "<< r.dump(2) << "\n";
+//— Create a new user
+void createUser(const std::string& name, const std::string& pass) {
+    // build URL-encoded body
+    CURL* esc = curl_easy_init();
+    char* u = curl_easy_escape(esc, name.c_str(), 0);
+    char* p = curl_easy_escape(esc, sha256(pass).c_str(), 0);
+    std::ostringstream form;
+    form<<"action=createUser"
+        <<"&username="<< (u?u:"")
+        <<"&password_hash="<< (p?p:"")
+        <<"&stage=1&px=0&py=0&coin=0&hp=100";
+    if (u) curl_free(u);
+    if (p) curl_free(p);
+    curl_easy_cleanup(esc);
+
+    auto r = http_post_form(API, form.str());
+    std::cout<<"createUser → "<< r.dump(2) <<"\n";
 }
 
-void updateUser(std::string name,
-    int stage, int px, int py, int coin, int hp) {
-    auto updReq = nlohmann::json{
-          {"action",   "updateUser"},
-          {"username", name},
-          {"stage",    stage},
-          {"px",       px},
-          {"py",       py},
-          {"coin",     coin},
-          {"hp",       hp}
-    };
-    auto r = http_json(API, &updReq);
-    std::cout<<"updateUser → "<<r.dump()<<"\n";
+//— Fetch an existing user
+void findUser(const std::string& name) {
+    // escape and build GET URL
+    CURL* esc = curl_easy_init();
+    char* u = curl_easy_escape(esc, name.c_str(), 0);
+    std::string url = API + "?action=getUser&username=" + (u?u:"");
+    if (u) curl_free(u);
+    curl_easy_cleanup(esc);
+
+    auto r = http_get(url);
+    std::cout<<"getUser → "<< r.dump(2) <<"\n";
 }
 
-void authUser(std::string name, std::string pass) {
-    auto authReq = nlohmann::json{
-          {"action",        "auth"},
-          {"username",      name},
-          {"password_hash", sha256(pass)}
-    };
-    auto r = http_json(API, &authReq);
-    std::cout<<"auth → "<<r.dump()<<"\n";
+//— Update user state
+void updateUser(const std::string& name,
+                int stage, int px, int py, int coin, int hp)
+{
+    CURL* esc = curl_easy_init();
+    char* u = curl_easy_escape(esc, name.c_str(), 0);
+    std::ostringstream form;
+    form<<"action=updateUser"
+        <<"&username="<< (u?u:"")
+        <<"&stage="<<stage
+        <<"&px="<<px
+        <<"&py="<<py
+        <<"&coin="<<coin
+        <<"&hp="<<hp;
+    if (u) curl_free(u);
+    curl_easy_cleanup(esc);
+
+    auto r = http_post_form(API, form.str());
+    std::cout<<"updateUser → "<< r.dump(2) <<"\n";
+}
+
+//— Authenticate a user
+void authUser(const std::string& name, const std::string& pass) {
+    CURL* esc = curl_easy_init();
+    char* u = curl_easy_escape(esc, name.c_str(), 0);
+    char* p = curl_easy_escape(esc, sha256(pass).c_str(), 0);
+    std::ostringstream form;
+    form<<"action=auth"
+        <<"&username="<< (u?u:"")
+        <<"&password_hash="<< (p?p:"");
+    if (u) curl_free(u);
+    if (p) curl_free(p);
+    curl_easy_cleanup(esc);
+
+    auto r = http_post_form(API, form.str());
+    std::cout<<"auth → "<< r.dump(2) <<"\n";
 }
