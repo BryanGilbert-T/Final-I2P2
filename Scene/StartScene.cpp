@@ -53,7 +53,9 @@ void StartScene::Draw() const {
     int w = eng.getVirtW();
     int h = eng.getVirtH();
     float freq = 0.5f;
-    float alpha = (std::sin(elapsed * 2 * M_PI * freq) + 1) * 0.5f;
+
+    float base = (std::sin(elapsed * 2 * M_PI * freq) + 1) * 0.5f;
+    float alpha = 0.4f + 0.6f * base;
     ALLEGRO_COLOR tint = al_map_rgba_f(1,1,1,alpha);
     al_draw_text(font, tint, w/2, h*0.9, ALLEGRO_ALIGN_CENTER,
         "Press any key");
