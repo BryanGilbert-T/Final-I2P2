@@ -57,9 +57,14 @@ void LoginScene::Terminate() {
 void LoginScene::Login(int stage) {
     if (name.empty()) return;
     if (pass.empty()) return;
-    createUser(name, pass);
-    // authUser(name, pass);
-    // Engine::GameEngine::GetInstance().ChangeScene("boarding");
+
+    int status = authUser(name, pass);
+    if (status == -1) { // no such name in database
+        return;
+    } else if (status == 0) { // password incorrect
+        return;
+    }
+    Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 void LoginScene::Draw() const {
     IScene::Draw();

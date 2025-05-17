@@ -2,11 +2,13 @@
 #define SHEETS_HPP
 
 #include <string>
+#include <map>
 
-extern void createUser(const std::string& username, const std::string& password);
-extern void getUser(const std::string& username);
-extern void updateUser(const std::string& name, int stage, int px, int py, int coin, int hp);
-extern void authUser(const std::string& name,const std::string& pass);
+std::map<std::string, std::string> getUser(const std::string& name);
+void createUser(const std::string& name, const std::string& password);
+void updateUser(const std::string& name, int px, int py, int coin, int hp);
+int authUser(const std::string& name, const std::string& password);
+
 
 
 #endif   // POINT_HPP
