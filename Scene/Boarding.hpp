@@ -16,6 +16,7 @@ public:
     void PlayOnClick(int stage);
     void ScoreboardOnClick();
     void BackOnClick(int stage);
+    void Logout(int stage);
 
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);

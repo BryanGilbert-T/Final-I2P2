@@ -144,16 +144,16 @@ int authUser(const std::string& name, const std::string& password) {
     if (result.empty()) return -1;
     if (result["pass"] == hash) {
         // Later
-        // std::ofstream ofs("Resource/account.txt");
-        // if (ofs) {
-        //     ofs << result["name"] << " "
-        //         << result["stage"] << " "
-        //         << result["px"] << " "
-        //         << result["py"] << " "
-        //         << result["coin"] << " "
-        //         << result["hp"] << "\n";
-        //     ofs.close();
-        // }
+        std::ofstream ofs("Resource/account.txt");
+        if (ofs) {
+            ofs << result["name"] << " "
+                << result["stage"] << " "
+                << result["px"] << " "
+                << result["py"] << " "
+                << result["coin"] << " "
+                << result["hp"] << "\n";
+            ofs.close();
+        }
         return 1;
     } else return 0;
 }

@@ -2,6 +2,7 @@
 #include <functional>
 #include <memory>
 #include <string>
+#include <fstream>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
@@ -29,22 +30,20 @@ void BoardingScene::Initialize() {
     AddNewControlObject(btn);
     AddNewObject(new Engine::Label("Stage 2", "pirulen.ttf", 48, halfW, halfH / 2 + 150, 0, 0, 0, 255, 0.5, 0.5));
 
-    Slider *sliderBGM, *sliderSFX;
-    sliderBGM = new Slider(40 + halfW - 95, halfH - 50 - 2, 190, 4);
-    sliderBGM->SetOnValueChangedCallback(std::bind(&BoardingScene::BGMSlideOnValueChanged, this, std::placeholders::_1));
-    AddNewControlObject(sliderBGM);
-    AddNewObject(new Engine::Label("BGM: ", "pirulen.ttf", 28, 40 + halfW - 60 - 95, halfH - 50, 255, 255, 255, 255, 0.5, 0.5));
-    sliderSFX = new Slider(40 + halfW - 95, halfH + 50 - 2, 190, 4);
-    sliderSFX->SetOnValueChangedCallback(std::bind(&BoardingScene::SFXSlideOnValueChanged, this, std::placeholders::_1));
-    AddNewControlObject(sliderSFX);
-    AddNewObject(new Engine::Label("SFX: ", "pirulen.ttf", 28, 40 + halfW - 60 - 95, halfH + 50, 255, 255, 255, 255, 0.5, 0.5));
-    // Not safe if release resource while playing, however we only free while change scene, so it's fine.
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
-    sliderBGM->SetValue(AudioHelper::BGMVolume);
-    sliderSFX->SetValue(AudioHelper::SFXVolume);
+    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", w - 400, h * 0.9, 400, 100);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::Logout, this, 1));
+    AddNewControlObject(btn);
+    AddNewObject(new Engine::Label("Logout", "pirulen.ttf", 48, w - 200, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
+
+    // Not safe if release resource while playing, however we only free while change scene, so it's fine.
+    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
+}
+void BoardingScene::Logout(int stage) {
+    std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
+    Engine::GameEngine::GetInstance().ChangeScene("login");
 }
 void BoardingScene::Terminate() {
     AudioHelper::StopSample(bgmInstance);
