@@ -40,7 +40,7 @@ void IntroScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     elapsedTime += deltaTime;
 
-    if (elapsedTime > 5) {
+    if (elapsedTime > 5.3) {
         Engine::GameEngine::GetInstance().ChangeScene("start");
     }
 }
