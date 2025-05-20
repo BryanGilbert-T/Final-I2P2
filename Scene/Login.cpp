@@ -189,7 +189,7 @@ void LoginScene::OnKeyDown(int keyCode) {
         if (keyCode >= ALLEGRO_KEY_A && keyCode <= ALLEGRO_KEY_Z && name.size() < MAX_NAME) {
             name += keyCode - ALLEGRO_KEY_A + 'a';
         }
-        if (keyCode == ALLEGRO_KEY_BACKSPACE) {
+        if (keyCode == ALLEGRO_KEY_BACKSPACE && !name.empty()) {
             name.pop_back();
         }
     } else if (BoxTwoClicked) {
@@ -199,7 +199,7 @@ void LoginScene::OnKeyDown(int keyCode) {
         if (keyCode >= ALLEGRO_KEY_0 && keyCode <= ALLEGRO_KEY_9 && name.size() < MAX_NAME) {
             pass += keyCode - ALLEGRO_KEY_0;
         }
-        if (keyCode == ALLEGRO_KEY_BACKSPACE) {
+        if (keyCode == ALLEGRO_KEY_BACKSPACE && !pass.empty()) {
             pass.pop_back();
         }
     }
