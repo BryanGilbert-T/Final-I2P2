@@ -20,6 +20,7 @@ public:
     void OnKeyDown(int keyCode) override;
     void Update(float deltaTime) override;
     void Draw() const override;
+    void OnMouseDown(int button, int mx, int my) override;
     float elapsed;
     ALLEGRO_FONT* font;
 };

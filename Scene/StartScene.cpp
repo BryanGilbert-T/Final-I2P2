@@ -68,6 +68,7 @@ bool is_empty(const std::string& path) {
 
 void StartScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
+    if (keyCode == ALLEGRO_KEY_ENTER) return;
     if (is_empty("Resource/account.txt")) {
         Engine::GameEngine::GetInstance().ChangeScene("login");
     } else {
@@ -77,6 +78,14 @@ void StartScene::OnKeyDown(int keyCode) {
 
 void StartScene::Terminate() {
     IScene::Terminate();
+}
+void StartScene::OnMouseDown(int button, int mx, int my) {
+    IScene::OnMouseDown(button, mx, my);
+    if (is_empty("Resource/account.txt")) {
+        Engine::GameEngine::GetInstance().ChangeScene("login");
+    } else {
+        Engine::GameEngine::GetInstance().ChangeScene("boarding");
+    }
 }
 void StartScene::PlayOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("stage-select");
