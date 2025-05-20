@@ -28,8 +28,7 @@ void IntroScene::Initialize() {
     int halfH = h / 2;
     Engine::ImageButton *btn;
 
-    cur = al_load_bitmap("Resource/images/play/benjamin.png");
-
+    cur = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
     elapsedTime = 0;
 }
 void IntroScene::Terminate() {
@@ -40,21 +39,27 @@ void IntroScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     elapsedTime += deltaTime;
 
-    if (elapsedTime > 5.3) {
+    if (elapsedTime > 7.0) {
         Engine::GameEngine::GetInstance().ChangeScene("start");
     }
 }
 void IntroScene::Draw() const {
     IScene::Draw();
 
-    float alpha = 0.0f;
-    if      (elapsedTime <  0.0f) alpha = 0.0f;
-    else if (elapsedTime <= 1.0f) alpha = elapsedTime / 1.0f;
-    else if (elapsedTime <= 4.0f) alpha = 1.0f;
-    else if (elapsedTime <= 5.0f) alpha = (5.0f - elapsedTime) / 1.0f;
-    else                           alpha = 0.0f;
+    al_clear_to_color(al_map_rgb(255, 255, 255));
 
-    float scale = 2.0;
+    const float delay = 1.0f;
+    const float fade = 2.5f;
+    const float fadeOut = 4.0f;
+    float alpha = 0.0f;
+
+    if      (elapsedTime < delay)           alpha = 0.0f;
+    else if (elapsedTime < delay + fade)    alpha = (elapsedTime - delay) / fade;
+    else if (elapsedTime < fadeOut)         alpha = 1.0f;
+    else if (elapsedTime < fadeOut + fade)  alpha = 1.0f - ((elapsedTime - fadeOut) / fade);
+    else                                    alpha = 0.0f;
+
+    float scale = 1.0;
 
     int benW = al_get_bitmap_width(cur);
     int benH = al_get_bitmap_height(cur);
