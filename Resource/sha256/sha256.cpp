@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <vector>
 #include <array>
+#include <cstdint>
 
 // Constants from the SHA-256 spec
 namespace {
