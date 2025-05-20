@@ -58,7 +58,7 @@ void StartScene::Draw() const {
     float alpha = 0.4f + 0.6f * base;
     ALLEGRO_COLOR tint = al_map_rgba_f(1,1,1,alpha);
     al_draw_text(font, tint, w/2, h*0.9, ALLEGRO_ALIGN_CENTER,
-        "Press any key");
+        "Click to start");
 }
 bool is_empty(const std::string& path) {
     std::ifstream f(path);
@@ -68,12 +68,12 @@ bool is_empty(const std::string& path) {
 
 void StartScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
-    if (keyCode == ALLEGRO_KEY_ENTER) return;
-    if (is_empty("Resource/account.txt")) {
-        Engine::GameEngine::GetInstance().ChangeScene("login");
-    } else {
-        Engine::GameEngine::GetInstance().ChangeScene("boarding");
-    }
+    // if (keyCode == ALLEGRO_KEY_ENTER) return;
+    // if (is_empty("Resource/account.txt")) {
+    //     Engine::GameEngine::GetInstance().ChangeScene("login");
+    // } else {
+    //     Engine::GameEngine::GetInstance().ChangeScene("boarding");
+    // }
 }
 
 void StartScene::Terminate() {
