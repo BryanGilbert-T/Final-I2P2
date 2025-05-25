@@ -18,8 +18,13 @@ public:
     void BackOnClick(int stage);
     void Logout(int stage);
 
+    void Draw() const override;
+
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
+
+    ALLEGRO_FONT* PlayFont;
+    ALLEGRO_BITMAP* Logo;
 };
 
 #endif   // STAGESELECTSCENE_HPP

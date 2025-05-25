@@ -21,14 +21,8 @@ void BoardingScene::Initialize() {
     int halfH = h / 2;
     Engine::ImageButton *btn;
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH / 2 - 50, 400, 100);
-    btn->SetOnClickCallback(std::bind(&BoardingScene::PlayOnClick, this, 1));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Stage 1", "pirulen.ttf", 48, halfW, halfH / 2, 0, 0, 0, 255, 0.5, 0.5));
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH / 2 + 100, 400, 100);
-    btn->SetOnClickCallback(std::bind(&BoardingScene::PlayOnClick, this, 2));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Stage 2", "pirulen.ttf", 48, halfW, halfH / 2 + 150, 0, 0, 0, 255, 0.5, 0.5));
+    PlayFont = al_load_font("Resource/fonts/imfell.ttf", 48, ALLEGRO_ALIGN_CENTER);
+    Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
 
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", w - 400, h * 0.9, 400, 100);
     btn->SetOnClickCallback(std::bind(&BoardingScene::Logout, this, 1));
@@ -49,6 +43,29 @@ void BoardingScene::Terminate() {
     AudioHelper::StopSample(bgmInstance);
     bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
+    if (Logo) al_destroy_bitmap(Logo);
+    if (PlayFont) al_destroy_font(PlayFont);
+}
+void BoardingScene::Draw() const {
+    al_clear_to_color(al_map_rgb(255, 255, 255));
+    Group::Draw();
+
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
+    int halfH = h / 2;
+
+    int sw = al_get_bitmap_width(Logo);
+    int sh = al_get_bitmap_height(Logo);
+
+    Engine::ImageButton *btn;
+    ALLEGRO_COLOR color = al_map_rgb(0, 0, 0);
+    al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
+
+
+    al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
+        0, 0, sw, sh,
+        w * 0.2, h * 0.2, sw, sh, 0);
 }
 void BoardingScene::BackOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("start");
