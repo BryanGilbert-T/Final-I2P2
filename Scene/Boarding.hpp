@@ -20,9 +20,14 @@ public:
 
     void Draw() const override;
     void Update(float deltaTime) override;
+    void OnMouseDown(int button, int mx, int my) override;
 
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
+
+    bool playHover = false;
+    bool settingHover = false;
+    bool backHover = false;
 
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;

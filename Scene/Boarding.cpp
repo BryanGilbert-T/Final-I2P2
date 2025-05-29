@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/Point.hpp"
@@ -60,23 +61,82 @@ void BoardingScene::Draw() const {
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_bitmap_height(Logo);
 
-    ALLEGRO_COLOR color = al_map_rgb(0, 0, 0);
-    al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
-    al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
-    al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
+    ALLEGRO_COLOR playcolor = (playHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR settingcolor = (settingHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR backcolor = (backHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
+
+    al_draw_text(PlayFont, playcolor, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
+    al_draw_text(PlayFont, settingcolor, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
+    al_draw_text(PlayFont, backcolor, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
 
 
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
         0, 0, sw, sh,
         w * 0.2, h * 0.2, sw, sh, 0);
 }
+bool mouseIn(int mx, int my, int x, int y, int w, int h) {
+    if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
+        return true;
+    }
+    return false;
+}
 void BoardingScene::Update(float deltatime) {
     IScene::Update(deltatime);
 
-    int sw = al_get_bitmap_width(Logo);
-    int sh = al_get_bitmap_height(Logo);
-
     Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
+
+    const int offset = 10;
+
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int startx = w * 0.2;
+
+    int sw = al_get_bitmap_width(Logo);
+    int sh = al_get_font_line_height(PlayFont) * 2 + offset;
+
+    if(mouseIn(mouse.x, mouse.y, startx, h * 0.575 - offset, sw, sh)) {
+        playHover = true;
+        settingHover = false;
+        backHover = false;
+    }
+    else if(mouseIn(mouse.x, mouse.y, startx, h * 0.675 - offset, sw, sh)) {
+        playHover = false;
+        settingHover = true;
+        backHover = false;
+    }
+    else if(mouseIn(mouse.x, mouse.y, startx, h * 0.775 - offset, sw, sh)) {
+        playHover = false;
+        settingHover = false;
+        backHover = true;
+    } else {
+        playHover = false;
+        settingHover = false;
+        backHover = false;
+    }
+}
+void BoardingScene::OnMouseDown(int button, int mx, int my) {
+    if (button & 1) {
+        const int offset = 10;
+
+        int w = Engine::GameEngine::GetInstance().getVirtW();
+        int h = Engine::GameEngine::GetInstance().getVirtH();
+        int startx = w * 0.2;
+
+        int sw = al_get_bitmap_width(Logo);
+        int sh = al_get_font_line_height(PlayFont) * 2 + offset;
+
+        if(mouseIn(mx, my, startx, h * 0.575 - offset, sw, sh)) {
+            PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+            scene->MapId = 0;
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+        }
+        else if(mouseIn(mx, my, startx, h * 0.675 - offset, sw, sh)) {
+            Engine::GameEngine::GetInstance().ChangeScene("settings");
+        }
+        else if(mouseIn(mx, my, startx, h * 0.775 - offset, sw, sh)) {
+            Engine::GameEngine::GetInstance().ChangeScene("start");
+        }
+    }
 }
 void BoardingScene::BackOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("start");
