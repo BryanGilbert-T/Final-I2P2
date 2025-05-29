@@ -5,7 +5,9 @@
 #include <fstream>
 
 #include "Engine/AudioHelper.hpp"
+#include "Engine/Point.hpp"
 #include "Engine/GameEngine.hpp"
+#include "Engine/Collider.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/Resources.hpp"
 #include "PlayScene.hpp"
@@ -58,14 +60,23 @@ void BoardingScene::Draw() const {
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_bitmap_height(Logo);
 
-    Engine::ImageButton *btn;
     ALLEGRO_COLOR color = al_map_rgb(0, 0, 0);
     al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
+    al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
+    al_draw_text(PlayFont, color, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
 
 
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
         0, 0, sw, sh,
         w * 0.2, h * 0.2, sw, sh, 0);
+}
+void BoardingScene::Update(float deltatime) {
+    IScene::Update(deltatime);
+
+    int sw = al_get_bitmap_width(Logo);
+    int sh = al_get_bitmap_height(Logo);
+
+    Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
 }
 void BoardingScene::BackOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("start");

@@ -19,6 +19,7 @@ public:
     void Logout(int stage);
 
     void Draw() const override;
+    void Update(float deltaTime) override;
 
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
