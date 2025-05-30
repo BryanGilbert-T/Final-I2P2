@@ -17,6 +17,17 @@ namespace Engine {
     class Sprite;
 }   // namespace Engine
 
+class Camera {
+public:
+    float x;
+    float y;
+    float width;
+    float height;
+
+    Camera(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {
+    }
+};
+
 class PlayScene final : public Engine::IScene {
 private:
     enum TileType {
