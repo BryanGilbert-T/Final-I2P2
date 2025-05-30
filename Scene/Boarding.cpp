@@ -127,7 +127,7 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
 
         if(mouseIn(mx, my, startx, h * 0.575 - offset, sw, sh)) {
             PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
-            scene->MapId = 0;
+            scene->MapId = 1;
             Engine::GameEngine::GetInstance().ChangeScene("play");
         }
         else if(mouseIn(mx, my, startx, h * 0.675 - offset, sw, sh)) {

@@ -55,6 +55,9 @@ add_executable(${PROJECT_NAME}
         Scene/Login.cpp
         Scene/Signup.cpp
 
+        Player/Player.cpp
+        Player/Player.hpp
+
         Turret/LaserTurret.cpp
         Turret/MachineGunTurret.cpp
         Turret/Turret.cpp
