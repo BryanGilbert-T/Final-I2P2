@@ -34,6 +34,7 @@ private:
         TILE_DIRT,
         TILE_FLOOR,
         TILE_OCCUPIED,
+        TILE_SKY,
     };
     ALLEGRO_SAMPLE_ID bgmId;
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
@@ -46,7 +47,7 @@ protected:
 public:
     static bool DebugMode;
     static const std::vector<Engine::Point> directions;
-    static const int MapWidth, MapHeight;
+    static int MapWidth, MapHeight;
     static const int BlockSize;
     static const float DangerTime;
     static const Engine::Point SpawnGridPoint;
