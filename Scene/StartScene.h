@@ -24,5 +24,6 @@ public:
     float elapsed;
     ALLEGRO_FONT* font;
     ALLEGRO_BITMAP* cur;
+    ALLEGRO_BITMAP* logo;
 };
 #endif   // INC_2025_I2P2_TOWERDEFENSE_WITH_ANSWER_STARTSCENE_H

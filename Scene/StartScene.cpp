@@ -33,7 +33,7 @@ void StartScene::Initialize() {
     Engine::ImageButton *btn;
     elapsed = 0.0;
 
-    font = al_load_font("Resource/fonts/imfell.ttf", 24, 0);
+    font = al_load_ttf_font("Resource/fonts/imfell.ttf", 24, 0);
     if (!font) {
         std::cout<<"ERROR: failed to load imfell.ttf\n";
         std::exit(1);
@@ -41,7 +41,7 @@ void StartScene::Initialize() {
 
     cur = al_load_bitmap("Resource/images/stage-select/final-bg.png");
     //AddNewObject(new Engine::Label("Sun Wu Kuo", "pirulen.ttf", 120, halfW, halfH / 3 + 50, 10, 255, 255, 255, 0.5, 0.5));
-
+    logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
 }
 void StartScene::Update(float deltaTime) {
     //if (cur) al_destroy_bitmap(cur);
@@ -59,6 +59,8 @@ void StartScene::Draw() const {
 
     int benW = al_get_bitmap_width(cur);
     int benH = al_get_bitmap_height(cur);
+    int logoW = al_get_bitmap_width(logo);
+    int logoH = al_get_bitmap_height(logo);
 
     int  vw  = eng.getVirtW();
     int  vh  = eng.getVirtH();
@@ -70,10 +72,14 @@ void StartScene::Draw() const {
     float dstW  = benW * scale;
     float dstH  = benH * scale;
 
+    float dWLogo = logoW * 1;
+    float dHLogo = logoH * 1;
     //auto& eng = Engine::GameEngine::GetInstance();
 
     float x  = (vw - dstW) * 0.5f;
     float y  = (vh - dstH) * 0.5f;
+    float logoX = (vw - logoW) * 0.5f;
+    float logoY = (vh - logoH) * 0.5f;
 
     float base = (std::sin(elapsed * 2 * M_PI * freq) + 1) * 0.5f;
     float alpha = 0.4f + 0.6f * base;
@@ -82,9 +88,13 @@ void StartScene::Draw() const {
         0, 0, benW, benH,
         x, y, dstW, dstH, 0);
 
+    al_draw_tinted_scaled_bitmap(logo, al_map_rgb(255,255,255),
+        0, 0, logoW, logoH,
+        logoX, logoY - 200, dWLogo, dHLogo, 0);
+
     ALLEGRO_COLOR tint = al_map_rgba_f(1,1,1,alpha);
     al_draw_text(font, tint, w/2, h*0.9, ALLEGRO_ALIGN_CENTER,
-        "CLICK TO START");
+        "CLICK TO BEGIN");
 
 }
 bool is_empty(const std::string& path) {

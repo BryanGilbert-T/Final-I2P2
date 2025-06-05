@@ -23,21 +23,21 @@ void SignupScene::Initialize() {
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH / 2 - 50, 400, 100);
     btn->SetOnClickCallback(std::bind(&SignupScene::PlayOnClick, this, 1));
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Stage 1", "pirulen.ttf", 48, halfW, halfH / 2, 0, 0, 0, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("Stage 1", "imfell.ttf", 48, halfW, halfH / 2, 0, 0, 0, 255, 0.5, 0.5));
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, halfH / 2 + 100, 400, 100);
     btn->SetOnClickCallback(std::bind(&SignupScene::PlayOnClick, this, 2));
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Stage 2", "pirulen.ttf", 48, halfW, halfH / 2 + 150, 0, 0, 0, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("Stage 2", "imfell.ttf", 48, halfW, halfH / 2 + 150, 0, 0, 0, 255, 0.5, 0.5));
 
     Slider *sliderBGM, *sliderSFX;
     sliderBGM = new Slider(40 + halfW - 95, halfH - 50 - 2, 190, 4);
     sliderBGM->SetOnValueChangedCallback(std::bind(&SignupScene::BGMSlideOnValueChanged, this, std::placeholders::_1));
     AddNewControlObject(sliderBGM);
-    AddNewObject(new Engine::Label("BGM: ", "pirulen.ttf", 28, 40 + halfW - 60 - 95, halfH - 50, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("BGM: ", "imfell.ttf", 28, 40 + halfW - 60 - 95, halfH - 50, 255, 255, 255, 255, 0.5, 0.5));
     sliderSFX = new Slider(40 + halfW - 95, halfH + 50 - 2, 190, 4);
     sliderSFX->SetOnValueChangedCallback(std::bind(&SignupScene::SFXSlideOnValueChanged, this, std::placeholders::_1));
     AddNewControlObject(sliderSFX);
-    AddNewObject(new Engine::Label("SFX: ", "pirulen.ttf", 28, 40 + halfW - 60 - 95, halfH + 50, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("SFX: ", "imfell.ttf", 28, 40 + halfW - 60 - 95, halfH + 50, 255, 255, 255, 255, 0.5, 0.5));
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
     sliderBGM->SetValue(AudioHelper::BGMVolume);

@@ -29,12 +29,12 @@ void LoginScene::Initialize() {
     NotFoundTimeStamp = -5;
     WrongPasswordTimeStamp = -5;
 
-    AddNewObject(NotFoundLabel = new Engine::Label("Name Not Found", "pirulen.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
-    AddNewObject(WrongPasswordLabel = new Engine::Label("Wrong Password", "pirulen.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(NotFoundLabel = new Engine::Label("Name Not Found", "imfell.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(WrongPasswordLabel = new Engine::Label("Wrong Password", "imfell.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
     NotFoundLabel->Visible = false;
     WrongPasswordLabel->Visible = false;
 
-    font = al_load_font("Resource/fonts/pirulen.ttf", 72, 0);
+    font = al_load_font("Resource/fonts/imfell.ttf", 72, 0);
 
     Engine::ImageButton *btn;
 
@@ -46,13 +46,14 @@ void LoginScene::Initialize() {
 
     int textheight = halfH / 3 + 50;
 
-    AddNewObject(new Engine::Label("User:", "pirulen.ttf", 120, 150, textheight, 10, 255, 255, 255, 0, 0.5));
-    AddNewObject(new Engine::Label("Pass:", "pirulen.ttf", 120, 150, textheight + 120, 10, 255, 255, 255, 0, 0.5));
+    AddNewObject(new Engine::Label("User:", "imfell.ttf", 120, 150, textheight, 10, 255, 255, 255, 0, 0.5));
+    AddNewObject(new Engine::Label("Pass:", "imfell.ttf", 120, 150, textheight + 120, 10, 255, 255, 255, 0, 0.5));
 
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9, 400, 100);
     btn->SetOnClickCallback(std::bind(&LoginScene::Login, this, 1));
+
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Login", "pirulen.ttf", 48, halfW, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("Login", "imfell.ttf", 48, halfW, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
@@ -130,6 +131,7 @@ void LoginScene::Update(float deltaTime) {
 }
 
 void LoginScene::Draw() const {
+    al_clear_to_color(al_map_rgb(255, 255, 255));
     IScene::Draw();
 
     ALLEGRO_COLOR clicked_color     = al_map_rgb(255, 255, 255);

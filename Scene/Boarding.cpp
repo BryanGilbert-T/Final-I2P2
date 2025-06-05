@@ -30,7 +30,7 @@ void BoardingScene::Initialize() {
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", w - 400, h * 0.9, 400, 100);
     btn->SetOnClickCallback(std::bind(&BoardingScene::Logout, this, 1));
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Logout", "pirulen.ttf", 48, w - 200, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
+    AddNewObject(new Engine::Label("Logout", "imfell.ttf", 48, w - 200, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
