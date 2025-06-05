@@ -35,5 +35,6 @@ protected:
 public:
   Player(int hp, int x, int y, int speed);
   void move(int keyCode);
+  void Draw() const override;
 };
 #endif   // PLAYER_HPP

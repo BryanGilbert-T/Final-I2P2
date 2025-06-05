@@ -31,4 +31,8 @@ void Player::move(int keyCode) {
     }
 }
 
+void Player::Draw() const {
+    Sprite::Draw();
+}
+
 
