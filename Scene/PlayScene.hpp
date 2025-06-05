@@ -5,6 +5,7 @@
 #include <memory>
 #include <utility>
 #include <vector>
+#include <set>
 
 #include "Engine/IScene.hpp"
 #include "Engine/Point.hpp"
@@ -32,6 +33,7 @@ protected:
     int SpeedMult;
 
 public:
+    std::set<int> keyHeld;
     static Camera cam;
     static Engine::Map map;
     static bool DebugMode;
@@ -73,6 +75,8 @@ public:
     void OnMouseMove(int mx, int my) override;
     void OnMouseUp(int button, int mx, int my) override;
     void OnKeyDown(int keyCode) override;
+    void OnKeyUp(int keyCode) override;
+    void OnKeyHold();
     void Hit();
     int GetMoney() const;
     void EarnMoney(int money);

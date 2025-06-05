@@ -84,7 +84,8 @@ void PlayScene::Terminate() {
     IScene::Terminate();
 }
 void PlayScene::Update(float deltaTime) {
-
+    IScene::Update(deltaTime);
+    OnKeyHold();
 }
 void PlayScene::Draw() const {
     IScene::Draw();
@@ -111,13 +112,36 @@ void PlayScene::OnMouseMove(int mx, int my) {
 }
 void PlayScene::OnMouseUp(int button, int mx, int my) {
     IScene::OnMouseUp(button, mx, my);
-
 }
 void PlayScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
-    
-
+    keyHeld.insert(keyCode);
 }
+void PlayScene::OnKeyUp(int keyCode) {
+    IScene::OnKeyUp(keyCode);
+    keyHeld.erase(keyCode);
+}
+void PlayScene::OnKeyHold() {
+    for (int key : keyHeld) {
+        switch (key){
+            case ALLEGRO_KEY_W:
+                cam.Update(cam.x, cam.y - 12);
+                break;
+            case ALLEGRO_KEY_A:
+                cam.Update(cam.x - 12, cam.y);
+                break;
+            case ALLEGRO_KEY_S:
+                cam.Update(cam.x, cam.y + 12);
+                break;
+            case ALLEGRO_KEY_D:
+                cam.Update(cam.x + 12, cam.y);
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void PlayScene::Hit() {
 
 }
