@@ -28,6 +28,7 @@ public:
     bool playHover = false;
     bool settingHover = false;
     bool backHover = false;
+    bool logoutHover = false;
 
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;

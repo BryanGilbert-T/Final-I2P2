@@ -27,11 +27,6 @@ void BoardingScene::Initialize() {
     PlayFont = al_load_font("Resource/fonts/imfell.ttf", 48, ALLEGRO_ALIGN_CENTER);
     Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", w - 400, h * 0.9, 400, 100);
-    btn->SetOnClickCallback(std::bind(&BoardingScene::Logout, this, 1));
-    AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Logout", "imfell.ttf", 48, w - 200, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
-
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 
@@ -64,10 +59,12 @@ void BoardingScene::Draw() const {
     ALLEGRO_COLOR playcolor = (playHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR settingcolor = (settingHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR backcolor = (backHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR logoutcolor = (logoutHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
 
     al_draw_text(PlayFont, playcolor, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
     al_draw_text(PlayFont, settingcolor, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
     al_draw_text(PlayFont, backcolor, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
+    al_draw_text(PlayFont, logoutcolor, w * 0.8, h * 0.8, ALLEGRO_ALIGN_CENTER, "LOGOUT");
 
 
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
@@ -90,6 +87,8 @@ void BoardingScene::Update(float deltatime) {
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int startx = w * 0.2;
+    int dxlogout = w * 0.8;
+    int dylogout = h * 0.8 - offset;
 
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_font_line_height(PlayFont) * 2 + offset;
@@ -103,15 +102,25 @@ void BoardingScene::Update(float deltatime) {
         playHover = false;
         settingHover = true;
         backHover = false;
+        logoutHover = false;
     }
     else if(mouseIn(mouse.x, mouse.y, startx, h * 0.775 - offset, sw, sh)) {
         playHover = false;
         settingHover = false;
         backHover = true;
-    } else {
+        logoutHover = false;
+    }
+    else if (mouseIn(mouse.x, mouse.y, w * 0.8, h * 0.8 - offset, sw, sh)) {
         playHover = false;
         settingHover = false;
         backHover = false;
+        logoutHover = true;
+    }
+    else {
+        playHover = false;
+        settingHover = false;
+        backHover = false;
+        logoutHover = false;
     }
 }
 void BoardingScene::OnMouseDown(int button, int mx, int my) {
@@ -121,6 +130,8 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
         int w = Engine::GameEngine::GetInstance().getVirtW();
         int h = Engine::GameEngine::GetInstance().getVirtH();
         int startx = w * 0.2;
+        int logoutdx = w * 0.8;
+        int logoutdy = h * 0.8 - offset;
 
         int sw = al_get_bitmap_width(Logo);
         int sh = al_get_font_line_height(PlayFont) * 2 + offset;
@@ -135,6 +146,9 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
         }
         else if(mouseIn(mx, my, startx, h * 0.775 - offset, sw, sh)) {
             Engine::GameEngine::GetInstance().ChangeScene("start");
+        }
+        else if (mouseIn(mx, my, logoutdx, logoutdy, sw, sh)) {
+            Engine::GameEngine::GetInstance().ChangeScene("login");
         }
     }
 }

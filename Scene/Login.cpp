@@ -79,6 +79,7 @@ void LoginScene::Login(int stage) {
     }
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
+
 void LoginScene::RaiseNotFound() {
     // kalo blm punya nama di database
     NotFoundTimeStamp = elapsed;
@@ -204,6 +205,20 @@ void LoginScene::OnKeyDown(int keyCode) {
         if (keyCode == ALLEGRO_KEY_BACKSPACE && !pass.empty()) {
             pass.pop_back();
         }
+    }
+
+    if (keyCode == ALLEGRO_KEY_ENTER) {
+        if (name.empty()) return;
+        if (pass.empty()) return;
+        int status = authUser(name, pass);
+        if (status == -1) { // no such name in database
+            this->RaiseNotFound();
+            return;
+        } if (status == 0) { // password incorrect
+            this->RaiseWrongPassword();
+            return;
+        }
+        Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
 }
 
