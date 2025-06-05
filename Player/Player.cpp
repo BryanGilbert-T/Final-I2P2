@@ -15,18 +15,18 @@
 const std::string filename = "Resource/images/player.png";
 
 Player::Player(int hp, int x, int y, int speed) : Engine::Sprite(filename, x, y),
-hp(hp), x(x), y(y), speed(speed) {
+hp(hp), x(x), y(y), speed(speed), dir(RIGHT) {
     jump = 0;
 }
 
-void Player::move(Direction dir) {
-    if (dir == LEFT) {
+void Player::move(int keyCode) {
+    if (keyCode == ALLEGRO_KEY_W) {
 
-    } else if (dir == RIGHT) {
+    } else if (keyCode == ALLEGRO_KEY_A) {
 
-    } else if (dir == UP) {
+    } else if (keyCode == ALLEGRO_KEY_S) {
 
-    } else if (dir == DOWN) {
+    } else if (keyCode == ALLEGRO_KEY_D) {
 
     }
 }

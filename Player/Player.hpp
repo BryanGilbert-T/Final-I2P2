@@ -30,9 +30,10 @@ protected:
   int x, y;
   int speed;
   int jump;
+  Direction dir;
 
 public:
   Player(int hp, int x, int y, int speed);
-  void move(Direction dir);
+  void move(int keyCode);
 };
 #endif   // PLAYER_HPP
