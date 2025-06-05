@@ -29,12 +29,14 @@ void LoginScene::Initialize() {
     NotFoundTimeStamp = -5;
     WrongPasswordTimeStamp = -5;
 
+    SignUpBtnHovered = false;
+
     AddNewObject(NotFoundLabel = new Engine::Label("Name Not Found", "imfell.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
     AddNewObject(WrongPasswordLabel = new Engine::Label("Wrong Password", "imfell.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
     NotFoundLabel->Visible = false;
     WrongPasswordLabel->Visible = false;
 
-    font = al_load_font("Resource/fonts/imfell.ttf", 72, 0);
+    font = al_load_font("Resource/fonts/imfell.ttf", 40, 0);
 
     Engine::ImageButton *btn;
 
@@ -46,15 +48,25 @@ void LoginScene::Initialize() {
 
     int textheight = halfH / 3 + 50;
 
-    AddNewObject(new Engine::Label("User:", "imfell.ttf", 120, 150, textheight, 10, 255, 255, 255, 0, 0.5));
-    AddNewObject(new Engine::Label("Pass:", "imfell.ttf", 120, 150, textheight + 120, 10, 255, 255, 255, 0, 0.5));
+    //TEXT IMAGE
+    usernameText = al_load_bitmap("Resource/images/login-scene/username.png");
+    passwordText = al_load_bitmap("Resource/images/login-scene/password.png");
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9, 400, 100);
+    //BUTTON
+    btn = new Engine::ImageButton("login-scene/login-button.png", "login-scene/login-button-hov.png",
+                                    halfW - 248, h * 0.9 - 90, 496,116);
     btn->SetOnClickCallback(std::bind(&LoginScene::Login, this, 1));
-
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Login", "imfell.ttf", 48, halfW, h * 0.9 + 50, 0, 0, 0, 255, 0.5, 0.5));
+
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
+
+    //IMAGES
+    background = al_load_bitmap("Resource/images/login-scene/background.png");
+    logo = al_load_bitmap("Resource/images/login-scene/logo-login.png");
+
+    signupMsg = al_load_bitmap("Resource/images/login-scene/signup-msg.png");
+    signupText = al_load_bitmap("Resource/images/login-scene/signup-txt.png");
+    signupTextHov = al_load_bitmap("Resource/images/login-scene/signup-txt-hov.png");
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
@@ -90,12 +102,36 @@ void LoginScene::RaiseWrongPassword() {
     WrongPasswordTimeStamp = elapsed;
     WrongPasswordLabel->Visible = true;
 }
+bool LoginmouseIn(int mx, int my, int x, int y, int w, int h) {
+    if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
+        return true;
+    }
+    return false;
+}
 void LoginScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+    Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
     elapsed += deltaTime;
 
     const float y_start = -140;
     const float y_end = 90;
+
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
+    int halfH = h / 2;
+    int signupmsgSW = al_get_bitmap_width(signupMsg);
+    int signupmsgSH = al_get_bitmap_height(signupMsg);
+    int signuptxtSW = al_get_bitmap_width(signupText);
+    int signuptxtSH = al_get_bitmap_height(signupText);
+    int msgMergedDX = signupmsgSW + signuptxtSW - 50;
+
+
+    if(LoginmouseIn(mouse.x, mouse.y, halfW - msgMergedDX/2 + signupmsgSW - 40 , halfH + 300, signuptxtSW, signuptxtSH)) {
+        SignUpBtnHovered = true;
+    }else {
+        SignUpBtnHovered = false;
+    }
 
     float dtNotFound = elapsed - NotFoundTimeStamp;
     if (dtNotFound >= 0 && dtNotFound < APPEAR_DURATION) {
@@ -132,7 +168,7 @@ void LoginScene::Update(float deltaTime) {
 }
 
 void LoginScene::Draw() const {
-    al_clear_to_color(al_map_rgb(255, 255, 255));
+    al_clear_to_color(al_map_rgb(223, 145, 107));
     IScene::Draw();
 
     ALLEGRO_COLOR clicked_color     = al_map_rgb(255, 255, 255);
@@ -141,16 +177,63 @@ void LoginScene::Draw() const {
 
     int w     = Engine::GameEngine::GetInstance().getVirtW();
     int h     = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
     int halfH = h / 2;
 
     // box positions & size
-    int x1   = 150 + 500;
-    int y1   = halfH / 3;
+    int boxW = 650;
+    int boxH = 70;
+    int x1   = halfW - boxW/2;
+    int y1   = halfH - 40;
     int x2   = x1;
-    int y2   = y1 + 120;
-    int boxW = w - 100 - x1;
-    int boxH = 100;
-    int thickness = 5;
+    int y2   = y1 + boxH + 100;
+
+    int thickness = 2;
+
+    int logoSW =al_get_bitmap_width(logo);
+    int logoSH =al_get_bitmap_height(logo);
+    int bgSW = al_get_bitmap_width(background); //background source width
+    int bgSH = al_get_bitmap_height(background);
+    int unameSW = al_get_bitmap_width(usernameText);
+    int unameSH = al_get_bitmap_height(usernameText);
+    int passSW = al_get_bitmap_width(passwordText);
+    int passSH = al_get_bitmap_height(passwordText);
+    int signupmsgSW = al_get_bitmap_width(signupMsg);
+    int signupmsgSH = al_get_bitmap_height(signupMsg);
+    int signuptxtSW = al_get_bitmap_width(signupText);
+    int signuptxtSH = al_get_bitmap_height(signupText);
+    int msgMergedDX = signupmsgSW + signuptxtSW - 50;
+
+    //logo
+    al_draw_tinted_scaled_bitmap(logo, al_map_rgb_f(1, 1, 1),
+                                0, 0, logoSW, logoSH,
+                                halfW - logoSW/2, 75, logoSW, logoSH, 0);
+
+    //background
+    al_draw_tinted_scaled_bitmap(background, al_map_rgb_f(1, 1, 1),
+                                0, 0, bgSW, bgSH,
+                                halfW - 400, halfH-165, bgSW, bgSH, 0);
+    //texts
+    al_draw_tinted_scaled_bitmap(usernameText, al_map_rgb_f(1, 1, 1),
+                                0, 0, unameSW, unameSH,
+                                halfW - unameSW/2, halfH-115, unameSW, unameSH, 0);
+    al_draw_tinted_scaled_bitmap(passwordText, al_map_rgb_f(1, 1, 1),
+                                0, 0, passSW, passSH,
+                                halfW - passSW/2, halfH-125 + 165, unameSW, unameSH, 0);
+    //message txt
+    al_draw_tinted_scaled_bitmap(signupMsg, al_map_rgb_f(1, 1, 1),
+                                0, 0, signupmsgSW, signupmsgSH,
+                                halfW - msgMergedDX/2, halfH + 300, signupmsgSW, signupmsgSH, 0);
+    if (SignUpBtnHovered) {
+        al_draw_tinted_scaled_bitmap(signupTextHov, al_map_rgb_f(1, 1, 1), //yg bisa dipencet
+                                0, 0,  signuptxtSW, signuptxtSH,
+                                halfW - msgMergedDX/2 + signupmsgSW - 40 , halfH + 300, signuptxtSW, signuptxtSH, 0);
+
+    } else {
+        al_draw_tinted_scaled_bitmap(signupText, al_map_rgb_f(1, 1, 1), //yg bisa dipencet
+                                0, 0,  signuptxtSW, signuptxtSH,
+                                halfW - msgMergedDX/2 + signupmsgSW - 40 , halfH + 300, signuptxtSW, signuptxtSH, 0);
+    }
 
     // draw the two boxes
     al_draw_rectangle(x1, y1, x1 + boxW, y1 + boxH,
@@ -168,8 +251,8 @@ void LoginScene::Draw() const {
     al_draw_text(
       font,
       text_color,
-      x1 + 10,           // small left padding
-      y1 + yOff,
+      x1 + 15,           // small left padding
+      y1 + 5,
       0,                 // no alignment flags = left align
       name.c_str()
     );
@@ -179,8 +262,8 @@ void LoginScene::Draw() const {
     al_draw_text(
       font,
       text_color,
-      x2 + 10,
-      y2 + yOff,
+      x2 + 15,
+      y2 + 15,
       0,
       masked.c_str()
     );
@@ -232,15 +315,16 @@ void LoginScene::OnMouseDown(int button, int mx, int my) {
     // recompute the same geometry you used in Draw()
     int w      = Engine::GameEngine::GetInstance().getVirtW();
     int h      = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
     int halfH  = h / 2;
 
-    int x1     = 150 + 500;
-    int y1     = halfH / 3;
-    int boxW   = w - 100 - x1;   // from x1 to (w - 100)
-    int boxH   = 100;            // height of each box
+    int boxW = 650;
+    int boxH = 70;
+    int x1   = halfW - boxW/2;
+    int y1   = halfH - 40;
+    int x2   = x1;
+    int y2   = y1 + boxH + 100;
 
-    int x2     = x1;
-    int y2     = y1 + 120;
 
     bool inBox1 = (mx >= x1 && mx <= x1 + boxW
                 && my >= y1 && my <= y1 + boxH);

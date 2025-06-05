@@ -10,6 +10,7 @@ private:
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
     bool BoxOneClicked;
     bool BoxTwoClicked;
+    bool SignUpBtnHovered;
     std::string name;
     std::string pass;
 
@@ -17,6 +18,14 @@ private:
     float elapsed;
     float NotFoundTimeStamp;
     float WrongPasswordTimeStamp;
+
+    ALLEGRO_BITMAP* logo;
+    ALLEGRO_BITMAP* usernameText;
+    ALLEGRO_BITMAP* passwordText;
+    ALLEGRO_BITMAP* signupMsg;
+    ALLEGRO_BITMAP* signupText;
+    ALLEGRO_BITMAP* signupTextHov;
+    ALLEGRO_BITMAP* background;
 
     Engine::Label* NotFoundLabel;
     Engine::Label* WrongPasswordLabel;

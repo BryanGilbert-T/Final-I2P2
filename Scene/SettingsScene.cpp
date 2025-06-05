@@ -45,7 +45,7 @@ void SettingsScene::Terminate() {
     IScene::Terminate();
 }
 void SettingsScene::BackOnClick(int stage) {
-    Engine::GameEngine::GetInstance().ChangeScene("start");
+    Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 void SettingsScene::BGMSlideOnValueChanged(float value) {
     AudioHelper::ChangeSampleVolume(bgmInstance, value);

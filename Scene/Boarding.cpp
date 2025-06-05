@@ -71,7 +71,7 @@ void BoardingScene::Draw() const {
         0, 0, sw, sh,
         w * 0.2, h * 0.2, sw, sh, 0);
 }
-bool mouseIn(int mx, int my, int x, int y, int w, int h) {
+bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
         return true;
     }

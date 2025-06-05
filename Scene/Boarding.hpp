@@ -30,6 +30,7 @@ public:
     bool backHover = false;
     bool logoutHover = false;
 
+
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;
 };
