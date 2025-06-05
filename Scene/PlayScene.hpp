@@ -50,8 +50,8 @@ public:
     static int MapWidth, MapHeight;
     static const int BlockSize;
     static const float DangerTime;
-    static const Engine::Point SpawnGridPoint;
-    static const Engine::Point EndGridPoint;
+    Engine::Point SpawnGridPoint;
+    Engine::Point EndGridPoint;
     static const std::vector<int> code;
     int MapId;
     float ticks;
