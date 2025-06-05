@@ -15,6 +15,7 @@
 #include "Engine/GameEngine.hpp"
 #include "Engine/Group.hpp"
 #include "Engine/LOG.hpp"
+#include "Engine/map.hpp"
 #include "Engine/Resources.hpp"
 #include "PlayScene.hpp"
 #include "Turret/LaserTurret.hpp"
@@ -32,10 +33,12 @@
 
 bool PlayScene::DebugMode = false;
 const std::vector<Engine::Point> PlayScene::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
-const int PlayScene::BlockSize = 64;
+const int PlayScene::BlockSize = 32;
 const float PlayScene::DangerTime = 7.61;
+Engine::Map PlayScene::map;
 int PlayScene::MapWidth = 64;
 int PlayScene::MapHeight = 64;
+Camera PlayScene::cam;
 const std::vector<int> PlayScene::code = {
     ALLEGRO_KEY_UP, ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_DOWN,
     ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT,
@@ -54,6 +57,8 @@ void PlayScene::Initialize() {
     lives = 10;
     money = 150;
     SpeedMult = 1;
+    cam.Update(0, 0);
+
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());
     AddNewObject(GroundEffectGroup = new Group());
@@ -83,6 +88,7 @@ void PlayScene::Update(float deltaTime) {
 }
 void PlayScene::Draw() const {
     IScene::Draw();
+    map.DrawMap(cam);
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
@@ -109,6 +115,7 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 }
 void PlayScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
+    
 
 }
 void PlayScene::Hit() {
@@ -127,7 +134,6 @@ void PlayScene::ReadMap() {
     std::vector<int> mapData;
     std::ifstream fin(filename);
     fin >> MapHeight >> MapWidth;
-    std::cout << MapHeight << " " << MapWidth << std::endl;
     while (fin >> c) {
         switch (c) {
             case '0': mapData.push_back(0); break;
@@ -154,12 +160,9 @@ void PlayScene::ReadMap() {
             } else if (num == 1) {
                 mapState[i][j] = TILE_DIRT;
             }
-            if (num)
-                TileMapGroup->AddNewObject(new Engine::Image("play/floor.png", j * BlockSize, i * BlockSize, BlockSize, BlockSize));
-            else
-                TileMapGroup->AddNewObject(new Engine::Image("play/dirt.png", j * BlockSize, i * BlockSize, BlockSize, BlockSize));
         }
     }
+    map.Init(MapWidth, MapHeight, mapState);
 }
 void PlayScene::ReadEnemyWave() {
 

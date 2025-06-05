@@ -8,6 +8,8 @@
 
 #include "Engine/IScene.hpp"
 #include "Engine/Point.hpp"
+#include "Engine/map.hpp"
+#include "Engine/utility.hpp"
 
 class Turret;
 namespace Engine {
@@ -15,27 +17,12 @@ namespace Engine {
     class Image;
     class Label;
     class Sprite;
+    class Map;
 }   // namespace Engine
 
-class Camera {
-public:
-    float x;
-    float y;
-    float width;
-    float height;
-
-    Camera(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {
-    }
-};
 
 class PlayScene final : public Engine::IScene {
 private:
-    enum TileType {
-        TILE_DIRT,
-        TILE_FLOOR,
-        TILE_OCCUPIED,
-        TILE_SKY,
-    };
     ALLEGRO_SAMPLE_ID bgmId;
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
 
@@ -45,6 +32,8 @@ protected:
     int SpeedMult;
 
 public:
+    static Camera cam;
+    static Engine::Map map;
     static bool DebugMode;
     static const std::vector<Engine::Point> directions;
     static int MapWidth, MapHeight;

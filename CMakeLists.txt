@@ -43,6 +43,9 @@ add_executable(${PROJECT_NAME}
         Engine/Resources.cpp
         Engine/Sprite.cpp
         Engine/Sheets.cpp
+        Engine/map.hpp
+        Engine/map.cpp
+        Engine/utility.hpp
 
         Scene/LoseScene.cpp
         Scene/PlayScene.cpp
