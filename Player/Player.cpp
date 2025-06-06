@@ -62,5 +62,5 @@ void Player::Draw(Camera cam){
     int dy = y - cam.y;
     al_draw_tinted_scaled_bitmap(player_bitmap, al_map_rgb(255, 255, 255),
         0, 0, 32, 32,
-        x, y, PLAYER_SIZE, PLAYER_SIZE, 0);
+        dx, dy, PLAYER_SIZE, PLAYER_SIZE, 0);
 }
