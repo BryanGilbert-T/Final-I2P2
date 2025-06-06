@@ -38,6 +38,6 @@ public:
   Player();
   ~Player();
   void move(int keyCode);
-  void Draw();
+  void Draw(Camera cam);
 };
 #endif   // PLAYER_HPP

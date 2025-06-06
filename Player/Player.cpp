@@ -57,7 +57,9 @@ void Player::move(int keyCode) {
     }
 }
 
-void Player::Draw(){
+void Player::Draw(Camera cam){
+    int dx = x - cam.x;
+    int dy = y - cam.y;
     al_draw_tinted_scaled_bitmap(player_bitmap, al_map_rgb(255, 255, 255),
         0, 0, 32, 32,
         x, y, PLAYER_SIZE, PLAYER_SIZE, 0);

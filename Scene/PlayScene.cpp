@@ -93,15 +93,19 @@ void PlayScene::Update(float deltaTime) {
     int halfW = w / 2;
     int halfH = h / 2;
 
+    cam.x = player.x - halfW - BlockSize / 2;
+    cam.y = player.y - halfH - BlockSize / 2;
 
     if (cam.x < 0) cam.x = 0;
     if (cam.y < 0) cam.y = 0;
 
+    if (cam.x > MapWidth * BlockSize - w) cam.x = MapWidth * BlockSize - w;
+    if (cam.y > MapHeight * BlockSize - h) cam.y = MapHeight * BlockSize - h;
 }
 void PlayScene::Draw() const {
     IScene::Draw();
     map.DrawMap(cam);
-    player.Draw();
+    player.Draw(cam);
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
