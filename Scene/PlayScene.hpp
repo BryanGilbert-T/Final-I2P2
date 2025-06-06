@@ -11,6 +11,7 @@
 #include "Engine/Point.hpp"
 #include "Engine/map.hpp"
 #include "Engine/utility.hpp"
+#include "Player/Player.hpp"
 
 class Turret;
 namespace Engine {
@@ -33,6 +34,7 @@ protected:
     int SpeedMult;
 
 public:
+    static Player player;
     std::set<int> keyHeld;
     static Camera cam;
     static Engine::Map map;

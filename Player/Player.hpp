@@ -24,7 +24,7 @@ typedef enum {
   DOWN,
 } Direction;
 
-class Player : public Engine::Sprite {
+class Player{
 protected:
   int hp;
   int x, y;
@@ -33,8 +33,9 @@ protected:
   Direction dir;
 
 public:
-  Player(int hp, int x, int y, int speed);
+  void Create(int hp, int x, int y);
+  Player();
   void move(int keyCode);
-  void Draw() const override;
+  void Draw();
 };
 #endif   // PLAYER_HPP

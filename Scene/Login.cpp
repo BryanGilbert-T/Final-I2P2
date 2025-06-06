@@ -270,17 +270,27 @@ void LoginScene::Draw() const {
 }
 void LoginScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
+    if (keyCode == ALLEGRO_KEY_LSHIFT || keyCode == ALLEGRO_KEY_RSHIFT) shiftHeld = true;
+    if (keyCode == ALLEGRO_KEY_CAPSLOCK) capsLockHeld = !capsLockHeld;
 
     if (BoxOneClicked) {
         if (keyCode >= ALLEGRO_KEY_A && keyCode <= ALLEGRO_KEY_Z && name.size() < MAX_NAME) {
-            name += keyCode - ALLEGRO_KEY_A + 'a';
+            if (shiftHeld || capsLockHeld) {
+                name += keyCode - ALLEGRO_KEY_A + 'A';
+            } else {
+                name += keyCode - ALLEGRO_KEY_A + 'a';
+            }
         }
         if (keyCode == ALLEGRO_KEY_BACKSPACE && !name.empty()) {
             name.pop_back();
         }
     } else if (BoxTwoClicked) {
         if (keyCode >= ALLEGRO_KEY_A && keyCode <= ALLEGRO_KEY_Z && pass.size() < MAX_PASS) {
-            pass += keyCode - ALLEGRO_KEY_A + 'a';
+            if (shiftHeld || capsLockHeld) {
+                pass += keyCode - ALLEGRO_KEY_A + 'A';
+            } else {
+                pass += keyCode - ALLEGRO_KEY_A + 'a';
+            }
         }
         if (keyCode >= ALLEGRO_KEY_0 && keyCode <= ALLEGRO_KEY_9 && name.size() < MAX_NAME) {
             pass += keyCode - ALLEGRO_KEY_0;
@@ -303,6 +313,10 @@ void LoginScene::OnKeyDown(int keyCode) {
         }
         Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
+}
+void LoginScene::OnKeyUp(int keyCode) {
+    IScene::OnKeyUp(keyCode);
+    if (keyCode == ALLEGRO_KEY_LSHIFT || keyCode == ALLEGRO_KEY_RSHIFT) shiftHeld = false;
 }
 
 void LoginScene::OnMouseDown(int button, int mx, int my) {

@@ -12,12 +12,27 @@
 #include "Scene/PlayScene.hpp"
 #include "Player.hpp"
 
-const std::string filename = "Resource/images/player.png";
+const std::string filename = "stage-select/player.png";
+const int SPEED = 4;
 
-Player::Player(int hp, int x, int y, int speed) : Engine::Sprite(filename, x, y),
-hp(hp), x(x), y(y), speed(speed), dir(RIGHT) {
+void Player::Create(int hp, int x, int y){
+    this->hp = hp;
+    this->x = x;
+    this->y = y;
+    this->speed = SPEED;
+    this->dir = RIGHT;
+    this->jump = 0;
+}
+
+Player::Player(){
+    hp = 100;
+    x = 0;
+    y = 0;
+    speed = SPEED;
+    dir = RIGHT;
     jump = 0;
 }
+
 
 void Player::move(int keyCode) {
     if (keyCode == ALLEGRO_KEY_W) {
@@ -31,8 +46,7 @@ void Player::move(int keyCode) {
     }
 }
 
-void Player::Draw() const {
-    Sprite::Draw();
+void Player::Draw(){
 }
 
 

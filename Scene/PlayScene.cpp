@@ -36,6 +36,7 @@ const std::vector<Engine::Point> PlayScene::directions = { Engine::Point(-1, 0),
 const int PlayScene::BlockSize = 32;
 const float PlayScene::DangerTime = 7.61;
 Engine::Map PlayScene::map;
+Player PlayScene::player;
 int PlayScene::MapWidth = 64;
 int PlayScene::MapHeight = 64;
 Camera PlayScene::cam;

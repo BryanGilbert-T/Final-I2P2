@@ -2,6 +2,7 @@
 #define LOGINSCENE_HPP
 #include <allegro5/allegro_audio.h>
 #include <memory>
+#include <set>
 
 #include "Engine/IScene.hpp"
 
@@ -30,6 +31,9 @@ private:
     Engine::Label* NotFoundLabel;
     Engine::Label* WrongPasswordLabel;
 
+    bool shiftHeld = false;
+    bool capsLockHeld = false;
+
 public:
     explicit LoginScene() = default;
     void Initialize() override;
@@ -40,6 +44,7 @@ public:
     void Login(int stage);
     void OnMouseDown(int button, int mx, int my) override;
     void OnKeyDown(int keyCode) override;
+    void OnKeyUp(int keyCode) override;
     void RaiseNotFound();
     void RaiseWrongPassword();
 };
