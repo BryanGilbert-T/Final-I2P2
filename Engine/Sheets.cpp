@@ -1,3 +1,5 @@
+#include "Sheets.hpp"
+
 #include <sha256/sha256.h>
 #include <curl/include/curl/curl.h>
 #include <nlohmann/json.hpp>
@@ -8,7 +10,7 @@
 #include <fstream>
 
 const std::string project_id = "sunwukong-5bd64";
-
+bool isSigningUp = false;
 static size_t write_cb(void* ptr, size_t size, size_t nmemb, void* userdata) {
     std::string& resp = *static_cast<std::string*>(userdata);
     resp.append(static_cast<char*>(ptr), size * nmemb);
@@ -142,6 +144,7 @@ int authUser(const std::string& name, const std::string& password) {
 
     std::map<std::string, std::string> result = getUser(name);
     if (result.empty()) return -1;
+    if (isSigningUp && !result.empty()) return 2; //found name in signingup
     if (result["pass"] == hash) {
         // Later
         std::ofstream ofs("Resource/account.txt");
@@ -154,6 +157,6 @@ int authUser(const std::string& name, const std::string& password) {
                 << result["hp"] << "\n";
             ofs.close();
         }
-        return 1;
-    } else return 0;
+        return 1; //ketemu passwordnya
+    } else return 0; //salah password
 }

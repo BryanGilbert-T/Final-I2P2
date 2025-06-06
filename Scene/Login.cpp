@@ -28,6 +28,7 @@ void LoginScene::Initialize() {
     elapsed = 0;
     NotFoundTimeStamp = -5;
     WrongPasswordTimeStamp = -5;
+    isSigningUp = false;
 
     SignUpBtnHovered = false;
 
@@ -270,6 +271,7 @@ void LoginScene::Draw() const {
 }
 void LoginScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
+
     if (keyCode == ALLEGRO_KEY_LSHIFT || keyCode == ALLEGRO_KEY_RSHIFT) shiftHeld = true;
     if (keyCode == ALLEGRO_KEY_CAPSLOCK) capsLockHeld = !capsLockHeld;
 
@@ -300,6 +302,8 @@ void LoginScene::OnKeyDown(int keyCode) {
         }
     }
 
+
+
     if (keyCode == ALLEGRO_KEY_ENTER) {
         if (name.empty()) return;
         if (pass.empty()) return;
@@ -314,6 +318,7 @@ void LoginScene::OnKeyDown(int keyCode) {
         Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
 }
+
 void LoginScene::OnKeyUp(int keyCode) {
     IScene::OnKeyUp(keyCode);
     if (keyCode == ALLEGRO_KEY_LSHIFT || keyCode == ALLEGRO_KEY_RSHIFT) shiftHeld = false;
@@ -322,6 +327,7 @@ void LoginScene::OnKeyUp(int keyCode) {
 void LoginScene::OnMouseDown(int button, int mx, int my) {
     // let any controls (buttons, textboxes, etc.) handle the click first
     IScene::OnMouseDown(button, mx, my);
+    Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
 
     // only react on left‐click
     if (button != 1) return;
@@ -339,6 +345,11 @@ void LoginScene::OnMouseDown(int button, int mx, int my) {
     int x2   = x1;
     int y2   = y1 + boxH + 100;
 
+    int signupmsgSW = al_get_bitmap_width(signupMsg);
+    int signupmsgSH = al_get_bitmap_height(signupMsg);
+    int signuptxtSW = al_get_bitmap_width(signupText);
+    int signuptxtSH = al_get_bitmap_height(signupText);
+    int msgMergedDX = signupmsgSW + signuptxtSW - 50;
 
     bool inBox1 = (mx >= x1 && mx <= x1 + boxW
                 && my >= y1 && my <= y1 + boxH);
@@ -357,6 +368,13 @@ void LoginScene::OnMouseDown(int button, int mx, int my) {
         BoxOneClicked = false;
         BoxTwoClicked = false;
     }
+
+    if (button & 1) {
+        if(LoginmouseIn(mouse.x, mouse.y, halfW - msgMergedDX/2 + signupmsgSW - 40 , halfH + 300, signuptxtSW, signuptxtSH)) {
+            Engine::GameEngine::GetInstance().ChangeScene("signup");
+        }
+    }
+
 }
 
 void LoginScene::BackOnClick(int stage) {

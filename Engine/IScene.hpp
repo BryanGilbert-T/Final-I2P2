@@ -44,7 +44,6 @@ namespace Engine {
         /// </summary>
         void Draw() const override;
 
-
     };
 }
 #endif   // ISCENE_HPP
