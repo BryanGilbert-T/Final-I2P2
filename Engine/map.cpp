@@ -42,15 +42,23 @@ void Map::DrawMap(Camera cam) {
             int dy = i * TILE_SIZE - cam.y;
             int dx = j * TILE_SIZE - cam.x;
 
+            int sw = 0;
+            int sh = 0;
             switch (MapState[i][j]) {
                 case TILE_DIRT:
+                    sw = al_get_bitmap_width(dirt_bitmap);
+                    sh = al_get_bitmap_height(dirt_bitmap);
+
                     al_draw_scaled_bitmap(dirt_bitmap,
-                        0, 0, 64, 64,
+                        0, 0, sw, sh,
                         dx, dy, TILE_SIZE, TILE_SIZE, 0);
                     break;
                 case TILE_SKY:
+                    sw = al_get_bitmap_width(sky_bitmap);
+                    sh = al_get_bitmap_height(sky_bitmap);
+
                     al_draw_scaled_bitmap(sky_bitmap,
-                        0, 0, 64, 64,
+                        0, 0, sw, sh,
                         dx, dy, TILE_SIZE, TILE_SIZE, 0);
                     break;
                 default:

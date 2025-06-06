@@ -27,14 +27,16 @@ typedef enum {
 class Player{
 protected:
   int hp;
-  int x, y;
   int speed;
   int jump;
   Direction dir;
+  ALLEGRO_BITMAP* player_bitmap;
 
 public:
+  int x, y;
   void Create(int hp, int x, int y);
   Player();
+  ~Player();
   void move(int keyCode);
   void Draw();
 };

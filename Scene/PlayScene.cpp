@@ -33,7 +33,7 @@
 
 bool PlayScene::DebugMode = false;
 const std::vector<Engine::Point> PlayScene::directions = { Engine::Point(-1, 0), Engine::Point(0, -1), Engine::Point(1, 0), Engine::Point(0, 1) };
-const int PlayScene::BlockSize = 32;
+const int PlayScene::BlockSize = 64;
 const float PlayScene::DangerTime = 7.61;
 Engine::Map PlayScene::map;
 Player PlayScene::player;
@@ -87,10 +87,21 @@ void PlayScene::Terminate() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     OnKeyHold();
+
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
+    int halfH = h / 2;
+
+
+    if (cam.x < 0) cam.x = 0;
+    if (cam.y < 0) cam.y = 0;
+
 }
 void PlayScene::Draw() const {
     IScene::Draw();
     map.DrawMap(cam);
+    player.Draw();
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
@@ -126,16 +137,10 @@ void PlayScene::OnKeyHold() {
     for (int key : keyHeld) {
         switch (key){
             case ALLEGRO_KEY_W:
-                cam.Update(cam.x, cam.y - 12);
-                break;
             case ALLEGRO_KEY_A:
-                cam.Update(cam.x - 12, cam.y);
-                break;
             case ALLEGRO_KEY_S:
-                cam.Update(cam.x, cam.y + 12);
-                break;
             case ALLEGRO_KEY_D:
-                cam.Update(cam.x + 12, cam.y);
+                player.move(key);
                 break;
             default:
                 break;
@@ -163,6 +168,7 @@ void PlayScene::ReadMap() {
         switch (c) {
             case '0': mapData.push_back(0); break;
             case '1': mapData.push_back(1); break;
+            case 'S': mapData.push_back(2); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -184,6 +190,9 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_SKY;
             } else if (num == 1) {
                 mapState[i][j] = TILE_DIRT;
+            } else if (num == 2) {
+                mapState[i][j] = TILE_SKY;
+                player.Create(100, j * BlockSize, i * BlockSize);
             }
         }
     }
