@@ -87,6 +87,7 @@ void PlayScene::Terminate() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     OnKeyHold();
+    player.Update();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();

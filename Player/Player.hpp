@@ -37,6 +37,7 @@ public:
   void Create(int hp, int x, int y);
   Player();
   ~Player();
+  void Update();
   void move(int keyCode);
   void Draw(Camera cam);
 };

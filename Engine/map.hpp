@@ -22,6 +22,7 @@ namespace Engine {
         MapType MapState;
         std::vector<std::vector<int>> offset_asset;
         void Init(int width, int height, MapType state);
+        bool IsCollision(int x, int y);
         Map() {
             MapWidth = 0;
             MapHeight = 0;

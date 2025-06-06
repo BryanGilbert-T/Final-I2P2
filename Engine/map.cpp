@@ -68,6 +68,17 @@ void Map::DrawMap(Camera cam) {
     }
 }
 
+bool Map::IsCollision(int x, int y) {
+    int dx = x / TILE_SIZE;
+    int dy = y / TILE_SIZE;
+
+    if (MapState[dy][dx] == TILE_DIRT) {
+        return true;
+    }
+
+    return false;
+}
+
 void Map::UpdateMap() {
 
 }

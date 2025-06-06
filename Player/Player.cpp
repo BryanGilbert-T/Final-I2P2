@@ -11,13 +11,16 @@
 #include "Engine/Point.hpp"
 #include "Scene/PlayScene.hpp"
 #include "Player.hpp"
+#include "Engine/map.hpp"
 
 #include <iostream>
 #include <ostream>
 
 const std::string filename = "Resource/images/stage-select/player.png";
-const int SPEED = 4;
 const int PLAYER_SIZE = 64;
+const int SPEED = PLAYER_SIZE / 4;
+
+const int GRAVITY = 10;
 
 void Player::Create(int hp, int x, int y){
     this->hp = hp;
@@ -29,6 +32,13 @@ void Player::Create(int hp, int x, int y){
     player_bitmap = al_load_bitmap(filename.c_str());
     if (!player_bitmap) {
         std::cerr << "Failed to load player_bitmap" << std::endl;
+    }
+}
+
+void Player::Update() {
+    PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+    if (!scene->map.IsCollision(x, y + PLAYER_SIZE)) {
+        this->y += GRAVITY;
     }
 }
 
