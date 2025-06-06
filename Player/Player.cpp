@@ -37,9 +37,16 @@ void Player::Create(int hp, int x, int y){
 
 void Player::Update() {
     PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
-    if (!scene->map.IsCollision(x, y + PLAYER_SIZE)) {
-        this->y += GRAVITY;
-    }
+    int dy = this->y + GRAVITY;
+    int dx = x;
+
+    if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+            x = dx;
+            y = dy;
+        }
 }
 
 Player::Player(){
@@ -56,14 +63,24 @@ Player::~Player() {
 }
 
 void Player::move(int keyCode) {
+    PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+    int dx = x;
+    int dy = y;
     if (keyCode == ALLEGRO_KEY_W) {
-        this->y -= this->speed;
+        dy -= this->speed;
     } else if (keyCode == ALLEGRO_KEY_A) {
-        this->x -= this->speed;
+        dx -= this->speed;
     } else if (keyCode == ALLEGRO_KEY_S) {
-        this->y += this->speed;
+        dy += this->speed;
     } else if (keyCode == ALLEGRO_KEY_D) {
-        this->x += this->speed;
+        dx += this->speed;
+    }
+    if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        x = dx;
+        y = dy;
     }
 }
 
