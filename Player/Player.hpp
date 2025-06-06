@@ -29,6 +29,7 @@ protected:
   int hp;
   int speed;
   int jump;
+  int jumpSpeed;
   Direction dir;
   ALLEGRO_BITMAP* player_bitmap;
 
@@ -40,5 +41,6 @@ public:
   void Update();
   void move(int keyCode);
   void Draw(Camera cam);
+  void Jump();
 };
 #endif   // PLAYER_HPP

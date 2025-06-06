@@ -133,6 +133,10 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 void PlayScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
     keyHeld.insert(keyCode);
+
+    if (keyCode == ALLEGRO_KEY_W || keyCode == ALLEGRO_KEY_SPACE) {
+        player.Jump();
+    }
 }
 void PlayScene::OnKeyUp(int keyCode) {
     IScene::OnKeyUp(keyCode);
