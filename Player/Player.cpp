@@ -20,7 +20,7 @@ const std::string filename = "Resource/images/stage-select/player.png";
 const int PLAYER_SIZE = 64;
 const int SPEED = PLAYER_SIZE / 4;
 
-const int GRAVITY = 10;
+const int GRAVITY = 8;
 
 void Player::Create(int hp, int x, int y){
     this->hp = hp;
@@ -44,9 +44,18 @@ void Player::Update() {
         dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
         !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
         !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        x = dx;
+        y = dy;
+    } else {
+        dy = this->y + 1;
+        if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
             x = dx;
             y = dy;
         }
+    }
 }
 
 Player::Player(){
