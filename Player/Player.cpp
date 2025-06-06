@@ -74,7 +74,7 @@ Player::Player(){
     speed = SPEED;
     dir = RIGHT;
     jump = 0;
-    vy = GRAVITY;
+    vy = 0;
 }
 
 Player::~Player() {
