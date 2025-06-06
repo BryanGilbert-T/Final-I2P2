@@ -21,7 +21,7 @@ const int PLAYER_SIZE = 64;
 const int SPEED = PLAYER_SIZE / 4;
 
 const int GRAVITY = 8;
-const float JUMP_ACCELERATION = 0.5;
+const float JUMP_ACCELERATION = 1;
 const int INITIAL_JUMP_SPEED = 16;
 
 void Player::Create(int hp, int x, int y){
@@ -39,49 +39,32 @@ void Player::Create(int hp, int x, int y){
 
 void Player::Update() {
     PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+
+    int dy = this->y + vy;
+    int dx = x;
+
     if (jump > 0) {
-        int dy = this->y - jumpSpeed;
-        int dx = x;
-
-        jumpSpeed -= JUMP_ACCELERATION;
-
-        if (dx >= 0 && dy >= 0 &&
-            dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-            !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-            !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
-            x = dx;
-            y = dy;
-            } else {
-                dy = this->y + 1;
-                if (dx >= 0 && dy >= 0 &&
-                dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-                !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-                !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
-                    x = dx;
-                    y = dy;
-                }
-            }
-    } else {
-        int dy = this->y + GRAVITY;
-        int dx = x;
-
-        if (dx >= 0 && dy >= 0 &&
-            dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-            !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-            !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
-            x = dx;
-            y = dy;
-            } else {
-                dy = this->y + 1;
-                if (dx >= 0 && dy >= 0 &&
-                dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-                !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-                !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
-                    x = dx;
-                    y = dy;
-                }
-            }
+        vy += JUMP_ACCELERATION;
     }
+
+    if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        x = dx;
+        y = dy;
+    } else {
+        dy = this->y + 1;
+        if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+            x = dx;
+            y = dy;
+        }
+        jump = 0;
+    }
+
 }
 
 Player::Player(){
@@ -91,7 +74,7 @@ Player::Player(){
     speed = SPEED;
     dir = RIGHT;
     jump = 0;
-    jumpSpeed = 0;
+    vy = GRAVITY;
 }
 
 Player::~Player() {
@@ -119,9 +102,9 @@ void Player::move(int keyCode) {
 }
 
 void Player::Jump() {
-    if (jump < 2 && jump != -1) {
+    if (jump < 2) {
         jump++;
-        jumpSpeed = INITIAL_JUMP_SPEED;
+        vy = -INITIAL_JUMP_SPEED;
     }
 }
 

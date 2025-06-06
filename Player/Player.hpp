@@ -29,7 +29,7 @@ protected:
   int hp;
   int speed;
   int jump;
-  int jumpSpeed;
+  float vy;
   Direction dir;
   ALLEGRO_BITMAP* player_bitmap;
 
