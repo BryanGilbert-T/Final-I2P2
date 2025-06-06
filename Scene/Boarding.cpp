@@ -87,11 +87,13 @@ void BoardingScene::Update(float deltatime) {
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int startx = w * 0.2;
-    int dxlogout = w * 0.8;
-    int dylogout = h * 0.8 - offset;
 
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_font_line_height(PlayFont) * 2 + offset;
+
+    int dxlogout = w * 0.8 - sw / 2;
+    int dylogout = h * 0.8 - offset;
+
 
     if(mouseIn(mouse.x, mouse.y, startx, h * 0.575 - offset, sw, sh)) {
         playHover = true;
@@ -110,7 +112,7 @@ void BoardingScene::Update(float deltatime) {
         backHover = true;
         logoutHover = false;
     }
-    else if (mouseIn(mouse.x, mouse.y, w * 0.8, h * 0.8 - offset, sw, sh)) {
+    else if (mouseIn(mouse.x, mouse.y, dxlogout, dylogout, sw, sh)) {
         playHover = false;
         settingHover = false;
         backHover = false;
@@ -130,11 +132,13 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
         int w = Engine::GameEngine::GetInstance().getVirtW();
         int h = Engine::GameEngine::GetInstance().getVirtH();
         int startx = w * 0.2;
-        int logoutdx = w * 0.8;
-        int logoutdy = h * 0.8 - offset;
 
         int sw = al_get_bitmap_width(Logo);
         int sh = al_get_font_line_height(PlayFont) * 2 + offset;
+
+        int logoutdx = w * 0.8 - sw / 2;
+        int logoutdy = h * 0.8 - offset;
+
 
         if(mouseIn(mx, my, startx, h * 0.575 - offset, sw, sh)) {
             PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
@@ -148,6 +152,7 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
             Engine::GameEngine::GetInstance().ChangeScene("start");
         }
         else if (mouseIn(mx, my, logoutdx, logoutdy, sw, sh)) {
+            std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
             Engine::GameEngine::GetInstance().ChangeScene("login");
         }
     }
