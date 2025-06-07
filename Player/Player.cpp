@@ -38,33 +38,69 @@ void Player::Create(int hp, int x, int y){
 }
 
 void Player::Update() {
-    PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+   PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
+    if (!scene) return;
 
-    int dy = this->y + vy;
-    int dx = x;
+    // 1) Apply gravity (vy will grow by GRAVITY each frame):
+    vy += JUMP_ACCELERATION;
 
-    if (jump > 0) {
-        vy += JUMP_ACCELERATION;
-    }
+    // 2) Figure out total vertical movement this frame:
+    //    For example, if vy==−12, you want to move up 12 pixels; if vy==+8, move down 8.
+    int totalDY   = vy;                      // could be negative (rising) or positive (falling)
+    int signDY    = (totalDY >= 0 ? +1 : -1);
+    int remaining = std::abs(totalDY);
 
-    if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
-        x = dx;
-        y = dy;
-    } else {
-        dy = this->y + 1;
-        if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
-            x = dx;
-            y = dy;
+    // 3) Move one pixel at a time in the direction of signDY:
+    //    This loop guarantees you never “tunnel” through a tile.
+    while (remaining > 0) {
+        // test a one-pixel step
+        int testY = y + signDY;
+        int leftX = x;
+        int rightX = x + PLAYER_SIZE - 1;
+        bool collided = false;
+
+        if (signDY > 0) {
+            // moving down: check the two bottom corners
+            // world-coords = (leftX, testY+PLAYER_SIZE-1) and (rightX, testY+PLAYER_SIZE-1)
+            if (scene->map.IsCollision(leftX,           testY + PLAYER_SIZE - 1) ||
+                scene->map.IsCollision(rightX,          testY + PLAYER_SIZE - 1))
+            {
+                // We’ve hit the ground. Land here:
+                vy = 0;
+                jump = 0;     // reset jumpCount so we can jump again next time
+                collided = true;
+            }
         }
-        jump = 0;
+        else {
+            // moving up: check the two top corners
+            // world-coords = (leftX, testY) and (rightX, testY)
+            if (scene->map.IsCollision(leftX,           testY) ||
+                scene->map.IsCollision(rightX,          testY))
+            {
+                // We’ve hit a ceiling. Stop upward momentum:
+                vy = 0;
+                collided = true;
+            }
+        }
+
+        if (collided) {
+            break;  // stop any further vertical movement this frame
+        } else {
+            // safe to move that one pixel
+            y = testY;
+            remaining--;
+        }
     }
 
+    // 4) We do not change x here—that only happens when move(keyCode) is called.
+
+    // 5) Clamp inside world bounds (so you can’t fall off the map):
+    int mapPixelW = scene->MapWidth * scene->BlockSize;
+    int mapPixelH = scene->MapHeight * scene->BlockSize;
+    if (x < 0)                           x = 0;
+    if (x + PLAYER_SIZE > mapPixelW)     x = mapPixelW - PLAYER_SIZE;
+    if (y < 0)                           y = 0;
+    if (y + PLAYER_SIZE > mapPixelH)     y = mapPixelH - PLAYER_SIZE;
 }
 
 Player::Player(){
