@@ -29,6 +29,7 @@ public:
     bool settingHover = false;
     bool backHover = false;
     bool logoutHover = false;
+    bool friendlistHover = false;
 
 
     ALLEGRO_FONT* PlayFont;
