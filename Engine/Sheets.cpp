@@ -172,3 +172,57 @@ int authUser(const std::string& name, const std::string& password) {
         return 1; //ketemu passwordnya
     } else return 0; //salah password
 }
+
+std::vector<std::string> getFriends(const std::string& name) {
+    // build the URL just like getUser()
+    std::string url =
+      "https://firestore.googleapis.com/v1/projects/" +
+      project_id + "/databases/(default)/documents/players/" + name;
+
+    CURL* curl = curl_easy_init();
+    std::string response;
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return {};
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "curl_easy_perform failed: "
+                  << curl_easy_strerror(res) << "\n";
+        return {};
+    }
+
+    // parse JSON and extract friends array
+    try {
+        auto j = nlohmann::json::parse(response);
+        if (!j.contains("fields")
+         || !j["fields"].contains("friends")
+         || !j["fields"]["friends"].contains("arrayValue")
+         || !j["fields"]["friends"]["arrayValue"].contains("values"))
+        {
+            return {};
+        }
+
+        const auto& vals = j["fields"]
+                              ["friends"]
+                              ["arrayValue"]
+                              ["values"];
+        std::vector<std::string> friends;
+        for (const auto& v : vals) {
+            if (v.contains("stringValue"))
+                friends.push_back(v["stringValue"].get<std::string>());
+        }
+        return friends;
+    } catch (const std::exception& e) {
+        std::cerr << "JSON error in getFriends: " << e.what() << "\n";
+        return {};
+    }
+}

@@ -18,6 +18,7 @@ public:
     void ScoreboardOnClick();
     void BackOnClick(int stage);
     void Logout(int stage);
+    void FriendsOnClick(int stage);
 
     void Draw() const override;
     void Update(float deltaTime) override;
@@ -28,6 +29,11 @@ public:
 
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;
+
+    ALLEGRO_BITMAP* background;
+
+    std::string curUser;
+    std::vector<std::string> friends;
 };
 
 #endif   // STAGESELECTSCENE_HPP

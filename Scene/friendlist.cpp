@@ -11,6 +11,7 @@
 #include "Engine/Collider.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/Resources.hpp"
+#include "Engine/Sheets.hpp"
 #include "PlayScene.hpp"
 #include "friendlist.hpp"
 #include "UI/Component/ImageButton.hpp"
@@ -32,7 +33,33 @@ void FriendListScene::Initialize() {
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
+
+    const int iconW = 64;
+    const int iconH = 64;
+    btn = new Engine::ImageButton("friendlist-scene/friendsicon.png", "friendlist-scene/friendsicon.png", w * 0.25, h * 0.1, iconW, iconH);
+    btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 1));
+    AddNewControlObject(btn);
+    btn = new Engine::ImageButton("friendlist-scene/requestsicon.png", "friendlist-scene/requestsicon.png", w * 0.5, h * 0.1, iconW, iconH);
+    btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 2));
+    AddNewControlObject(btn);
+    btn = new Engine::ImageButton("friendlist-scene/searchicon.png", "friendlist-scene/searchicon.png", w * 0.75, h * 0.1, iconW, iconH);
+    btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 3));
+    AddNewControlObject(btn);
+
+    std::ifstream in("Resource/account.txt");
+    in >> curUser;
+    friends = getFriends(curUser);
 }
+void FriendListScene::FriendsOnClick(int stage) {
+    if (stage == 1) {
+
+    } else if (stage == 2) {
+
+    } else if (stage == 3) {
+
+    }
+}
+
 void FriendListScene::Logout(int stage) {
     std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
     Engine::GameEngine::GetInstance().ChangeScene("login");
@@ -55,6 +82,16 @@ void FriendListScene::Draw() const {
 
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_bitmap_height(Logo);
+
+    int iconw = 64;
+    int iconh = 64;
+
+    for (int i = 0; i < 5; i++) {
+        if (i >= friends.size()) break;
+        al_draw_text(PlayFont, al_map_rgb(255, 255, 255),
+            w * 0.2, h * 0.2 + i * 100, ALLEGRO_ALIGN_LEFT,
+            friends[i].c_str());
+    }
 
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
