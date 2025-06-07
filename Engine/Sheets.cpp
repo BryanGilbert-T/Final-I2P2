@@ -75,7 +75,19 @@ void createUser(const std::string& name,
             "px": {"integerValue": 0},
             "py": {"integerValue": 0},
             "coin": {"integerValue": 0},
-            "hp": {"integerValue": 100}
+            "hp": {"integerValue": 100},
+            "followers": {
+                "arrayValue": {
+                    "values": []
+                }
+            },
+            "followerscnt": {"integerValue": 0},
+            "followings": {
+                "arrayValue": {
+                    "values": []
+                }
+            },
+            "followingscnt": {"integerValue": 0}
         }
     })";
 

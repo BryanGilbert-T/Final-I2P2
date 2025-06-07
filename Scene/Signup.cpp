@@ -176,7 +176,6 @@ void SignupScene::Draw() const {
     int logintxtSH = al_get_bitmap_height(loginText);
     int msgMergedDX = loginmsgSW + logintxtSW - 50;
 
-
     //logo
     al_draw_tinted_scaled_bitmap(logo, al_map_rgb_f(1, 1, 1),
                                 0, 0, logoSW, logoSH,
@@ -207,7 +206,6 @@ void SignupScene::Draw() const {
                                  0, 0,  logintxtSW, logintxtSH,
                                  halfW - msgMergedDX/2 + loginmsgSW - 40 , halfH + 300, logintxtSW, logintxtSH, 0);
     }
-
     // draw the two boxes
     al_draw_rectangle(x1, y1, x1 + boxW, y1 + boxH,
                      BoxOneClicked ? clicked_color : not_clicked_color,
