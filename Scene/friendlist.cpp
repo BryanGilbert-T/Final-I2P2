@@ -1,9 +1,11 @@
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_primitives.h>
 #include <functional>
 #include <memory>
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/Point.hpp"
@@ -36,13 +38,13 @@ void FriendListScene::Initialize() {
 
     const int iconW = 64;
     const int iconH = 64;
-    btn = new Engine::ImageButton("friendlist-scene/friendsicon.png", "friendlist-scene/friendsicon.png", w * 0.25, h * 0.1, iconW, iconH);
+    btn = (friendsIcon = new Engine::ImageButton("friendlist-scene/friendsicon.png", "friendlist-scene/requestsicon.png", w * 0.25, h * 0.1, iconW, iconH));
     btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 1));
     AddNewControlObject(btn);
-    btn = new Engine::ImageButton("friendlist-scene/requestsicon.png", "friendlist-scene/requestsicon.png", w * 0.5, h * 0.1, iconW, iconH);
+    btn = (requestsIcon = new Engine::ImageButton("friendlist-scene/requestsicon.png", "friendlist-scene/searchicon.png", w * 0.5, h * 0.1, iconW, iconH));
     btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 2));
     AddNewControlObject(btn);
-    btn = new Engine::ImageButton("friendlist-scene/searchicon.png", "friendlist-scene/searchicon.png", w * 0.75, h * 0.1, iconW, iconH);
+    btn = (searchIcon = new Engine::ImageButton("friendlist-scene/searchicon.png", "friendlist-scene/searchicon.png", w * 0.75, h * 0.1, iconW, iconH));
     btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 3));
     AddNewControlObject(btn);
 
@@ -51,12 +53,13 @@ void FriendListScene::Initialize() {
     friends = getFriends(curUser);
 }
 void FriendListScene::FriendsOnClick(int stage) {
+    std::cout << "Masuk" << std::endl;
     if (stage == 1) {
 
     } else if (stage == 2) {
-
+        Engine::GameEngine::GetInstance().ChangeScene("requests");
     } else if (stage == 3) {
-
+        Engine::GameEngine::GetInstance().ChangeScene("search");
     }
 }
 
@@ -88,10 +91,30 @@ void FriendListScene::Draw() const {
 
     for (int i = 0; i < 5; i++) {
         if (i >= friends.size()) break;
-        al_draw_text(PlayFont, al_map_rgb(255, 255, 255),
+        al_draw_text(PlayFont, al_map_rgb(0, 0, 0),
             w * 0.2, h * 0.2 + i * 100, ALLEGRO_ALIGN_LEFT,
             friends[i].c_str());
     }
+
+    al_draw_rectangle(
+      w * 0.25, h * 0.1,
+      w * 0.25 + 64, h * 0.1 + 64,
+      al_map_rgb(255,0,0),  2.0
+    );
+
+    al_draw_rectangle(
+      w * 0.5, h * 0.1,
+      w * 0.5 + 64, h * 0.1 + 64,
+      al_map_rgb(255,0,0),  2.0
+    );
+
+    al_draw_rectangle(
+      w * 0.75, h * 0.1,
+      w * 0.75 + 64, h * 0.1 + 64,
+      al_map_rgb(255,0,0),  2.0
+    );
+
+
 
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
@@ -120,6 +143,7 @@ void FriendListScene::Update(float deltatime) {
 
 }
 void FriendListScene::OnMouseDown(int button, int mx, int my) {
+    IScene::OnMouseDown(button, mx, my);
     if (button & 1) {
         const int offset = 10;
 

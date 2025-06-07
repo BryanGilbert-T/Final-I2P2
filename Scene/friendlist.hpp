@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Engine/IScene.hpp"
+#include "UI/Component/ImageButton.hpp"
 
 class FriendListScene final : public Engine::IScene {
 private:
@@ -34,6 +35,10 @@ public:
 
     std::string curUser;
     std::vector<std::string> friends;
+
+    Engine::ImageButton* friendsIcon;
+    Engine::ImageButton* requestsIcon;
+    Engine::ImageButton* searchIcon;
 };
 
 #endif   // STAGESELECTSCENE_HPP
