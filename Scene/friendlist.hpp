@@ -19,7 +19,6 @@ public:
     void ScoreboardOnClick();
     void BackOnClick(int stage);
     void Logout(int stage);
-    void FriendsOnClick(int stage);
 
     void Draw() const override;
     void Update(float deltaTime) override;

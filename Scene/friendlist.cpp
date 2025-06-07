@@ -43,19 +43,13 @@ void FriendListScene::Initialize() {
     requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
     searchIcon = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
 
+    friendsIconHover = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
+    requestsIconHover = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
+    searchIconHover = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
+
     std::ifstream in("Resource/account.txt");
     in >> curUser;
     friends = getFriends(curUser);
-}
-void FriendListScene::FriendsOnClick(int stage) {
-    std::cout << "Masuk" << std::endl;
-    if (stage == 1) {
-
-    } else if (stage == 2) {
-        Engine::GameEngine::GetInstance().ChangeScene("requests");
-    } else if (stage == 3) {
-        Engine::GameEngine::GetInstance().ChangeScene("search");
-    }
 }
 
 void FriendListScene::Logout(int stage) {
@@ -96,8 +90,8 @@ void FriendListScene::Draw() const {
     }
 
     if (friendsHover) { // hover nya belum ada
-        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgb(255, 255, 255),
-                    0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
+        al_draw_tinted_scaled_bitmap(friendsIconHover, al_map_rgb(255, 255, 255),
+                    0, 0, al_get_bitmap_width(friendsIconHover), al_get_bitmap_height(friendsIconHover),
                     w * 0.25, h * 0.1, iconw, iconh,
                     0);
     } else {
@@ -109,8 +103,8 @@ void FriendListScene::Draw() const {
 
     if (requestHover) { // hover nya belum ada
         std::cout << "here";
-        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
-                0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
+        al_draw_tinted_scaled_bitmap(requestsIconHover, al_map_rgb(255, 255, 255),
+                0, 0, al_get_bitmap_width(requestsIconHover), al_get_bitmap_height(requestsIconHover),
                 w * 0.5, h * 0.1, iconw, iconh,
                 0);
     } else {
@@ -121,8 +115,8 @@ void FriendListScene::Draw() const {
     }
 
     if (searchHover) { // hover nya belum ada
-        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
-              0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
+        al_draw_tinted_scaled_bitmap(searchIconHover, al_map_rgb(255, 255, 255),
+              0, 0, al_get_bitmap_width(searchIconHover), al_get_bitmap_height(searchIconHover),
               w * 0.75, h * 0.1, iconw, iconh,
               0);
     } else {
@@ -164,12 +158,12 @@ void FriendListScene::Update(float deltatime) {
         requestHover = false;
         searchHover = false;
     }
-    if (mouseIn(mouse.x, mouse.y, w * 0.5, h * 0.1, iconw, iconh)) {
+    else if (mouseIn(mouse.x, mouse.y, w * 0.5, h * 0.1, iconw, iconh)) {
         friendsHover = false;
         requestHover = true;
         searchHover = false;
     }
-    if (mouseIn(mouse.x, mouse.y, w * 0.75, h * 0.1, iconw, iconh)) {
+    else if (mouseIn(mouse.x, mouse.y, w * 0.75, h * 0.1, iconw, iconh)) {
         friendsHover = false;
         requestHover = false;
         searchHover = true;
