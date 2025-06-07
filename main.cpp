@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
 	game.AddNewScene("login", new LoginScene());
 	game.AddNewScene("signup", new SignupScene());
 	game.AddNewScene("friendlist", new FriendListScene());
-	game.AddNewScene("requests", new RequestsScene);
+	game.AddNewScene("requests", new RequestsScene());
 	game.AddNewScene("search", new SearchScene());
 
 

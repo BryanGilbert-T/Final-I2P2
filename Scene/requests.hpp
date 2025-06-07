@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "Engine/IScene.hpp"
+#include "UI/Component/ImageButton.hpp"
 
 class RequestsScene final : public Engine::IScene {
 private:
@@ -18,7 +19,6 @@ public:
     void ScoreboardOnClick();
     void BackOnClick(int stage);
     void Logout(int stage);
-    void FriendsOnClick(int stage);
 
     void Draw() const override;
     void Update(float deltaTime) override;
@@ -33,7 +33,19 @@ public:
     ALLEGRO_BITMAP* background;
 
     std::string curUser;
-    std::vector<std::string> requests;
+    std::vector<std::string> friends;
+
+    bool friendsHover = false;
+    bool requestHover = false;
+    bool searchHover = false;
+
+    ALLEGRO_BITMAP* friendsIcon;
+    ALLEGRO_BITMAP* requestsIcon;
+    ALLEGRO_BITMAP* searchIcon;
+
+    ALLEGRO_BITMAP* friendsIconHover;
+    ALLEGRO_BITMAP* requestsIconHover;
+    ALLEGRO_BITMAP* searchIconHover;
 };
 
 #endif   // STAGESELECTSCENE_HPP

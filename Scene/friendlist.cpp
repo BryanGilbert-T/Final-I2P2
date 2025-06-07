@@ -50,6 +50,11 @@ void FriendListScene::Initialize() {
     std::ifstream in("Resource/account.txt");
     in >> curUser;
     friends = getFriends(curUser);
+
+    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9 - 50, 400, 100);
+    btn->SetOnClickCallback(std::bind(&FriendListScene::BackOnClick, this, 1));
+    AddNewControlObject(btn);
+    AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
 }
 
 void FriendListScene::Logout(int stage) {
@@ -92,37 +97,36 @@ void FriendListScene::Draw() const {
     if (friendsHover) { // hover nya belum ada
         al_draw_tinted_scaled_bitmap(friendsIconHover, al_map_rgb(255, 255, 255),
                     0, 0, al_get_bitmap_width(friendsIconHover), al_get_bitmap_height(friendsIconHover),
-                    w * 0.25, h * 0.1, iconw, iconh,
+                    w * 0.25 - iconw/2, h * 0.1, iconw, iconh,
                     0);
     } else {
         al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
             0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
-            w * 0.25, h * 0.1, iconw, iconh,
+            w * 0.25 - iconw/2, h * 0.1, iconw, iconh,
             0);
     }
 
     if (requestHover) { // hover nya belum ada
-        std::cout << "here";
         al_draw_tinted_scaled_bitmap(requestsIconHover, al_map_rgb(255, 255, 255),
                 0, 0, al_get_bitmap_width(requestsIconHover), al_get_bitmap_height(requestsIconHover),
-                w * 0.5, h * 0.1, iconw, iconh,
+                w * 0.5 - iconw/2, h * 0.1, iconw, iconh,
                 0);
     } else {
         al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgb(255, 255, 255),
         0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
-        w * 0.5, h * 0.1, iconw, iconh,
+        w * 0.5 - iconw/2, h * 0.1, iconw, iconh,
         0);
     }
 
     if (searchHover) { // hover nya belum ada
         al_draw_tinted_scaled_bitmap(searchIconHover, al_map_rgb(255, 255, 255),
               0, 0, al_get_bitmap_width(searchIconHover), al_get_bitmap_height(searchIconHover),
-              w * 0.75, h * 0.1, iconw, iconh,
+              w * 0.75 - iconw/2, h * 0.1, iconw, iconh,
               0);
     } else {
         al_draw_tinted_scaled_bitmap(searchIcon, al_map_rgb(255, 255, 255),
       0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
-      w * 0.75, h * 0.1, iconw, iconh,
+      w * 0.75 - iconw/2, h * 0.1, iconw, iconh,
       0);
     }
 
@@ -153,17 +157,17 @@ void FriendListScene::Update(float deltatime) {
     const int iconw = 64;
     const int iconh = 64;
 
-    if (mouseIn(mouse.x, mouse.y, w * 0.25, h * 0.1, iconw, iconh)) {
+    if (mouseIn(mouse.x, mouse.y, w * 0.25 - iconw/2, h * 0.1, iconw, iconh)) {
         friendsHover = true;
         requestHover = false;
         searchHover = false;
     }
-    else if (mouseIn(mouse.x, mouse.y, w * 0.5, h * 0.1, iconw, iconh)) {
+    else if (mouseIn(mouse.x, mouse.y, w * 0.5 - iconw/2, h * 0.1, iconw, iconh)) {
         friendsHover = false;
         requestHover = true;
         searchHover = false;
     }
-    else if (mouseIn(mouse.x, mouse.y, w * 0.75, h * 0.1, iconw, iconh)) {
+    else if (mouseIn(mouse.x, mouse.y, w * 0.75 - iconw/2, h * 0.1, iconw, iconh)) {
         friendsHover = false;
         requestHover = false;
         searchHover = true;
@@ -200,7 +204,7 @@ void FriendListScene::OnMouseDown(int button, int mx, int my) {
     }
 }
 void FriendListScene::BackOnClick(int stage) {
-    Engine::GameEngine::GetInstance().ChangeScene("start");
+    Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 void FriendListScene::PlayOnClick(int stage) {
     PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));

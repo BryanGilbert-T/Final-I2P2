@@ -1,4 +1,5 @@
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_primitives.h>
 #include <functional>
 #include <memory>
 #include <string>
@@ -37,28 +38,23 @@ void RequestsScene::Initialize() {
 
     const int iconW = 64;
     const int iconH = 64;
-    btn = new Engine::ImageButton("friendlist-scene/friendsicon.png", "friendlist-scene/friendsicon.png", w * 0.25, h * 0.1, iconW, iconH);
-    btn->SetOnClickCallback(std::bind(&RequestsScene::FriendsOnClick, this, 1));
-    AddNewControlObject(btn);
-    btn = new Engine::ImageButton("friendlist-scene/requestsicon.png", "friendlist-scene/requestsicon.png", w * 0.5, h * 0.1, iconW, iconH);
-    btn->SetOnClickCallback(std::bind(&RequestsScene::FriendsOnClick, this, 2));
-    AddNewControlObject(btn);
-    btn = new Engine::ImageButton("friendlist-scene/searchicon.png", "friendlist-scene/searchicon.png", w * 0.75, h * 0.1, iconW, iconH);
-    btn->SetOnClickCallback(std::bind(&RequestsScene::FriendsOnClick, this, 3));
-    AddNewControlObject(btn);
+
+    friendsIcon = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
+    requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
+    searchIcon = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
+
+    friendsIconHover = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
+    requestsIconHover = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
+    searchIconHover = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
 
     std::ifstream in("Resource/account.txt");
     in >> curUser;
-    requests = getRequests(curUser);
-}
-void RequestsScene::FriendsOnClick(int stage) {
-    if (stage == 1) {
-        Engine::GameEngine::GetInstance().ChangeScene("friendlist");
-    } else if (stage == 2) {
+    friends = getFriends(curUser);
 
-    } else if (stage == 3) {
-        Engine::GameEngine::GetInstance().ChangeScene("search");
-    }
+    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9 - 50, 400, 100);
+    btn->SetOnClickCallback(std::bind(&RequestsScene::BackOnClick, this, 1));
+    AddNewControlObject(btn);
+    AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
 }
 
 void RequestsScene::Logout(int stage) {
@@ -71,6 +67,10 @@ void RequestsScene::Terminate() {
     IScene::Terminate();
     if (Logo) al_destroy_bitmap(Logo);
     if (PlayFont) al_destroy_font(PlayFont);
+
+    al_destroy_bitmap(friendsIcon);
+    al_destroy_bitmap(requestsIcon);
+    al_destroy_bitmap(searchIcon);
 }
 void RequestsScene::Draw() const {
     al_clear_to_color(al_map_rgb(255, 255, 255));
@@ -88,10 +88,46 @@ void RequestsScene::Draw() const {
     int iconh = 64;
 
     for (int i = 0; i < 5; i++) {
-        if (i >= requests.size()) break;
+        if (i >= friends.size()) break;
         al_draw_text(PlayFont, al_map_rgb(0, 0, 0),
             w * 0.2, h * 0.2 + i * 100, ALLEGRO_ALIGN_LEFT,
-            requests[i].c_str());
+            friends[i].c_str());
+    }
+
+    if (friendsHover) { // hover nya belum ada
+        al_draw_tinted_scaled_bitmap(friendsIconHover, al_map_rgb(255, 255, 255),
+                    0, 0, al_get_bitmap_width(friendsIconHover), al_get_bitmap_height(friendsIconHover),
+                    w * 0.25 - iconw/2, h * 0.1, iconw, iconh,
+                    0);
+    } else {
+        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
+            0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
+            w * 0.25 - iconw/2, h * 0.1, iconw, iconh,
+            0);
+    }
+
+    if (requestHover) { // hover nya belum ada
+        al_draw_tinted_scaled_bitmap(requestsIconHover, al_map_rgb(255, 255, 255),
+                0, 0, al_get_bitmap_width(requestsIconHover), al_get_bitmap_height(requestsIconHover),
+                w * 0.5 - iconw/2, h * 0.1, iconw, iconh,
+                0);
+    } else {
+        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgb(255, 255, 255),
+        0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
+        w * 0.5 - iconw/2, h * 0.1, iconw, iconh,
+        0);
+    }
+
+    if (searchHover) { // hover nya belum ada
+        al_draw_tinted_scaled_bitmap(searchIconHover, al_map_rgb(255, 255, 255),
+              0, 0, al_get_bitmap_width(searchIconHover), al_get_bitmap_height(searchIconHover),
+              w * 0.75 - iconw/2, h * 0.1, iconw, iconh,
+              0);
+    } else {
+        al_draw_tinted_scaled_bitmap(searchIcon, al_map_rgb(255, 255, 255),
+      0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
+      w * 0.75 - iconw/2, h * 0.1, iconw, iconh,
+      0);
     }
 
 }
@@ -118,7 +154,29 @@ void RequestsScene::Update(float deltatime) {
     int dxlogout = w * 0.8 - sw / 2;
     int dylogout = h * 0.8 - offset;
 
+    const int iconw = 64;
+    const int iconh = 64;
 
+    if (mouseIn(mouse.x, mouse.y, w * 0.25 - iconw/2, h * 0.1, iconw, iconh)) {
+        friendsHover = true;
+        requestHover = false;
+        searchHover = false;
+    }
+    else if (mouseIn(mouse.x, mouse.y, w * 0.5 - iconw/2, h * 0.1, iconw, iconh)) {
+        friendsHover = false;
+        requestHover = true;
+        searchHover = false;
+    }
+    else if (mouseIn(mouse.x, mouse.y, w * 0.75 - iconw/2, h * 0.1, iconw, iconh)) {
+        friendsHover = false;
+        requestHover = false;
+        searchHover = true;
+    }
+    else {
+        friendsHover = false;
+        requestHover = false;
+        searchHover = false;
+    }
 }
 void RequestsScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
@@ -135,11 +193,17 @@ void RequestsScene::OnMouseDown(int button, int mx, int my) {
         int logoutdx = w * 0.8 - sw / 2;
         int logoutdy = h * 0.8 - offset;
 
+        if (friendsHover) {
+            Engine::GameEngine::GetInstance().ChangeScene("friendlist");
+        } else if (requestHover) {
+        } else if (searchHover) {
+            Engine::GameEngine::GetInstance().ChangeScene("search");
+        }
 
     }
 }
 void RequestsScene::BackOnClick(int stage) {
-    Engine::GameEngine::GetInstance().ChangeScene("start");
+    Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 void RequestsScene::PlayOnClick(int stage) {
     PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
