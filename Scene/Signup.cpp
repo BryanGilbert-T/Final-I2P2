@@ -61,6 +61,7 @@ void SignupScene::Initialize() {
 
     //IMAGES
     background = al_load_bitmap("Resource/images/login-scene/background.png");
+    BG = al_load_bitmap("Resource/images/stage-select/bg-only.jpg");
     logo = al_load_bitmap("Resource/images/login-scene/logo-login.png");
 
     loginMsg = al_load_bitmap("Resource/images/login-scene/login-msg.png");
@@ -175,6 +176,11 @@ void SignupScene::Draw() const {
     int logintxtSW = al_get_bitmap_width(loginText);
     int logintxtSH = al_get_bitmap_height(loginText);
     int msgMergedDX = loginmsgSW + logintxtSW - 50;
+
+    int backSW = al_get_bitmap_width(BG);
+    int backSH = al_get_bitmap_height(BG);
+
+    al_draw_scaled_bitmap(BG, 0, 0, backSW, backSH, 0, 0, backSW, backSH, 0);
 
     //logo
     al_draw_tinted_scaled_bitmap(logo, al_map_rgb_f(1, 1, 1),

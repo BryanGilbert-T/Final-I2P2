@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <vector>
 
 std::map<std::string, std::string> getUser(const std::string& name);
 void createUser(const std::string& name, const std::string& password);

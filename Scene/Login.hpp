@@ -27,6 +27,7 @@ private:
     ALLEGRO_BITMAP* signupText;
     ALLEGRO_BITMAP* signupTextHov;
     ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* BG;
 
     Engine::Label* NotFoundLabel;
     Engine::Label* WrongPasswordLabel;

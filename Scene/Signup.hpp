@@ -24,6 +24,7 @@ private:
     ALLEGRO_BITMAP* loginText;
     ALLEGRO_BITMAP* logintextHov;
     ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* BG;
 
     Engine::Label* UserExistLabel;
 

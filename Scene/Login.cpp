@@ -53,6 +53,7 @@ void LoginScene::Initialize() {
     usernameText = al_load_bitmap("Resource/images/login-scene/username.png");
     passwordText = al_load_bitmap("Resource/images/login-scene/password.png");
 
+    BG = al_load_bitmap("Resource/images/stage-select/bg-only.jpg");
     //BUTTON
     btn = new Engine::ImageButton("login-scene/login-button.png", "login-scene/login-button-hov.png",
                                     halfW - 248, h * 0.9 - 90, 496,116);
@@ -63,6 +64,7 @@ void LoginScene::Initialize() {
 
     //IMAGES
     background = al_load_bitmap("Resource/images/login-scene/background.png");
+
     logo = al_load_bitmap("Resource/images/login-scene/logo-login.png");
 
     signupMsg = al_load_bitmap("Resource/images/login-scene/signup-msg.png");
@@ -171,6 +173,11 @@ void LoginScene::Update(float deltaTime) {
 void LoginScene::Draw() const {
     al_clear_to_color(al_map_rgb(223, 145, 107));
     IScene::Draw();
+    int backSW = al_get_bitmap_width(BG);
+    int backSH = al_get_bitmap_height(BG);
+
+    //bg plg blkg
+    al_draw_scaled_bitmap(BG, 0, 0, backSW, backSH, 0, 0, backSW, backSH, 0);
 
     ALLEGRO_COLOR clicked_color     = al_map_rgb(255, 255, 255);
     ALLEGRO_COLOR not_clicked_color = al_map_rgb(130, 130, 130);
@@ -211,7 +218,7 @@ void LoginScene::Draw() const {
                                 halfW - logoSW/2, 75, logoSW, logoSH, 0);
 
     //background
-    al_draw_tinted_scaled_bitmap(background, al_map_rgb_f(1, 1, 1),
+    al_draw_tinted_scaled_bitmap(background, al_map_rgba(255, 255, 255, 150),
                                 0, 0, bgSW, bgSH,
                                 halfW - 400, halfH-165, bgSW, bgSH, 0);
     //texts
