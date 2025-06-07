@@ -226,3 +226,55 @@ std::vector<std::string> getFriends(const std::string& name) {
         return {};
     }
 }
+
+std::vector<std::string> getRequests(const std::string& name) {
+    // Build the same URL
+    std::string url =
+      "https://firestore.googleapis.com/v1/projects/" +
+      project_id + "/databases/(default)/documents/players/" + name;
+
+    CURL* curl = curl_easy_init();
+    std::string response;
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return {};
+    }
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    if (curl_easy_perform(curl) != CURLE_OK) {
+        std::cerr << "curl failed: "
+                  << curl_easy_strerror(curl_easy_perform(curl))
+                  << "\n";
+        curl_easy_cleanup(curl);
+        return {};
+    }
+    curl_easy_cleanup(curl);
+
+    // Parse out the requests array
+    try {
+        auto j = nlohmann::json::parse(response);
+        auto& f = j["fields"];
+        if (!f.contains("requests")
+         || !f["requests"].contains("arrayValue")
+         || !f["requests"]["arrayValue"].contains("values"))
+        {
+            return {};
+        }
+
+        std::vector<std::string> reqs;
+        for (auto& v : f["requests"]["arrayValue"]["values"]) {
+            if (v.contains("stringValue"))
+                reqs.push_back(v["stringValue"].get<std::string>());
+        }
+        return reqs;
+    } catch (const std::exception& e) {
+        std::cerr << "JSON error in getRequests: " << e.what() << "\n";
+        return {};
+    }
+}
+

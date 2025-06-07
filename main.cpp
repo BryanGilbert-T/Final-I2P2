@@ -13,6 +13,8 @@
 #include "Scene/Boarding.hpp"
 #include "Scene/friendlist.hpp"
 #include "Scene/Login.hpp"
+#include "Scene/requests.hpp"
+#include "Scene/search.hpp"
 #include "Scene/Signup.hpp"
 
 int main(int argc, char **argv) {
@@ -31,6 +33,8 @@ int main(int argc, char **argv) {
 	game.AddNewScene("login", new LoginScene());
 	game.AddNewScene("signup", new SignupScene());
 	game.AddNewScene("friendlist", new FriendListScene());
+	game.AddNewScene("requests", new RequestsScene);
+	game.AddNewScene("search", new SearchScene());
 
 
     // TODO HACKATHON-1 (1/1): Change the start scene

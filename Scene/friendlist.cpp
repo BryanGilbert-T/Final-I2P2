@@ -38,15 +38,10 @@ void FriendListScene::Initialize() {
 
     const int iconW = 64;
     const int iconH = 64;
-    btn = (friendsIcon = new Engine::ImageButton("friendlist-scene/friendsicon.png", "friendlist-scene/requestsicon.png", w * 0.25, h * 0.1, iconW, iconH));
-    btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 1));
-    AddNewControlObject(btn);
-    btn = (requestsIcon = new Engine::ImageButton("friendlist-scene/requestsicon.png", "friendlist-scene/searchicon.png", w * 0.5, h * 0.1, iconW, iconH));
-    btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 2));
-    AddNewControlObject(btn);
-    btn = (searchIcon = new Engine::ImageButton("friendlist-scene/searchicon.png", "friendlist-scene/searchicon.png", w * 0.75, h * 0.1, iconW, iconH));
-    btn->SetOnClickCallback(std::bind(&FriendListScene::FriendsOnClick, this, 3));
-    AddNewControlObject(btn);
+
+    friendsIcon = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
+    requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
+    searchIcon = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
 
     std::ifstream in("Resource/account.txt");
     in >> curUser;
@@ -73,6 +68,10 @@ void FriendListScene::Terminate() {
     IScene::Terminate();
     if (Logo) al_destroy_bitmap(Logo);
     if (PlayFont) al_destroy_font(PlayFont);
+
+    al_destroy_bitmap(friendsIcon);
+    al_destroy_bitmap(requestsIcon);
+    al_destroy_bitmap(searchIcon);
 }
 void FriendListScene::Draw() const {
     al_clear_to_color(al_map_rgb(255, 255, 255));
@@ -96,25 +95,42 @@ void FriendListScene::Draw() const {
             friends[i].c_str());
     }
 
-    al_draw_rectangle(
-      w * 0.25, h * 0.1,
-      w * 0.25 + 64, h * 0.1 + 64,
-      al_map_rgb(255,0,0),  2.0
-    );
+    if (friendsHover) { // hover nya belum ada
+        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgb(255, 255, 255),
+                    0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
+                    w * 0.25, h * 0.1, iconw, iconh,
+                    0);
+    } else {
+        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
+            0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
+            w * 0.25, h * 0.1, iconw, iconh,
+            0);
+    }
 
-    al_draw_rectangle(
-      w * 0.5, h * 0.1,
-      w * 0.5 + 64, h * 0.1 + 64,
-      al_map_rgb(255,0,0),  2.0
-    );
+    if (requestHover) { // hover nya belum ada
+        std::cout << "here";
+        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
+                0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
+                w * 0.5, h * 0.1, iconw, iconh,
+                0);
+    } else {
+        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgb(255, 255, 255),
+        0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
+        w * 0.5, h * 0.1, iconw, iconh,
+        0);
+    }
 
-    al_draw_rectangle(
-      w * 0.75, h * 0.1,
-      w * 0.75 + 64, h * 0.1 + 64,
-      al_map_rgb(255,0,0),  2.0
-    );
-
-
+    if (searchHover) { // hover nya belum ada
+        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
+              0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
+              w * 0.75, h * 0.1, iconw, iconh,
+              0);
+    } else {
+        al_draw_tinted_scaled_bitmap(searchIcon, al_map_rgb(255, 255, 255),
+      0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
+      w * 0.75, h * 0.1, iconw, iconh,
+      0);
+    }
 
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
@@ -140,7 +156,29 @@ void FriendListScene::Update(float deltatime) {
     int dxlogout = w * 0.8 - sw / 2;
     int dylogout = h * 0.8 - offset;
 
+    const int iconw = 64;
+    const int iconh = 64;
 
+    if (mouseIn(mouse.x, mouse.y, w * 0.25, h * 0.1, iconw, iconh)) {
+        friendsHover = true;
+        requestHover = false;
+        searchHover = false;
+    }
+    if (mouseIn(mouse.x, mouse.y, w * 0.5, h * 0.1, iconw, iconh)) {
+        friendsHover = false;
+        requestHover = true;
+        searchHover = false;
+    }
+    if (mouseIn(mouse.x, mouse.y, w * 0.75, h * 0.1, iconw, iconh)) {
+        friendsHover = false;
+        requestHover = false;
+        searchHover = true;
+    }
+    else {
+        friendsHover = false;
+        requestHover = false;
+        searchHover = false;
+    }
 }
 void FriendListScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
@@ -157,6 +195,13 @@ void FriendListScene::OnMouseDown(int button, int mx, int my) {
         int logoutdx = w * 0.8 - sw / 2;
         int logoutdy = h * 0.8 - offset;
 
+        if (friendsHover) {
+
+        } else if (requestHover) {
+            Engine::GameEngine::GetInstance().ChangeScene("requests");
+        } else if (searchHover) {
+            Engine::GameEngine::GetInstance().ChangeScene("search");
+        }
 
     }
 }

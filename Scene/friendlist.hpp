@@ -36,9 +36,17 @@ public:
     std::string curUser;
     std::vector<std::string> friends;
 
-    Engine::ImageButton* friendsIcon;
-    Engine::ImageButton* requestsIcon;
-    Engine::ImageButton* searchIcon;
+    bool friendsHover = false;
+    bool requestHover = false;
+    bool searchHover = false;
+
+    ALLEGRO_BITMAP* friendsIcon;
+    ALLEGRO_BITMAP* requestsIcon;
+    ALLEGRO_BITMAP* searchIcon;
+
+    ALLEGRO_BITMAP* friendsIconHover;
+    ALLEGRO_BITMAP* requestsIconHover;
+    ALLEGRO_BITMAP* searchIconHover;
 };
 
 #endif   // STAGESELECTSCENE_HPP
