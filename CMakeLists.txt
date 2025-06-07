@@ -57,6 +57,8 @@ add_executable(${PROJECT_NAME}
         Scene/Boarding.cpp
         Scene/Login.cpp
         Scene/Signup.cpp
+        Scene/friendlist.cpp
+        Scene/friendlist.hpp
 
         Player/Player.cpp
         Player/Player.hpp

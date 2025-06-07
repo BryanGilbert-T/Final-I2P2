@@ -26,12 +26,6 @@ public:
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
 
-    bool playHover = false;
-    bool settingHover = false;
-    bool backHover = false;
-    bool logoutHover = false;
-    bool friendlistHover = false;
-
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;
 };

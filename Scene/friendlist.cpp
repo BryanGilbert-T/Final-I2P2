@@ -56,22 +56,6 @@ void FriendListScene::Draw() const {
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_bitmap_height(Logo);
 
-    ALLEGRO_COLOR playcolor = (playHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR settingcolor = (settingHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR backcolor = (backHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR logoutcolor = (logoutHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR friendlistcolor = (friendlistHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-
-    al_draw_text(PlayFont, playcolor, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
-    al_draw_text(PlayFont, settingcolor, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
-    al_draw_text(PlayFont, backcolor, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
-    al_draw_text(PlayFont, logoutcolor, w * 0.8, h * 0.8, ALLEGRO_ALIGN_CENTER, "LOGOUT");
-    al_draw_text(PlayFont, friendlistcolor, w * 0.8, h * 0.175, ALLEGRO_ALIGN_CENTER, "FRIENDLIST");
-
-
-    al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
-        0, 0, sw, sh,
-        w * 0.2, h * 0.2, sw, sh, 0);
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
@@ -97,48 +81,6 @@ void FriendListScene::Update(float deltatime) {
     int dylogout = h * 0.8 - offset;
 
 
-    if(mouseIn(mouse.x, mouse.y, startx, h * 0.575 - offset, sw, sh)) {
-        playHover = true;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-    }
-    else if(mouseIn(mouse.x, mouse.y, startx, h * 0.675 - offset, sw, sh)) {
-        playHover = false;
-        settingHover = true;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-    }
-    else if(mouseIn(mouse.x, mouse.y, startx, h * 0.775 - offset, sw, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = true;
-        logoutHover = false;
-        friendlistHover = false;
-    }
-    else if (mouseIn(mouse.x, mouse.y, dxlogout, dylogout, sw, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = true;
-        friendlistHover = false;
-    }
-    else if (mouseIn(mouse.x, mouse.y, dxlogout - 20, h * 0.175 - offset, sw + 20, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = true;
-    }
-    else {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-    }
 }
 void FriendListScene::OnMouseDown(int button, int mx, int my) {
     if (button & 1) {
@@ -154,24 +96,7 @@ void FriendListScene::OnMouseDown(int button, int mx, int my) {
         int logoutdx = w * 0.8 - sw / 2;
         int logoutdy = h * 0.8 - offset;
 
-        if(mouseIn(mx, my, startx, h * 0.575 - offset, sw, sh)) {
-            PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
-            scene->MapId = 1;
-            Engine::GameEngine::GetInstance().ChangeScene("play");
-        }
-        else if(mouseIn(mx, my, startx, h * 0.675 - offset, sw, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("settings");
-        }
-        else if(mouseIn(mx, my, startx, h * 0.775 - offset, sw, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("start");
-        }
-        else if (mouseIn(mx, my, logoutdx, logoutdy, sw, sh)) {
-            std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
-            Engine::GameEngine::GetInstance().ChangeScene("login");
-        }
-        else if (mouseIn(mx, my, logoutdx - 20, h * 0.175 - offset, sw + 20, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("settings");
-        }
+
     }
 }
 void FriendListScene::BackOnClick(int stage) {

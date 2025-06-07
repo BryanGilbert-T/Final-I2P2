@@ -11,6 +11,7 @@
 #include "Scene/SettingsScene.hpp"
 #include "Scene/IntroScene.h"
 #include "Scene/Boarding.hpp"
+#include "Scene/friendlist.hpp"
 #include "Scene/Login.hpp"
 #include "Scene/Signup.hpp"
 
@@ -29,6 +30,7 @@ int main(int argc, char **argv) {
 	game.AddNewScene("boarding", new BoardingScene());
 	game.AddNewScene("login", new LoginScene());
 	game.AddNewScene("signup", new SignupScene());
+	game.AddNewScene("friendlist", new FriendListScene());
 
 
     // TODO HACKATHON-1 (1/1): Change the start scene
