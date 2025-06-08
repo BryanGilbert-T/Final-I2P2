@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <algorithm>
 
 const std::string project_id = "sunwukong-5bd64";
 bool isSigningUp = false;
@@ -397,3 +398,85 @@ std::vector<std::string> getRequests(const std::string& name) {
     }
 }
 
+static void patchArrayField(
+    const std::string& docId,
+    const std::string& fieldName,
+    const std::vector<std::string>& values)
+{
+    // build the URL with updateMask so only this field is touched
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players/" + docId +
+        "?updateMask.fieldPaths=" + fieldName;
+
+    // build JSON: { "fields": { "friends": { "arrayValue": { "values": [ … ] } } } }
+    std::ostringstream js;
+    js << R"({ "fields": { ")"
+       << fieldName
+       << R"(": { "arrayValue": { "values": [)";
+
+    for (size_t i = 0; i < values.size(); ++i) {
+        if (i) js << ',';
+        js << R"({ "stringValue": ")" << values[i] << R"(" })";
+    }
+    js << R"(] } } } })";
+
+    std::string json = js.str();
+
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return;
+    }
+    struct curl_slist* hdrs = nullptr;
+    hdrs = curl_slist_append(hdrs, "Content-Type: application/json");
+
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, hdrs);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &json /*or a real response buffer*/);
+
+    // if you’ve disabled SSL verify elsewhere, repeat here
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "patchArrayField failed: "
+                  << curl_easy_strerror(res) << "\n";
+    }
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(hdrs);
+}
+
+void addFriend(const std::string& player1, const std::string& player2) {
+    auto f1 = getFriends(player1);
+    auto f2 = getFriends(player2);
+
+    // 2) Append if missing
+    if (std::find(f1.begin(), f1.end(), player2) == f1.end()) {
+        f1.push_back(player2);
+        patchArrayField(player1, "friends", f1);
+    }
+    if (std::find(f2.begin(), f2.end(), player1) == f2.end()) {
+        f2.push_back(player1);
+        patchArrayField(player2, "friends", f2);
+    }
+}
+
+void RemoveRequests(const std::string& player1, const std::string& player2) {
+    // 1) Load current requests
+    auto reqs = getRequests(player1);
+
+    // 2) Remove player2 if present
+    auto it = std::find(reqs.begin(), reqs.end(), player2);
+    if (it == reqs.end()) return;  // nothing to do
+
+    reqs.erase(it);
+
+    // 3) Push the updated array back to Firestore
+    patchArrayField(player1, "requests", reqs);
+}

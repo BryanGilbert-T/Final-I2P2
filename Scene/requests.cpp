@@ -320,11 +320,17 @@ void RequestsScene::Update(float deltatime) {
 }
 void RequestsScene::onCheckClicked(int idx) {
     idx += scrollOffset;
+    std::cout << friends[idx] << std::endl;
+    addFriend(friends[idx], curUser);
+    RemoveRequests(curUser, friends[idx]);
+    friends.erase(friends.begin() + idx);
 }
 void RequestsScene::onCrossClicked(int idx) {
     idx += scrollOffset;
+    std::cout << friends[idx] << std::endl;
+    RemoveRequests(curUser, friends[idx]);
+    friends.erase(friends.begin() + idx);
 }
-
 
 void RequestsScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);

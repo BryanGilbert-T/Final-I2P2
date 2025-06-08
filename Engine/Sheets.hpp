@@ -13,6 +13,8 @@ std::vector<std::string> getFriends(const std::string& name);
 std::vector<std::string> getRequests(const std::string& name);
 std::map<std::string, bool> find_online();
 void set_online(const std::string& name, bool on);
+void addFriend(const std::string& player1, const std::string& player2);
+void RemoveRequests(const std::string& player1, const std::string& player2);
 extern bool isSigningUp;
 
 
