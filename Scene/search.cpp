@@ -53,7 +53,8 @@ void SearchScene::Initialize() {
 
     std::ifstream in("Resource/account.txt");
     in >> curUser;
-    friends = getFriends(curUser);
+    UserData ud = getUserData(curUser);
+    friends = ud.friends;
 
     allPlayer = getAllPlayers();
     allPlayer.erase(std::find(allPlayer.begin(), allPlayer.end(), curUser));
@@ -64,8 +65,8 @@ void SearchScene::Initialize() {
     AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
 
     online = find_online();
-    requests = getRequests(curUser);
-    pending = getPendings(curUser);
+    requests = ud.requests;
+    pending = ud.pending;
 
     requestsHover.assign(MaxVisible, false);
 }

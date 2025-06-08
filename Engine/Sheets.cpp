@@ -645,3 +645,60 @@ void removePending(const std::string& player1, const std::string& player2) {
         /* values:   */ pendings
     );
 }
+
+UserData getUserData(const std::string& name) {
+    UserData ud;
+    // 1) build URL
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players/" + name;
+
+    // 2) do one cURL GET
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return ud;
+    }
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "curl failed: " << curl_easy_strerror(res) << "\n";
+        return ud;
+    }
+
+    // 3) parse JSON once
+    try {
+        auto j = nlohmann::json::parse(response);
+        if (!j.contains("fields")) return ud;
+        auto &f = j["fields"];
+
+        auto extractArray = [&](const std::string &fieldName,
+                                std::vector<std::string> &out) {
+            if (f.contains(fieldName)
+             && f[fieldName].contains("arrayValue")
+             && f[fieldName]["arrayValue"].contains("values")) {
+                for (auto &v : f[fieldName]["arrayValue"]["values"]) {
+                    if (v.contains("stringValue"))
+                        out.push_back(v["stringValue"].get<std::string>());
+                }
+             }
+        };
+
+        extractArray("friends",  ud.friends);
+        extractArray("requests", ud.requests);
+        extractArray("pending",  ud.pending);
+    }
+    catch (const std::exception &e) {
+        std::cerr << "JSON parse error in getUserData: " << e.what() << "\n";
+    }
+
+    return ud;
+}
