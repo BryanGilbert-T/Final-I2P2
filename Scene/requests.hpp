@@ -3,6 +3,8 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_font.h>
 #include <memory>
+#include <map>
+#include <vector>
 
 #include "Engine/IScene.hpp"
 #include "UI/Component/ImageButton.hpp"
@@ -12,6 +14,8 @@ private:
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
 
 public:
+    const int MaxVisible = 5;
+    int scrollOffset = 0;
     explicit RequestsScene() = default;
     void Initialize() override;
     void Terminate() override;
@@ -23,6 +27,7 @@ public:
     void Draw() const override;
     void Update(float deltaTime) override;
     void OnMouseDown(int button, int mx, int my) override;
+    void OnMouseScroll(int mx, int my, int delta) override;
 
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
@@ -32,12 +37,22 @@ public:
 
     ALLEGRO_BITMAP* background;
 
+    ALLEGRO_BITMAP* checkIcon;
+    ALLEGRO_BITMAP* crossIcon;
+
     std::string curUser;
     std::vector<std::string> friends;
+    std::map<std::string, bool> online;
 
     bool friendsHover = false;
     bool requestHover = false;
     bool searchHover = false;
+
+    std::vector<bool> crossHover;
+    std::vector<bool> checkHover;
+
+    void onCheckClicked(int idx);
+    void onCrossClicked(int idx);
 
     ALLEGRO_BITMAP* friendsIcon;
     ALLEGRO_BITMAP* requestsIcon;

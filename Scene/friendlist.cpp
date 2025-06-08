@@ -91,6 +91,15 @@ void FriendListScene::Draw() const {
     int iconw = 64;
     int iconh = 64;
 
+    if (friends.size() == 0) {
+        std::string nofriendTxt = "You don't have friends yet";
+        const int fontHeight = al_get_font_line_height(PlayFont);
+        const int fontWidth = al_get_text_width(PlayFont, nofriendTxt.c_str());
+        al_draw_text(PlayFont, al_map_rgb(0, 0, 0),
+            halfW, halfH,
+            ALLEGRO_ALIGN_CENTER, nofriendTxt.c_str());
+    }
+
     int visible = std::min((int)friends.size() - scrollOffset, MaxVisible);
     for (int i = 0; i < visible; ++i) {
         int idx = scrollOffset + i;

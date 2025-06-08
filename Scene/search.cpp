@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/Point.hpp"
@@ -39,6 +40,8 @@ void SearchScene::Initialize() {
     const int iconW = 64;
     const int iconH = 64;
 
+    scrollOffset = 0;
+
     friendsIcon = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
     requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
     searchIcon = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
@@ -55,6 +58,8 @@ void SearchScene::Initialize() {
     btn->SetOnClickCallback(std::bind(&SearchScene::BackOnClick, this, 1));
     AddNewControlObject(btn);
     AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
+
+    online = find_online();
 }
 
 void SearchScene::Logout(int stage) {
@@ -74,7 +79,6 @@ void SearchScene::Terminate() {
 }
 void SearchScene::Draw() const {
     al_clear_to_color(al_map_rgb(255, 255, 255));
-    Group::Draw();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -87,11 +91,30 @@ void SearchScene::Draw() const {
     int iconw = 64;
     int iconh = 64;
 
-    for (int i = 0; i < 5; i++) {
-        if (i >= friends.size()) break;
-        al_draw_text(PlayFont, al_map_rgb(0, 0, 0),
-            w * 0.2, h * 0.2 + i * 100, ALLEGRO_ALIGN_LEFT,
-            friends[i].c_str());
+    int visible = std::min((int)friends.size() - scrollOffset, MaxVisible);
+    for (int i = 0; i < visible; ++i) {
+        int idx = scrollOffset + i;
+        const int offset = 36;
+        const int fontHeight = al_get_font_line_height(PlayFont);
+        const int starth = h * 0.27;
+        const int deltah = 125;
+        const int startw = w * 0.25;
+
+        al_draw_filled_circle(w * 0.22, starth + i * deltah + (fontHeight / 2),
+            25, (online.find(friends[idx])->second) ? al_map_rgb(0, 255, 0) : al_map_rgb(0, 0, 0));
+
+        // background
+        al_draw_filled_rounded_rectangle(
+            w * 0.2 - offset, starth + i * deltah - offset,
+            w * 0.8 + offset, starth + i * deltah + fontHeight + offset,
+            25, 25, al_map_rgba(0, 0, 0, 100)
+        );
+        // text
+        al_draw_text(
+            PlayFont, al_map_rgb(255,255,255),
+            startw, starth + i * deltah - fontHeight/2,
+            ALLEGRO_ALIGN_LEFT, friends[idx].c_str()
+        );
     }
 
     if (friendsHover) { // hover nya belum ada
@@ -130,6 +153,39 @@ void SearchScene::Draw() const {
       0);
     }
 
+    int N = friends.size();
+    if (N > MaxVisible) {
+        // define the top and bottom of your track in pixels
+        float trackTop    = h * 0.24f;
+        float trackBottom = h * 0.24f + h * 0.56f;
+        float trackH      = trackBottom - trackTop;
+
+        int visible   = MaxVisible;
+        int maxOffset = N - visible;    // how many “extra” items there are
+
+        // thumb height is proportional to fraction visible / total
+        float thumbH = trackH * (float(visible) / float(N));
+
+        // thumb Y moves from trackTop → trackBottom - thumbH
+        float thumbY = trackTop
+                     + (trackH - thumbH) * (float(scrollOffset) / float(maxOffset));
+
+        // draw the track
+        al_draw_filled_rectangle(
+            w*0.85f, trackTop,
+            w*0.87f, trackBottom,
+            al_map_rgb(200, 200, 200)
+        );
+
+        // draw the thumb
+        al_draw_filled_rectangle(
+            w*0.85f, thumbY,
+            w*0.87f, thumbY + thumbH,
+            al_map_rgb(100, 100, 100)
+        );
+    }
+
+    Group::Draw();
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
@@ -202,6 +258,14 @@ void SearchScene::OnMouseDown(int button, int mx, int my) {
 
     }
 }
+void SearchScene::OnMouseScroll(int mx, int my, int delta) {
+    // delta > 0 means wheel up → scroll list up (i.e. show earlier friends)
+    // delta < 0 means wheel down → scroll list down (show later friends)
+    int maxOffset = std::max(0, (int)friends.size() - MaxVisible);
+    // subtract delta because positive delta should move the viewport up
+    scrollOffset = std::clamp(scrollOffset - delta, 0, maxOffset);
+}
+
 void SearchScene::BackOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
