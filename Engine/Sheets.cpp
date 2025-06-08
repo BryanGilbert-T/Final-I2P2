@@ -114,16 +114,18 @@ void createUser(const std::string& name,
     curl_slist_free_all(headers);
 }
 
-bool find_online(const std::string& name) {
+std::map<std::string, bool> find_online() {
+        // 1) Build the “list documents” URL for your collection:
     std::string url =
-          "https://firestore.googleapis.com/v1/projects/" +
-          project_id + "/databases/(default)/documents/players/" + name;
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players";
 
-    // perform the HTTP GET
+    // 2) Perform the GET
     CURL* curl = curl_easy_init();
     if (!curl) {
         std::cerr << "curl init failed\n";
-        return false;
+        return {};
     }
     std::string response;
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -137,25 +139,42 @@ bool find_online(const std::string& name) {
     if (res != CURLE_OK) {
         std::cerr << "curl_easy_perform failed: "
                   << curl_easy_strerror(res) << "\n";
-        return false;
+        return {};
     }
 
-    // parse JSON and extract the booleanValue
+    // 3) Parse JSON and build the map
+    std::map<std::string,bool> statusMap;
     try {
         auto j = nlohmann::json::parse(response);
-        auto& f = j.at("fields");
-        if (f.contains("online")
-         && f["online"].contains("booleanValue"))
-        {
-            return f["online"]["booleanValue"].get<bool>();
+        if (!j.contains("documents")) return {};
+
+        for (const auto& doc : j["documents"]) {
+            // Firestore returns a full resource name like:
+            // projects/…/databases/(default)/documents/players/<docID>
+            std::string fullName = doc.value("name", "");
+            // extract the trailing ID (after the last '/')
+            auto pos = fullName.find_last_of('/');
+            std::string playerID = (pos == std::string::npos)
+                                   ? fullName
+                                   : fullName.substr(pos + 1);
+
+            bool online = false;
+            if (doc.contains("fields")
+             && doc["fields"].contains("online")
+             && doc["fields"]["online"].contains("booleanValue"))
+            {
+                online = doc["fields"]["online"]["booleanValue"].get<bool>();
+            }
+            statusMap[playerID] = online;
         }
     }
     catch (const std::exception& e) {
-        std::cerr << "JSON error in find_online: " << e.what() << "\n";
+        std::cerr << "JSON parse error in getAllPlayersOnlineStatus: "
+                  << e.what() << "\n";
+        return {};
     }
 
-    // if anything went wrong or field missing, treat as offline
-    return false;
+    return statusMap;
 }
 
 void updateUser(const std::string& name,

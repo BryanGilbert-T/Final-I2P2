@@ -11,7 +11,7 @@ void updateUser(const std::string& name, int px, int py, int coin, int hp);
 int authUser(const std::string& name, const std::string& password);
 std::vector<std::string> getFriends(const std::string& name);
 std::vector<std::string> getRequests(const std::string& name);
-bool find_online(const std::string& name);
+std::map<std::string, bool> find_online();
 extern bool isSigningUp;
 
 
