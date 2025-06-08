@@ -172,12 +172,14 @@ void LoginScene::Update(float deltaTime) {
 
 void LoginScene::Draw() const {
     al_clear_to_color(al_map_rgb(223, 145, 107));
-    IScene::Draw();
+    //IScene::Draw();
     int backSW = al_get_bitmap_width(BG);
     int backSH = al_get_bitmap_height(BG);
 
     //bg plg blkg
     al_draw_scaled_bitmap(BG, 0, 0, backSW, backSH, 0, 0, backSW, backSH, 0);
+
+    Group::Draw();
 
     ALLEGRO_COLOR clicked_color     = al_map_rgb(255, 255, 255);
     ALLEGRO_COLOR not_clicked_color = al_map_rgb(130, 130, 130);

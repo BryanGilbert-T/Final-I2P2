@@ -142,7 +142,7 @@ void SignupScene::Update(float deltaTime) {
 
 void SignupScene::Draw() const {
     al_clear_to_color(al_map_rgb(223, 145, 107));
-    IScene::Draw();
+    //IScene::Draw();
 
     ALLEGRO_COLOR clicked_color     = al_map_rgb(255, 255, 255);
     ALLEGRO_COLOR not_clicked_color = al_map_rgb(130, 130, 130);
@@ -181,6 +181,8 @@ void SignupScene::Draw() const {
     int backSH = al_get_bitmap_height(BG);
 
     al_draw_scaled_bitmap(BG, 0, 0, backSW, backSH, 0, 0, backSW, backSH, 0);
+
+    Group::Draw();
 
     //logo
     al_draw_tinted_scaled_bitmap(logo, al_map_rgb_f(1, 1, 1),
