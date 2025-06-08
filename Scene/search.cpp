@@ -7,6 +7,7 @@
 #include <iostream>
 #include <vector>
 #include <map>
+#include <algorithm>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/Point.hpp"
@@ -54,12 +55,17 @@ void SearchScene::Initialize() {
     in >> curUser;
     friends = getFriends(curUser);
 
+    allPlayer = getAllPlayers();
+    allPlayer.erase(std::find(allPlayer.begin(), allPlayer.end(), curUser));
+
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9 - 50, 400, 100);
     btn->SetOnClickCallback(std::bind(&SearchScene::BackOnClick, this, 1));
     AddNewControlObject(btn);
     AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
 
     online = find_online();
+
+    requestsHover.assign(MaxVisible, false);
 }
 
 void SearchScene::Logout(int stage) {
@@ -91,7 +97,7 @@ void SearchScene::Draw() const {
     int iconw = 64;
     int iconh = 64;
 
-    int visible = std::min((int)friends.size() - scrollOffset, MaxVisible);
+    int visible = std::min((int)allPlayer.size() - scrollOffset, MaxVisible);
     for (int i = 0; i < visible; ++i) {
         int idx = scrollOffset + i;
         const int offset = 36;
@@ -101,7 +107,7 @@ void SearchScene::Draw() const {
         const int startw = w * 0.25;
 
         al_draw_filled_circle(w * 0.22, starth + i * deltah + (fontHeight / 2),
-            25, (online.find(friends[idx])->second) ? al_map_rgb(0, 255, 0) : al_map_rgb(0, 0, 0));
+            25, (online.find(allPlayer[idx])->second) ? al_map_rgb(0, 255, 0) : al_map_rgb(0, 0, 0));
 
         // background
         al_draw_filled_rounded_rectangle(
@@ -113,8 +119,41 @@ void SearchScene::Draw() const {
         al_draw_text(
             PlayFont, al_map_rgb(255,255,255),
             startw, starth + i * deltah - fontHeight/2,
-            ALLEGRO_ALIGN_LEFT, friends[idx].c_str()
+            ALLEGRO_ALIGN_LEFT, allPlayer[idx].c_str()
         );
+
+        const int ofs = 36;
+        const int iconSize    = 48;    // desired width & height
+        const int iconPadding = 24;    // space from right edge
+        const int rectR   = w * 0.8  + ofs;
+        const int entryY  = starth + i*deltah;
+
+        // 2) center‐vertically on the entry
+        float iconY = entryY + (fontHeight/2) - (iconSize/2);
+
+        // 3) position the two icons flush‐right
+        float crossX = rectR - iconPadding - iconSize;
+        float checkX = crossX   - iconPadding - iconSize;
+
+        ALLEGRO_COLOR checkTint = requestsHover[i]
+            ? al_map_rgba(255,255,255,160)
+            : al_map_rgb(255,255,255);
+
+
+        if (std::find(friends.begin(), friends.end(), allPlayer[idx]) == friends.end()) {
+            al_draw_tinted_scaled_bitmap(
+               requestsIcon, checkTint,
+               0,0,
+               al_get_bitmap_width(requestsIcon),
+               al_get_bitmap_height(requestsIcon),
+               crossX, iconY,
+               iconSize, iconSize,
+               0
+           );
+        }
+        // 4) draw them scaled into a square
+        //    you can also use al_draw_tinted_scaled_bitmap if you need tinting
+
     }
 
     if (friendsHover) { // hover nya belum ada
@@ -153,7 +192,7 @@ void SearchScene::Draw() const {
       0);
     }
 
-    int N = friends.size();
+    int N = allPlayer.size();
     if (N > MaxVisible) {
         // define the top and bottom of your track in pixels
         float trackTop    = h * 0.24f;
@@ -198,6 +237,28 @@ void SearchScene::Update(float deltatime) {
 
     Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
 
+    std::fill(requestsHover.begin(),  requestsHover.end(),  false);
+
+    // your constants (must match Draw):
+    const int ofs         = 36;
+    const int fontH       = al_get_font_line_height(PlayFont);
+    const float starth    = Engine::GameEngine::GetInstance().getVirtH() * 0.27f;
+    const int deltah      = 125;
+    const float rectR     = Engine::GameEngine::GetInstance().getVirtW() * 0.8f + ofs;
+    const int iconSize    = 48;
+    const int iconPadding = 24;
+
+    int visible = std::min((int)allPlayer.size() - scrollOffset, MaxVisible);
+    for (int i = 0; i < visible; ++i) {
+        float entryY = starth + i * deltah;
+        float iconY  = entryY + (fontH/2.f) - (iconSize/2.f);
+        float crossX = rectR - iconPadding - iconSize;
+        float checkX = crossX  - iconPadding - iconSize;
+
+        if (mouseIn(mouse.x, mouse.y, (int)crossX, (int)iconY, iconSize, iconSize))
+            requestsHover[i] = true;
+    }
+
     const int offset = 10;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
@@ -234,9 +295,31 @@ void SearchScene::Update(float deltatime) {
         searchHover = false;
     }
 }
+void SearchScene::addReq(int idx) {
+
+}
 void SearchScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
     if (button & 1) {
+
+        const int ofs         = 36;
+        const int fontH       = al_get_font_line_height(PlayFont);
+        const float starth    = Engine::GameEngine::GetInstance().getVirtH() * 0.27f;
+        const int deltah      = 125;
+        const float rectR     = Engine::GameEngine::GetInstance().getVirtW() * 0.8f + ofs;
+        const int iconSize    = 48;
+        const int iconPadding = 24;
+
+        int visible = std::min((int)allPlayer.size() - scrollOffset, MaxVisible);
+        for (int i = 0; i < visible; ++i) {
+            float entryY = starth + i * deltah;
+            float iconY  = entryY + (fontH/2.f) - (iconSize/2.f);
+            float crossX = rectR - iconPadding - iconSize;
+            float checkX = crossX  - iconPadding - iconSize;
+
+            if (requestsHover[i])   { addReq(i);   break; }
+        }
+
         const int offset = 10;
 
         int w = Engine::GameEngine::GetInstance().getVirtW();

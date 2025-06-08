@@ -38,7 +38,12 @@ public:
 
     std::string curUser;
     std::vector<std::string> friends;
+    std::vector<std::string> allPlayer;
     std::map<std::string, bool> online;
+
+    std::vector<bool> requestsHover;
+
+    void addReq(int idx);
 
     bool friendsHover = false;
     bool requestHover = false;

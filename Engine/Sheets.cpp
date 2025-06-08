@@ -480,3 +480,53 @@ void RemoveRequests(const std::string& player1, const std::string& player2) {
     // 3) Push the updated array back to Firestore
     patchArrayField(player1, "requests", reqs);
 }
+
+std::vector<std::string> getAllPlayers() {
+    std::vector<std::string> players;
+
+    // 1) Firestore “list documents” endpoint for your collection
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players";
+
+    // 2) Perform the GET
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return players;
+    }
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    if (curl_easy_perform(curl) != CURLE_OK) {
+        std::cerr << "curl_easy_perform failed: "
+                  << curl_easy_strerror(curl_easy_perform(curl))
+                  << "\n";
+        curl_easy_cleanup(curl);
+        return players;
+    }
+    curl_easy_cleanup(curl);
+
+    // 3) Parse JSON, extract the trailing ID from each document’s `name`
+    try {
+        auto j = nlohmann::json::parse(response);
+        if (!j.contains("documents")) return players;
+        for (auto& doc : j["documents"]) {
+            std::string fullName = doc.value("name", "");
+            auto pos = fullName.find_last_of('/');
+            std::string id = (pos == std::string::npos)
+                             ? fullName
+                             : fullName.substr(pos + 1);
+            players.push_back(id);
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "JSON parse error in getAllPlayers: " << e.what() << "\n";
+    }
+
+    return players;
+}

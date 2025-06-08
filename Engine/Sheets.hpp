@@ -15,6 +15,7 @@ std::map<std::string, bool> find_online();
 void set_online(const std::string& name, bool on);
 void addFriend(const std::string& player1, const std::string& player2);
 void RemoveRequests(const std::string& player1, const std::string& player2);
+std::vector<std::string> getAllPlayers(void);
 extern bool isSigningUp;
 
 
