@@ -530,3 +530,23 @@ std::vector<std::string> getAllPlayers() {
 
     return players;
 }
+
+void setRequests(const std::string& player1, const std::string& player2) {
+    auto reqs = getRequests(player2);
+
+    if (std::find(reqs.begin(), reqs.end(), player1) != reqs.end()) {
+        return;
+    }
+
+    // 2) append if missing (so you don’t send duplicates)
+    if (std::find(reqs.begin(), reqs.end(), player1) == reqs.end()) {
+        reqs.push_back(player1);
+
+        // 3) PATCH just that field back to Firestore
+        patchArrayField(
+            /*docId:*/   player2,
+            /*fieldName:*/"requests",
+            /*values:*/   reqs
+        );
+    }
+}

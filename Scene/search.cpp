@@ -296,7 +296,8 @@ void SearchScene::Update(float deltatime) {
     }
 }
 void SearchScene::addReq(int idx) {
-
+    idx += scrollOffset;
+    setRequests(curUser, allPlayer[idx]);
 }
 void SearchScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
