@@ -65,6 +65,7 @@ void SearchScene::Initialize() {
 
     online = find_online();
     requests = getRequests(curUser);
+    pending = getPendings(curUser);
 
     requestsHover.assign(MaxVisible, false);
 }
@@ -141,7 +142,8 @@ void SearchScene::Draw() const {
             : al_map_rgb(255,255,255);
 
 
-        if (std::find(friends.begin(), friends.end(), allPlayer[idx]) == friends.end()) {
+        if (std::find(friends.begin(), friends.end(), allPlayer[idx]) == friends.end() &&
+            std::find(pending.begin(), pending.end(), allPlayer[idx]) == pending.end()) {
             al_draw_tinted_scaled_bitmap(
                requestsIcon, checkTint,
                0,0,
@@ -263,8 +265,13 @@ void SearchScene::Update(float deltatime) {
         float crossX = rectR - iconPadding - iconSize;
         float checkX = crossX  - iconPadding - iconSize;
 
-        if (mouseIn(mouse.x, mouse.y, (int)crossX, (int)iconY, iconSize, iconSize))
-            requestsHover[i] = true;
+        const int idx = i + scrollOffset;
+        if (mouseIn(mouse.x, mouse.y, (int)crossX, (int)iconY, iconSize, iconSize)) {
+            if (std::find(friends.begin(), friends.end(), allPlayer[idx]) == friends.end() &&
+                std::find(pending.begin(), pending.end(), allPlayer[idx]) == pending.end()) {
+                    requestsHover[i] = true;
+            }
+        }
     }
 
     const int offset = 10;
@@ -306,6 +313,8 @@ void SearchScene::Update(float deltatime) {
 void SearchScene::addReq(int idx) {
     idx += scrollOffset;
     setRequests(curUser, allPlayer[idx]);
+    addPending(curUser, allPlayer[idx]);
+    pending.push_back(allPlayer[idx]);
 }
 void SearchScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);

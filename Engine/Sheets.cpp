@@ -90,6 +90,11 @@ void createUser(const std::string& name,
             },
             "requestscnt": {"integerValue": 0},
             "online": {"booleanValue": true},
+            "pending": {
+                "arrayValue": {
+                    "values": []
+                }
+            }
         }
     })";
 
@@ -549,4 +554,94 @@ void setRequests(const std::string& player1, const std::string& player2) {
             /*values:*/   reqs
         );
     }
+}
+
+std::vector<std::string> getPendings(const std::string& name) {
+    // Build the document URL
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players/" + name;
+
+    // Fetch via cURL
+    CURL* curl = curl_easy_init();
+    std::vector<std::string> pendings;
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return pendings;
+    }
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    if (curl_easy_perform(curl) != CURLE_OK) {
+        std::cerr << "curl_easy_perform failed: "
+                  << curl_easy_strerror(curl_easy_perform(curl))
+                  << "\n";
+        curl_easy_cleanup(curl);
+        return pendings;
+    }
+    curl_easy_cleanup(curl);
+
+    // Parse out the pending array
+    try {
+        auto j = nlohmann::json::parse(response);
+        if (!j.contains("fields")
+         || !j["fields"].contains("pending")
+         || !j["fields"]["pending"].contains("arrayValue")
+         || !j["fields"]["pending"]["arrayValue"].contains("values"))
+        {
+            return pendings;
+        }
+
+        for (auto& v : j["fields"]["pending"]["arrayValue"]["values"]) {
+            if (v.contains("stringValue"))
+                pendings.push_back(v["stringValue"].get<std::string>());
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "JSON error in getPendings: " << e.what() << "\n";
+    }
+
+    return pendings;
+}
+
+void addPending(const std::string& player1, const std::string& player2) {
+    // 1) Pull the current `pending` array for player1
+    auto pendings = getPendings(player1);
+
+    // 2) If player2 is already pending, do nothing
+    if (std::find(pendings.begin(), pendings.end(), player2) != pendings.end()) {
+        return;
+    }
+
+    // 3) Otherwise append and PATCH back to Firestore
+    pendings.push_back(player2);
+    patchArrayField(
+        /* docId:    */ player1,
+        /* fieldName:*/ "pending",
+        /* values:   */ pendings
+    );
+}
+void removePending(const std::string& player1, const std::string& player2) {
+    // player1.pending.remove(player2)
+    // 1) Load the current pending list
+    auto pendings = getPendings(player1);
+
+    // 2) Find and erase player2, if present
+    auto it = std::find(pendings.begin(), pendings.end(), player2);
+    if (it == pendings.end()) {
+        // nothing to do
+        return;
+    }
+    pendings.erase(it);
+
+    // 3) PATCH the updated array back to Firestore
+    patchArrayField(
+        /* docId:    */ player1,
+        /* fieldName:*/ "pending",
+        /* values:   */ pendings
+    );
 }

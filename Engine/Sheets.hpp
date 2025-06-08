@@ -17,6 +17,9 @@ void addFriend(const std::string& player1, const std::string& player2);
 void RemoveRequests(const std::string& player1, const std::string& player2);
 std::vector<std::string> getAllPlayers(void);
 void setRequests(const std::string& player1, const std::string& player2);
+std::vector<std::string> getPendings(const std::string& name);
+void addPending(const std::string& player1, const std::string& player2);
+void removePending(const std::string& player1, const std::string& player2);
 extern bool isSigningUp;
 
 

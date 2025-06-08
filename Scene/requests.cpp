@@ -331,12 +331,14 @@ void RequestsScene::onCheckClicked(int idx) {
     addFriend(friends[idx], curUser);
     RemoveRequests(curUser, friends[idx]);
     friends.erase(friends.begin() + idx);
+    removePending(friends[idx], curUser);
 }
 void RequestsScene::onCrossClicked(int idx) {
     idx += scrollOffset;
     std::cout << friends[idx] << std::endl;
     RemoveRequests(curUser, friends[idx]);
     friends.erase(friends.begin() + idx);
+    removePending(friends[idx], curUser);
 }
 
 void RequestsScene::OnMouseDown(int button, int mx, int my) {
