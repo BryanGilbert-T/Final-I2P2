@@ -43,6 +43,7 @@ void StartScene::Initialize() {
     //AddNewObject(new Engine::Label("Sun Wu Kuo", "pirulen.ttf", 120, halfW, halfH / 3 + 50, 10, 255, 255, 255, 0.5, 0.5));
     clicktxt = al_load_bitmap("Resource/images/stage-select/click-text.png");
     clickbg = al_load_bitmap("Resource/images/stage-select/text-background.png");
+    bgmInstance = AudioHelper::PlaySample("start.mp3", true, AudioHelper::BGMVolume);
 }
 void StartScene::Update(float deltaTime) {
     //if (cur) al_destroy_bitmap(cur);
@@ -118,6 +119,8 @@ void StartScene::OnKeyDown(int keyCode) {
 }
 
 void StartScene::Terminate() {
+    AudioHelper::StopSample(bgmInstance);
+    bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     if (cur) {
         al_destroy_bitmap(cur);
         cur = nullptr;
