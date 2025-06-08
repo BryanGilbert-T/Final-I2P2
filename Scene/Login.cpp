@@ -92,6 +92,7 @@ void LoginScene::Login(int stage) {
         this->RaiseWrongPassword();
         return;
     }
+    set_online(name, true);
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 
@@ -324,6 +325,7 @@ void LoginScene::OnKeyDown(int keyCode) {
             this->RaiseWrongPassword();
             return;
         }
+        set_online(name, true);
         Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
 }

@@ -9,6 +9,7 @@
 #include "Engine/Point.hpp"
 #include "Engine/GameEngine.hpp"
 #include "Engine/Collider.hpp"
+#include "Engine/Sheets.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/Resources.hpp"
 #include "PlayScene.hpp"
@@ -34,6 +35,7 @@ void BoardingScene::Initialize() {
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 }
 void BoardingScene::Logout(int stage) {
+
     std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
     Engine::GameEngine::GetInstance().ChangeScene("login");
 }
@@ -166,6 +168,12 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
             Engine::GameEngine::GetInstance().ChangeScene("start");
         }
         else if (mouseIn(mx, my, logoutdx, logoutdy, sw, sh)) {
+            std::string curUser;
+            std::ifstream in("Resource/account.txt");
+            if (in.peek() != EOF) {
+                in >> curUser;
+                set_online(curUser, false);
+            }
             std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
             Engine::GameEngine::GetInstance().ChangeScene("login");
         }

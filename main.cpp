@@ -3,6 +3,7 @@
 // You can register your scenes here, and start the game.
 #include "Engine/GameEngine.hpp"
 #include "Engine/LOG.hpp"
+#include "Engine/Sheets.hpp"
 #include "Scene/LoseScene.hpp"
 #include "Scene/PlayScene.hpp"
 #include "Scene/StageSelectScene.hpp"
@@ -16,6 +17,8 @@
 #include "Scene/requests.hpp"
 #include "Scene/search.hpp"
 #include "Scene/Signup.hpp"
+
+#include "fstream"
 
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
@@ -36,6 +39,12 @@ int main(int argc, char **argv) {
 	game.AddNewScene("requests", new RequestsScene());
 	game.AddNewScene("search", new SearchScene());
 
+	std::string curUser;
+	std::ifstream in("Resource/account.txt");
+	if (in.peek() != EOF) {
+		in >> curUser;
+		set_online(curUser, true);
+	}
 
     // TODO HACKATHON-1 (1/1): Change the start scene
 	game.Start("start", 60, 1920, 1080);

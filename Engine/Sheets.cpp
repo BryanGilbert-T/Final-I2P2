@@ -114,6 +114,61 @@ void createUser(const std::string& name,
     curl_slist_free_all(headers);
 }
 
+void set_online(const std::string& name, bool on) {
+    // Build the document URL, including an update mask so only 'online' changes
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players/" + name +
+        "?updateMask.fieldPaths=online";
+
+    // Prepare the JSON payload
+    std::string json = R"({
+        "fields": {
+            "online": { "booleanValue": )"
+        + std::string(on ? "true" : "false")
+        + R"( }
+        }
+    })";
+
+    // Initialize curl
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return;
+    }
+
+    // Set headers
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+
+    // Response buffer
+    std::string response;
+
+    // Configure curl for PATCH
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+
+    // (Optional) disable peer verification if you did so elsewhere
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    // Execute
+    CURLcode res = curl_easy_perform(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "set_online failed: "
+                  << curl_easy_strerror(res) << "\n";
+    }
+
+    // Clean up
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
+}
+
 std::map<std::string, bool> find_online() {
         // 1) Build the “list documents” URL for your collection:
     std::string url =

@@ -17,6 +17,7 @@
 #include "LOG.hpp"
 #include "Point.hpp"
 #include "Resources.hpp"
+#include "Sheets.hpp"
 
 namespace Engine {
     void GameEngine::initAllegro5() {
@@ -223,6 +224,13 @@ namespace Engine {
         // Free all scenes.
         for (const auto &pair : scenes)
             delete pair.second;
+
+        std::string curUser;
+        std::ifstream in("Resource/account.txt");
+        if (in.peek() != EOF) {
+            in >> curUser;
+            set_online(curUser, false);
+        }
     }
     void GameEngine::changeScene(const std::string &name) {
         if (scenes.count(name) == 0)

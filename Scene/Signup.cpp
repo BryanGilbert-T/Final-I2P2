@@ -89,6 +89,7 @@ void SignupScene::Signup(int stage) {
     }
 
     createUser(name, pass);
+    set_online(name, true);
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 
@@ -285,6 +286,7 @@ void SignupScene::OnKeyDown(int keyCode) {
             return;
         }
         createUser(name, pass);
+        set_online(name, true);
         Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
 }
