@@ -188,6 +188,13 @@ void RequestsScene::Draw() const {
             0);
     }
 
+    // notification for requests
+    if (friends.size() > 0) {
+        al_draw_text(PlayFont,
+            al_map_rgb(255, 0, 0),
+            w * 0.5 + iconw/2, h * 0.11, ALLEGRO_ALIGN_LEFT,
+            std::to_string(friends.size()).c_str());
+    }
     if (requestHover) { // hover nya belum ada
         al_draw_tinted_scaled_bitmap(requestsIconHover, al_map_rgb(255, 255, 255),
                 0, 0, al_get_bitmap_width(requestsIconHover), al_get_bitmap_height(requestsIconHover),

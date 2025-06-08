@@ -40,6 +40,8 @@ public:
     std::vector<std::string> friends;
     std::map<std::string, bool> online;
 
+    std::vector<std::string> requests;
+
     bool friendsHover = false;
     bool requestHover = false;
     bool searchHover = false;

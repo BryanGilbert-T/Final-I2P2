@@ -40,6 +40,7 @@ public:
     std::vector<std::string> friends;
     std::vector<std::string> allPlayer;
     std::map<std::string, bool> online;
+    std::vector<std::string> requests;
 
     std::vector<bool> requestsHover;
 

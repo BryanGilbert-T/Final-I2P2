@@ -60,6 +60,7 @@ void FriendListScene::Initialize() {
     AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
 
     online = find_online();
+    requests = getRequests(curUser);
 }
 
 void FriendListScene::Logout(int stage) {
@@ -138,6 +139,13 @@ void FriendListScene::Draw() const {
             0);
     }
 
+    // notification for requests
+    if (requests.size() > 0) {
+        al_draw_text(PlayFont,
+            al_map_rgb(255, 0, 0),
+            w * 0.5 + iconw/2, h * 0.11, ALLEGRO_ALIGN_LEFT,
+            std::to_string(requests.size()).c_str());
+    }
     if (requestHover) { // hover nya belum ada
         al_draw_tinted_scaled_bitmap(requestsIconHover, al_map_rgb(255, 255, 255),
                 0, 0, al_get_bitmap_width(requestsIconHover), al_get_bitmap_height(requestsIconHover),
