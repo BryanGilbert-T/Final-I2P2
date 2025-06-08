@@ -276,7 +276,7 @@ int authUser(const std::string& name, const std::string& password) {
 
     std::map<std::string, std::string> result = getUser(name);
     if (result.empty()) return -1;
-    if (isSigningUp && !result.empty()) return 2; //found name in signingup
+    // if (isSigningUp && !result.empty()) return 2; //found name in signingup
     if (result["pass"] == hash) {
         // Later
         std::ofstream ofs("Resource/account.txt");

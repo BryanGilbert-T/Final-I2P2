@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <map>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
@@ -82,14 +83,15 @@ void SignupScene::Signup(int stage) {
     if (name.empty()) return;
     if (pass.empty()) return;
 
-    int status = authUser(name, pass);
-    if (status == 2) {
+    std::map<std::string, std::string> status = getUser(name);
+    if (status["name"] == name) {
         this->RaiseExist();
         return;
     }
 
     createUser(name, pass);
     set_online(name, true);
+    authUser(name, pass);
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 
@@ -280,13 +282,14 @@ void SignupScene::OnKeyDown(int keyCode) {
     if (keyCode == ALLEGRO_KEY_ENTER) {
         if (name.empty()) return;
         if (pass.empty()) return;
-        int status = authUser(name, pass);
-        if (status == 2) {
+        std::map<std::string, std::string> status = getUser(name);
+        if (status["name"] == name) {
             this->RaiseExist();
             return;
         }
         createUser(name, pass);
         set_online(name, true);
+        authUser(name, pass);
         Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
 }

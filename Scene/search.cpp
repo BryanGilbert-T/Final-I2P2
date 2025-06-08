@@ -344,7 +344,7 @@ void SearchScene::OnMouseDown(int button, int mx, int my) {
 void SearchScene::OnMouseScroll(int mx, int my, int delta) {
     // delta > 0 means wheel up → scroll list up (i.e. show earlier friends)
     // delta < 0 means wheel down → scroll list down (show later friends)
-    int maxOffset = std::max(0, (int)friends.size() - MaxVisible);
+    int maxOffset = std::max(0, (int)allPlayer.size() - MaxVisible);
     // subtract delta because positive delta should move the viewport up
     scrollOffset = std::clamp(scrollOffset - delta, 0, maxOffset);
 }
