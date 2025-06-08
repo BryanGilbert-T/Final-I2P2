@@ -74,7 +74,6 @@ void FriendListScene::Terminate() {
 }
 void FriendListScene::Draw() const {
     al_clear_to_color(al_map_rgb(255, 255, 255));
-    Group::Draw();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -89,8 +88,19 @@ void FriendListScene::Draw() const {
 
     for (int i = 0; i < 5; i++) {
         if (i >= friends.size()) break;
-        al_draw_text(PlayFont, al_map_rgb(0, 0, 0),
-            w * 0.2, h * 0.2 + i * 100, ALLEGRO_ALIGN_LEFT,
+        const int offset = 36;
+        const int fontheight = al_get_font_line_height(PlayFont);
+        const int starth = h * 0.27;
+        const int deltah = 125;
+        const int startw = w * 0.2;
+        al_draw_filled_rounded_rectangle(
+            w * 0.2 - offset, starth + i * deltah - offset,
+            w * 0.8 + offset, starth + i * deltah + fontheight + offset,
+            25, 25,
+            al_map_rgba(0, 0, 0, 100)
+        );
+        al_draw_text(PlayFont, al_map_rgb(255, 255, 255),
+            startw, starth + i * deltah - fontheight / 2, ALLEGRO_ALIGN_LEFT,
             friends[i].c_str());
     }
 
@@ -130,6 +140,7 @@ void FriendListScene::Draw() const {
       0);
     }
 
+    Group::Draw();
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
