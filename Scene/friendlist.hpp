@@ -12,6 +12,8 @@ private:
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
 
 public:
+    const int MaxVisible = 5;
+    int scrollOffset = 0;
     explicit FriendListScene() = default;
     void Initialize() override;
     void Terminate() override;
@@ -23,6 +25,7 @@ public:
     void Draw() const override;
     void Update(float deltaTime) override;
     void OnMouseDown(int button, int mx, int my) override;
+    void OnMouseScroll(int mx, int my, int delta) override;
 
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
