@@ -87,7 +87,7 @@ void PlayScene::Terminate() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     OnKeyHold();
-    player.Update();
+    player.Update(deltaTime);
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -201,7 +201,7 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_DIRT;
             } else if (num == 2) {
                 mapState[i][j] = TILE_SKY;
-                player.Create(100, j * BlockSize, i * BlockSize);
+                player.Create(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize));
             }
         }
     }
