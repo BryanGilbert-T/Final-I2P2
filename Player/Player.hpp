@@ -3,6 +3,7 @@
 #include <allegro5/base.h>
 #include <list>
 #include <string>
+#include <map>
 
 #include "Engine/Sprite.hpp"
 
@@ -24,6 +25,16 @@ typedef enum {
   DOWN,
 } Direction;
 
+struct Animation {
+  std::vector<ALLEGRO_BITMAP*> frames;  // individual frames
+  double                  frame_time;   // seconds per frame
+  int                     current;      // current frame index
+  double                  timer;        // time accumulator
+
+  Animation(double ft = 0.1)
+    : frame_time(ft), current(0), timer(0.0) {}
+};
+
 class Player{
 protected:
   int hp;
@@ -31,16 +42,23 @@ protected:
   int jump;
   float vy;
   Direction dir;
-  ALLEGRO_BITMAP* player_bitmap;
+  ALLEGRO_BITMAP* idle_sheet;
+  std::map<State, Animation> animations;
+  State                      state;
+
 
 public:
   int x, y;
   void Create(int hp, int x, int y);
   Player();
   ~Player();
-  void Update();
+  void Update(float deltaTime);
   void move(int keyCode);
   void Draw(Camera cam);
   void Jump();
+  int flag;
+
+private:
+  void setState(State s);
 };
 #endif   // PLAYER_HPP

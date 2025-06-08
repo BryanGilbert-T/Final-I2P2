@@ -16,28 +16,60 @@
 #include <iostream>
 #include <ostream>
 
-const std::string filename = "Resource/images/stage-select/player.png";
-const int PLAYER_SIZE = 64;
-const int SPEED = PLAYER_SIZE / 4;
+const int PLAYER_SIZE = 100;
+const int SPEED = PLAYER_SIZE / 16;
 
 const int GRAVITY = 8;
 const float JUMP_ACCELERATION = 1;
 const int INITIAL_JUMP_SPEED = 16;
 
+const int IDLE_FRAME_COUNT = 2;
+const double IDLE_FRAME_RATE = 0.3;
+
+const int JUMP_FRAME_COUNT = 2;
+const double JUMP_FRAME_RATE = 0.3;
+
+
 void Player::Create(int hp, int x, int y){
+    flag = 0;
+    idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap" << std::endl;
+    }
+    int frameW = al_get_bitmap_width(idle_sheet) / IDLE_FRAME_COUNT;
+    int frameH = al_get_bitmap_height(idle_sheet);
+    Animation idleAnim(IDLE_FRAME_RATE);
+    for (int i = 0; i < IDLE_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        );
+        idleAnim.frames.push_back(f);
+    }
+    animations[IDLE] = std::move(idleAnim);
+
+    animations[JUMP] = animations[IDLE];
+
     this->hp = hp;
     this->x = x;
     this->y = y;
     this->speed = SPEED;
     this->dir = RIGHT;
     this->jump = 0;
-    player_bitmap = al_load_bitmap(filename.c_str());
-    if (!player_bitmap) {
-        std::cerr << "Failed to load player_bitmap" << std::endl;
+    state = IDLE;
+
+}
+
+void Player::setState(State s) {
+    if (state != s) {
+        state = s;
+        auto &A = animations[state];
+        A.current = 0;
+        A.timer   = 0.0;
     }
 }
 
-void Player::Update() {
+
+void Player::Update(float deltaTime) {
    PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
     if (!scene) return;
 
@@ -91,6 +123,16 @@ void Player::Update() {
             remaining--;
         }
     }
+    if (jump > 0 && vy < 0)        setState(JUMP);
+    else if (jump > 0 && vy > 0)   setState(JUMP);  // falling could be separate
+    else if (state != IDLE)        setState(IDLE);
+
+    auto &A = animations[state];
+    A.timer += deltaTime;
+    if (A.timer >= A.frame_time) {
+        A.timer -= A.frame_time;
+        A.current = (A.current + 1) % A.frames.size();
+    }
 
     // 4) We do not change x here—that only happens when move(keyCode) is called.
 
@@ -114,7 +156,14 @@ Player::Player(){
 }
 
 Player::~Player() {
-    al_destroy_bitmap(player_bitmap);
+    al_destroy_bitmap(idle_sheet);
+
+    // then free each frame
+    for (auto &kv : animations) {
+        for (auto* f : kv.second.frames) {
+            al_destroy_bitmap(f);
+        }
+    }
 }
 
 void Player::move(int keyCode) {
@@ -123,10 +172,12 @@ void Player::move(int keyCode) {
     int dy = y;
     if (keyCode == ALLEGRO_KEY_A) {
         dx -= this->speed;
+        flag = 1;
     } else if (keyCode == ALLEGRO_KEY_S) {
         dy += this->speed;
     } else if (keyCode == ALLEGRO_KEY_D) {
         dx += this->speed;
+        flag = 0;
     }
     if (dx >= 0 && dy >= 0 &&
         dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
@@ -147,7 +198,15 @@ void Player::Jump() {
 void Player::Draw(Camera cam){
     int dx = x - cam.x;
     int dy = y - cam.y;
-    al_draw_tinted_scaled_bitmap(player_bitmap, al_map_rgb(255, 255, 255),
-        0, 0, 32, 32,
-        dx, dy, PLAYER_SIZE, PLAYER_SIZE, 0);
+    auto &A = animations[state];
+    ALLEGRO_BITMAP* bmp = A.frames[A.current];
+    al_draw_scaled_bitmap(
+        bmp,
+        0, 0,
+        al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+        dx, dy,
+        PLAYER_SIZE, PLAYER_SIZE,
+        flag
+    );
+
 }
