@@ -87,7 +87,8 @@ void createUser(const std::string& name,
                     "values": []
                 }
             },
-            "requestscnt": {"integerValue": 0}
+            "requestscnt": {"integerValue": 0},
+            "online": {"booleanValue": true},
         }
     })";
 
@@ -111,6 +112,50 @@ void createUser(const std::string& name,
         std::cerr << "curl_easy_perform failed: " << curl_easy_strerror(res) << "\n";
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);
+}
+
+bool find_online(const std::string& name) {
+    std::string url =
+          "https://firestore.googleapis.com/v1/projects/" +
+          project_id + "/databases/(default)/documents/players/" + name;
+
+    // perform the HTTP GET
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return false;
+    }
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "curl_easy_perform failed: "
+                  << curl_easy_strerror(res) << "\n";
+        return false;
+    }
+
+    // parse JSON and extract the booleanValue
+    try {
+        auto j = nlohmann::json::parse(response);
+        auto& f = j.at("fields");
+        if (f.contains("online")
+         && f["online"].contains("booleanValue"))
+        {
+            return f["online"]["booleanValue"].get<bool>();
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "JSON error in find_online: " << e.what() << "\n";
+    }
+
+    // if anything went wrong or field missing, treat as offline
+    return false;
 }
 
 void updateUser(const std::string& name,

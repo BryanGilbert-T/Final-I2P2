@@ -37,6 +37,7 @@ public:
 
     std::string curUser;
     std::vector<std::string> friends;
+    std::vector<bool> online;
 
     bool friendsHover = false;
     bool requestHover = false;
