@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
+#include <map>
 
 #include "Engine/AudioHelper.hpp"
 #include "Engine/Point.hpp"
@@ -57,7 +58,8 @@ void FriendListScene::Initialize() {
     btn->SetOnClickCallback(std::bind(&FriendListScene::BackOnClick, this, 1));
     AddNewControlObject(btn);
     AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
-    
+
+    online = find_online();
 }
 
 void FriendListScene::Logout(int stage) {
@@ -96,7 +98,10 @@ void FriendListScene::Draw() const {
         const int fontHeight = al_get_font_line_height(PlayFont);
         const int starth = h * 0.27;
         const int deltah = 125;
-        const int startw = w * 0.2;
+        const int startw = w * 0.25;
+
+        al_draw_filled_circle(w * 0.22, starth + i * deltah + (fontHeight / 2),
+            25, (online.find(friends[idx])->second) ? al_map_rgb(0, 255, 0) : al_map_rgb(0, 0, 0));
 
         // background
         al_draw_filled_rounded_rectangle(

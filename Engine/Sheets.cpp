@@ -87,7 +87,8 @@ void createUser(const std::string& name,
                     "values": []
                 }
             },
-            "requestscnt": {"integerValue": 0}
+            "requestscnt": {"integerValue": 0},
+            "online": {"booleanValue": true},
         }
     })";
 
@@ -111,6 +112,69 @@ void createUser(const std::string& name,
         std::cerr << "curl_easy_perform failed: " << curl_easy_strerror(res) << "\n";
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);
+}
+
+std::map<std::string, bool> find_online() {
+        // 1) Build the “list documents” URL for your collection:
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players";
+
+    // 2) Perform the GET
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return {};
+    }
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    if (res != CURLE_OK) {
+        std::cerr << "curl_easy_perform failed: "
+                  << curl_easy_strerror(res) << "\n";
+        return {};
+    }
+
+    // 3) Parse JSON and build the map
+    std::map<std::string,bool> statusMap;
+    try {
+        auto j = nlohmann::json::parse(response);
+        if (!j.contains("documents")) return {};
+
+        for (const auto& doc : j["documents"]) {
+            // Firestore returns a full resource name like:
+            // projects/…/databases/(default)/documents/players/<docID>
+            std::string fullName = doc.value("name", "");
+            // extract the trailing ID (after the last '/')
+            auto pos = fullName.find_last_of('/');
+            std::string playerID = (pos == std::string::npos)
+                                   ? fullName
+                                   : fullName.substr(pos + 1);
+
+            bool online = false;
+            if (doc.contains("fields")
+             && doc["fields"].contains("online")
+             && doc["fields"]["online"].contains("booleanValue"))
+            {
+                online = doc["fields"]["online"]["booleanValue"].get<bool>();
+            }
+            statusMap[playerID] = online;
+        }
+    }
+    catch (const std::exception& e) {
+        std::cerr << "JSON parse error in getAllPlayersOnlineStatus: "
+                  << e.what() << "\n";
+        return {};
+    }
+
+    return statusMap;
 }
 
 void updateUser(const std::string& name,

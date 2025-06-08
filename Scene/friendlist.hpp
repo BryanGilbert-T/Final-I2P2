@@ -3,6 +3,7 @@
 #include <allegro5/allegro_audio.h>
 #include <allegro5/allegro_font.h>
 #include <memory>
+#include <map>
 
 #include "Engine/IScene.hpp"
 #include "UI/Component/ImageButton.hpp"
@@ -37,6 +38,7 @@ public:
 
     std::string curUser;
     std::vector<std::string> friends;
+    std::map<std::string, bool> online;
 
     bool friendsHover = false;
     bool requestHover = false;
