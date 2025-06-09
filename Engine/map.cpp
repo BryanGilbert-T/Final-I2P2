@@ -26,7 +26,7 @@ void Map::Init(int width, int height, MapType state) {
     const char* paths[3][3] = {
         { "floor-top-left.png", "floor-top-mid.png", "floor-top-right.png"},
         { "floor-mid-left.png", "floor-mid-mid.png", "floor-mid-right.png"},
-        { "floor-bottom-left.png", "floor-bottom-mid.png", "floor-bottom-right.png"}
+        { "floor-bot-left.png", "floor-bot-mid.png", "floor-bot-right.png"}
     };
     for(int r = 0; r < 3; ++r) {
         for(int c = 0; c < 3; ++c) {
@@ -63,20 +63,31 @@ void Map::DrawMap(Camera cam) {
             int sh = 0;
             switch (MapState[i][j]) {
                 case TILE_DIRT: {
+                    ALLEGRO_BITMAP* center = floor_bitmap[1][1];
+                    al_draw_scaled_bitmap(center,
+                        0,0,
+                        al_get_bitmap_width(center),
+                        al_get_bitmap_height(center),
+                        dx,dy,
+                        TILE_SIZE,TILE_SIZE,
+                        0
+                    );
 
+                    // 2) if we’re on an edge or corner, draw that on top
                     int idx = offset_asset[i][j];
-                    if (idx < 0) break;   // nothing to draw
-                    int row = idx / 3;
-                    int col = idx % 3;
-                    ALLEGRO_BITMAP* bmp = floor_bitmap[row][col];
-
-                    sw = al_get_bitmap_width(bmp);
-                    sh = al_get_bitmap_height(bmp);
-
-
-                    al_draw_scaled_bitmap(bmp,
-                        0, 0, sw, sh,
-                        dx, dy, TILE_SIZE, TILE_SIZE, 0);
+                    if (idx != 4) {
+                        int row = idx/3;
+                        int col = idx%3;
+                        ALLEGRO_BITMAP* variant = floor_bitmap[row][col];
+                        al_draw_scaled_bitmap(variant,
+                            0,0,
+                            al_get_bitmap_width(variant),
+                            al_get_bitmap_height(variant),
+                            dx,dy,
+                            TILE_SIZE,TILE_SIZE,
+                            0
+                        );
+                    }
                     break;
                 }
                 case TILE_SKY:
