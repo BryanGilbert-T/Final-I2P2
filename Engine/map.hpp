@@ -31,6 +31,7 @@ namespace Engine {
         ~Map();
         ALLEGRO_BITMAP* dirt_bitmap;
         ALLEGRO_BITMAP* sky_bitmap;
+        ALLEGRO_BITMAP* floor_bitmap[3][3];
 
         void DrawMap(Camera cam);
         void UpdateMap();
