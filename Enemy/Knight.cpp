@@ -17,7 +17,7 @@
 #include <ostream>
 
 const int HP = 100;
-const int SPEED = 5;
+const int SPEED = 24;
 const int DAMAGE = 12;
 
 const int IDLE_FRAME_COUNT = 10;
@@ -32,7 +32,15 @@ const int HEIGHT = 80*2.5;
 const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
 
-KnightEnemy::KnightEnemy(int x, int y) : Enemy(HP, x, y, SPEED, DAMAGE, WIDTH, HEIGHT){
+KnightEnemy::KnightEnemy(int x, int y):
+    Enemy(HP, x, y, SPEED, DAMAGE, WIDTH, HEIGHT),
+    aiState(AIState::PATROL),
+    patrolOriginX(static_cast<float>(x)),
+    patrolDir(1),
+    patrolRange(200.0f),    // e.g. ±200px from spawn
+    chaseRadius(300.0f),    // e.g. start chasing if closer than 300px
+    attackRadius(50.0f)   // optional melee range
+{
     flag = 0;
     idle_sheet = al_load_bitmap(idlefile.c_str());
     if (!idle_sheet) {
@@ -51,19 +59,79 @@ KnightEnemy::KnightEnemy(int x, int y) : Enemy(HP, x, y, SPEED, DAMAGE, WIDTH, H
     animations[JUMP] = animations[IDLE];
 }
 
+std::pair<float,float> KnightEnemy::getPlayerPos() const {
+    auto scene = dynamic_cast<PlayScene*>(
+        Engine::GameEngine::GetInstance().GetScene("play")
+    );
+    if (scene) {
+        return { scene->player.x, scene->player.y };
+    }
+    return { 0, 0 };
+}
+
 void KnightEnemy::Draw(Camera cam) {
     Enemy::Draw(cam);
 }
 
+void KnightEnemy::performPatrol(float dt) {
+    // Move horizontally
+    x += patrolDir * speed * dt;
+
+    // Flip direction at range limits
+    if (x > patrolOriginX + patrolRange || x < patrolOriginX - patrolRange) {
+        patrolDir = -patrolDir;
+    }
+
+    // Choose idle or walk animation based on patrolDir
+    setState(IDLE);  // or a WALK state if you have one
+}
+
+void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
+    // Normalize direction
+    if (dist > 1e-3f) {
+        float nx = dx / dist;
+        float ny = dy / dist;
+        x += nx * speed * dt;
+        y += ny * speed * dt;
+    }
+
+    // You can trigger an attack when very close:
+    if (dist < attackRadius) {
+        // e.g. launch projectile or deal melee damage
+        // attackPlayer();
+        setState(JUMP); // placeholder for attack animation
+    } else {
+        setState(IDLE); // or chase‐walk animation
+    }
+}
+
 void KnightEnemy::Update(float deltaTime) {
+    auto [px, py] = getPlayerPos();
+    float dx   = px - x;
+    float dy   = py - y;
+    float dist = std::sqrt(dx*dx + dy*dy);
+
+    // Choose state
+    if (dist < chaseRadius) {
+        aiState = AIState::CHASE;
+    } else {
+        aiState = AIState::PATROL;
+    }
+
+    // Act
+    if (aiState == AIState::PATROL) {
+        performPatrol(deltaTime);
+    } else {
+        performChase(deltaTime, dx, dy, dist);
+    }
+
     Enemy::Update(deltaTime);
 }
 
 void KnightEnemy::move(int keyCode) {
-
+    // find the nearest path to player
 }
 
 KnightEnemy::~KnightEnemy() {
-
 }
 

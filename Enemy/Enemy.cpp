@@ -50,6 +50,46 @@ void Enemy::Update(float deltaTime) {
     int signDY    = (totalDY >= 0 ? +1 : -1);
     int remaining = std::abs(totalDY);
 
+    while (remaining > 0) {
+        // test a one-pixel step
+        int testY = y + signDY;
+        int leftX = x;
+        int rightX = x + ENEMY_WIDTH - 1;
+        bool collided = false;
+
+        if (signDY > 0) {
+            // moving down: check the two bottom corners
+            // world-coords = (leftX, testY+PLAYER_SIZE-1) and (rightX, testY+PLAYER_SIZE-1)
+            if (scene->map.IsCollision(leftX,           testY + ENEMY_HEIGHT - 1) ||
+                scene->map.IsCollision(rightX,          testY + ENEMY_HEIGHT - 1))
+            {
+                // We’ve hit the ground. Land here:
+                vy = 0;
+                jump = 0;     // reset jumpCount so we can jump again next time
+                collided = true;
+            }
+        }
+        else {
+            // moving up: check the two top corners
+            // world-coords = (leftX, testY) and (rightX, testY)
+            if (scene->map.IsCollision(leftX,           testY) ||
+                scene->map.IsCollision(rightX,          testY))
+            {
+                // We’ve hit a ceiling. Stop upward momentum:
+                vy = 0;
+                collided = true;
+            }
+        }
+
+        if (collided) {
+            break;  // stop any further vertical movement this frame
+        } else {
+            // safe to move that one pixel
+            y = testY;
+            remaining--;
+        }
+    }
+
     auto &A = animations[state];
     A.timer += deltaTime;
     if (A.timer >= A.frame_time) {

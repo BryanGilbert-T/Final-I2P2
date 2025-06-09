@@ -44,8 +44,6 @@ public:
     virtual void Draw(Camera cam);
     void Jump();
     int flag;
-
-private:
     void setState(State s);
 };
 #endif   // PLAYER_HPP
