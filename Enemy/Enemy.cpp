@@ -72,24 +72,6 @@ void Enemy::Update(float deltaTime) {
 }
 
 Enemy::Enemy(int hp, int x, int y, int speed, int damage){
-    flag = 0;
-    idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
-    if (!idle_sheet) {
-        std::cerr << "Failed to load player_bitmap" << std::endl;
-    }
-    int frameW = al_get_bitmap_width(idle_sheet) / IDLE_FRAME_COUNT;
-    int frameH = al_get_bitmap_height(idle_sheet);
-    Animation idleAnim(IDLE_FRAME_RATE);
-    for (int i = 0; i < IDLE_FRAME_COUNT; ++i) {
-        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
-            idle_sheet, i * frameW, 0, frameW, frameH
-        );
-        idleAnim.frames.push_back(f);
-    }
-    animations[IDLE] = std::move(idleAnim);
-
-    animations[JUMP] = animations[IDLE];
-
     this->damage = damage;
     this->hp = hp;
     this->x = x;

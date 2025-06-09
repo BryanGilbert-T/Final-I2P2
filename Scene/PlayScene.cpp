@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "Enemy/Enemy.hpp"
+#include "Enemy/Knight.hpp"
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
 #include "Engine/Group.hpp"
@@ -211,7 +212,7 @@ void PlayScene::ReadMap() {
                 player.Create(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize));
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
-                enemyGroup.push_back(new Enemy(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize), 12, 0));
+                enemyGroup.push_back(new KnightEnemy(j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize)));
             }
         }
     }

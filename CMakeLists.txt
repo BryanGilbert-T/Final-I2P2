@@ -24,6 +24,8 @@ add_executable(${PROJECT_NAME}
 
         Enemy/Enemy.cpp
         Enemy/Enemy.hpp
+        Enemy/Knight.cpp
+        Enemy/Knight.hpp
 
         Engine/Allegro5Exception.cpp
         Engine/AudioHelper.cpp
