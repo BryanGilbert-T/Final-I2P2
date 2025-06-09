@@ -22,21 +22,23 @@
 #include "UI/Component/Slider.hpp"
 
 void FriendListScene::Initialize() {
+    DrawLoading(1);
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
     Engine::ImageButton *btn;
+    DrawLoading(2);
 
     PlayFont = al_load_font("Resource/fonts/imfell.ttf", 48, ALLEGRO_ALIGN_CENTER);
     Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
-
+    DrawLoading(3);
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
-
+    DrawLoading(4);
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
-
+    DrawLoading(5);
     const int iconW = 64;
     const int iconH = 64;
 
@@ -45,7 +47,7 @@ void FriendListScene::Initialize() {
     friendsIcon = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
     requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
     searchIcon = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
-
+    DrawLoading(6);
     friendsIconHover = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
     requestsIconHover = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
     searchIconHover = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
@@ -53,14 +55,15 @@ void FriendListScene::Initialize() {
     std::ifstream in("Resource/account.txt");
     in >> curUser;
     friends = getFriends(curUser);
-
+    DrawLoading(7);
     btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9 - 50, 400, 100);
     btn->SetOnClickCallback(std::bind(&FriendListScene::BackOnClick, this, 1));
     AddNewControlObject(btn);
     AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
-
+    DrawLoading(9);
     online = find_online();
     requests = getRequests(curUser);
+    DrawLoading(10);
 }
 
 void FriendListScene::Logout(int stage) {
@@ -77,6 +80,65 @@ void FriendListScene::Terminate() {
     al_destroy_bitmap(friendsIcon);
     al_destroy_bitmap(requestsIcon);
     al_destroy_bitmap(searchIcon);
+}
+void FriendListScene::DrawLoading(int step) {
+    // 1) Reset transform so we're in true screen‐space
+    ALLEGRO_TRANSFORM old;
+    al_copy_transform(&old, al_get_current_transform());
+    ALLEGRO_TRANSFORM identity;
+    al_identity_transform(&identity);
+    al_use_transform(&identity);
+
+    // 2) Grab real display size
+    ALLEGRO_DISPLAY* disp = al_get_current_display();
+    int W = al_get_display_width(disp);
+    int H = al_get_display_height(disp);
+
+    // 3) Clear to white
+    al_clear_to_color(al_map_rgb(255,255,255));
+
+    // 4) Outline rectangle parameters
+    const int totalSteps = 10;
+    int barW =  int(W * 0.3f);
+    int barH =  int(H * 0.05f);
+    int x0   = (W - barW) / 2;
+    int y0   = (H - barH) / 2;
+    int x1   = x0 + barW;
+    int y1   = y0 + barH;
+
+    // 5) Draw the border
+    al_draw_rectangle(float(x0), float(y0),
+                      float(x1), float(y1),
+                      al_map_rgb(20,20,20),
+                      4);
+
+    // 6) Compute segment widths & spacing
+    //    inset from the border so we don’t overwrite the border
+    const int inset = 4;
+    float innerW    = float(barW - 2*inset);
+    float innerH    = float(barH - 2*inset);
+
+    // spacing between segments
+    float spacing   = 4.0f;
+    // solve: stepW * totalSteps + spacing*(totalSteps-1) = innerW
+    float stepW     = (innerW - spacing*(totalSteps-1)) / totalSteps;
+
+    // 7) Draw filled segments up to `step`
+    for (int i = 0; i < step && i < totalSteps; ++i) {
+        float sx0 = x0 + inset + i * (stepW + spacing);
+        float sy0 = y0 + inset;
+        float sx1 = sx0 + stepW;
+        float sy1 = sy0 + innerH;
+
+        al_draw_filled_rectangle(sx0, sy0, sx1, sy1,
+                                 al_map_rgb(255,0,0));
+    }
+
+    // 8) Present & pump events
+    al_flip_display();
+
+    // 9) Restore previous transform
+    al_use_transform(&old);
 }
 void FriendListScene::Draw() const {
     al_clear_to_color(al_map_rgb(255, 255, 255));

@@ -31,6 +31,8 @@ public:
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
 
+    void DrawLoading(int step);
+
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;
 

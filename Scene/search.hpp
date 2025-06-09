@@ -28,6 +28,8 @@ public:
     void OnMouseDown(int button, int mx, int my) override;
     void OnMouseScroll(int mx, int my, int delta) override;
 
+    void DrawLoading(int step);
+
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);
 

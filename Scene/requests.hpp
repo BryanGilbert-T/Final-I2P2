@@ -51,6 +51,8 @@ public:
     std::vector<bool> crossHover;
     std::vector<bool> checkHover;
 
+    void DrawLoading(int step);
+
     void onCheckClicked(int idx);
     void onCrossClicked(int idx);
 
