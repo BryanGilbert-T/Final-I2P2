@@ -35,7 +35,9 @@ protected:
 
 public:
     int x, y;
-    Enemy(int hp, int x, int y, int speed, int damage);
+    int ENEMY_WIDTH;
+    int ENEMY_HEIGHT;
+    Enemy(int hp, int x, int y, int speed, int damage, int w, int h);
     ~Enemy();
     virtual void Update(float deltaTime);
     virtual void move(int keyCode);

@@ -64,9 +64,7 @@ void PlayScene::Initialize() {
     AddNewObject(EffectGroup = new Group());
     // Should support buttons.
     AddNewControlObject(UIGroup = new Group());
-    std::cout << "Reading map" << std::endl;
     ReadMap();
-    std::cout << "Map read" << std::endl;
     mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
     deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
@@ -81,7 +79,6 @@ void PlayScene::Terminate() {
     IScene::Terminate();
 }
 void PlayScene::Update(float deltaTime) {
-    std::cout << "Updating" << std::endl;
     IScene::Update(deltaTime);
     OnKeyHold();
     player.Update(deltaTime);
@@ -103,10 +100,8 @@ void PlayScene::Update(float deltaTime) {
     for (Enemy* e : enemyGroup) {
         e->Update(deltaTime);
     }
-    std::cout << "Updated" << std::endl;
 }
 void PlayScene::Draw() const {
-    std::cout << "Drawing" << std::endl;
     IScene::Draw();
     map.DrawMap(cam);
     player.Draw(cam);
@@ -126,7 +121,6 @@ void PlayScene::Draw() const {
             }
         }
     }
-    std::cout << "Drawn" << std::endl;
 }
 void PlayScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
@@ -212,7 +206,7 @@ void PlayScene::ReadMap() {
                 player.Create(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize));
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
-                enemyGroup.push_back(new KnightEnemy(j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize)));
+                enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
             }
         }
     }

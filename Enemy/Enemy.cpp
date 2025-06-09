@@ -16,9 +16,6 @@
 #include <iostream>
 #include <ostream>
 
-const int PLAYER_SIZE = 100;
-const int SPEED = PLAYER_SIZE / 16;
-
 const int GRAVITY = 8;
 const float JUMP_ACCELERATION = 1;
 const int INITIAL_JUMP_SPEED = 16;
@@ -66,12 +63,14 @@ void Enemy::Update(float deltaTime) {
     int mapPixelW = scene->MapWidth * scene->BlockSize;
     int mapPixelH = scene->MapHeight * scene->BlockSize;
     if (x < 0)                           x = 0;
-    if (x + PLAYER_SIZE > mapPixelW)     x = mapPixelW - PLAYER_SIZE;
+    if (x + ENEMY_WIDTH > mapPixelW)     x = mapPixelW - ENEMY_WIDTH;
     if (y < 0)                           y = 0;
-    if (y + PLAYER_SIZE > mapPixelH)     y = mapPixelH - PLAYER_SIZE;
+    if (y + ENEMY_HEIGHT > mapPixelH)     y = mapPixelH - ENEMY_HEIGHT;
 }
 
-Enemy::Enemy(int hp, int x, int y, int speed, int damage){
+Enemy::Enemy(int hp, int x, int y, int speed, int damage, int w, int h){
+    ENEMY_WIDTH = w;
+    ENEMY_HEIGHT = h;
     this->damage = damage;
     this->hp = hp;
     this->x = x;
@@ -101,9 +100,9 @@ void Enemy::move(int keyCode) {
     // move it
 
     if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
+        !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
         x = dx;
         y = dy;
     }
@@ -126,7 +125,7 @@ void Enemy::Draw(Camera cam){
         0, 0,
         al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
         dx, dy,
-        PLAYER_SIZE, PLAYER_SIZE,
+        ENEMY_WIDTH, ENEMY_HEIGHT,
         flag
     );
 
