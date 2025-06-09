@@ -17,13 +17,10 @@ private:
     ALLEGRO_FONT* font;
     float elapsed;
     float userExistTimeStamp;
-    ALLEGRO_BITMAP* logo;
-    ALLEGRO_BITMAP* usernameText;
-    ALLEGRO_BITMAP* passwordText;
+
     ALLEGRO_BITMAP* loginMsg;
     ALLEGRO_BITMAP* loginText;
     ALLEGRO_BITMAP* logintextHov;
-    ALLEGRO_BITMAP* background;
     ALLEGRO_BITMAP* BG;
 
     Engine::Label* UserExistLabel;

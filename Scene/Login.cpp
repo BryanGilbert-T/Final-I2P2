@@ -49,11 +49,7 @@ void LoginScene::Initialize() {
 
     int textheight = halfH / 3 + 50;
 
-    //TEXT IMAGE
-    usernameText = al_load_bitmap("Resource/images/login-scene/username.png");
-    passwordText = al_load_bitmap("Resource/images/login-scene/password.png");
-
-    BG = al_load_bitmap("Resource/images/stage-select/bg-only.jpg");
+    BG = al_load_bitmap("Resource/images/login-scene/login-bg.png");
     //BUTTON
     btn = new Engine::ImageButton("login-scene/login-button.png", "login-scene/login-button-hov.png",
                                     halfW - 248, h * 0.9 - 90, 496,116);
@@ -63,9 +59,6 @@ void LoginScene::Initialize() {
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 
     //IMAGES
-    background = al_load_bitmap("Resource/images/login-scene/background.png");
-
-    logo = al_load_bitmap("Resource/images/login-scene/logo-login.png");
 
     signupMsg = al_load_bitmap("Resource/images/login-scene/signup-msg.png");
     signupText = al_load_bitmap("Resource/images/login-scene/signup-txt.png");
@@ -182,9 +175,9 @@ void LoginScene::Draw() const {
 
     Group::Draw();
 
-    ALLEGRO_COLOR clicked_color     = al_map_rgb(255, 255, 255);
-    ALLEGRO_COLOR not_clicked_color = al_map_rgb(130, 130, 130);
-    ALLEGRO_COLOR text_color        = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR clicked_color     = al_map_rgb(130, 0, 0);
+    ALLEGRO_COLOR not_clicked_color = al_map_rgba(130, 0, 0, 50);
+    ALLEGRO_COLOR text_color        = al_map_rgb(0, 0, 0);
 
     int w     = Engine::GameEngine::GetInstance().getVirtW();
     int h     = Engine::GameEngine::GetInstance().getVirtH();
@@ -201,36 +194,12 @@ void LoginScene::Draw() const {
 
     int thickness = 2;
 
-    int logoSW =al_get_bitmap_width(logo);
-    int logoSH =al_get_bitmap_height(logo);
-    int bgSW = al_get_bitmap_width(background); //background source width
-    int bgSH = al_get_bitmap_height(background);
-    int unameSW = al_get_bitmap_width(usernameText);
-    int unameSH = al_get_bitmap_height(usernameText);
-    int passSW = al_get_bitmap_width(passwordText);
-    int passSH = al_get_bitmap_height(passwordText);
     int signupmsgSW = al_get_bitmap_width(signupMsg);
     int signupmsgSH = al_get_bitmap_height(signupMsg);
     int signuptxtSW = al_get_bitmap_width(signupText);
     int signuptxtSH = al_get_bitmap_height(signupText);
     int msgMergedDX = signupmsgSW + signuptxtSW - 50;
 
-    //logo
-    al_draw_tinted_scaled_bitmap(logo, al_map_rgb_f(1, 1, 1),
-                                0, 0, logoSW, logoSH,
-                                halfW - logoSW/2, 75, logoSW, logoSH, 0);
-
-    //background
-    al_draw_tinted_scaled_bitmap(background, al_map_rgba(255, 255, 255, 150),
-                                0, 0, bgSW, bgSH,
-                                halfW - 400, halfH-165, bgSW, bgSH, 0);
-    //texts
-    al_draw_tinted_scaled_bitmap(usernameText, al_map_rgb_f(1, 1, 1),
-                                0, 0, unameSW, unameSH,
-                                halfW - unameSW/2, halfH-115, unameSW, unameSH, 0);
-    al_draw_tinted_scaled_bitmap(passwordText, al_map_rgb_f(1, 1, 1),
-                                0, 0, passSW, passSH,
-                                halfW - passSW/2, halfH-125 + 165, unameSW, unameSH, 0);
     //message txt
     al_draw_tinted_scaled_bitmap(signupMsg, al_map_rgb_f(1, 1, 1),
                                 0, 0, signupmsgSW, signupmsgSH,
