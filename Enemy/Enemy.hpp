@@ -1,33 +1,49 @@
 #ifndef ENEMY_HPP
 #define ENEMY_HPP
+#include <allegro5/base.h>
 #include <list>
 #include <string>
-#include <vector>
+#include <map>
+#include "Scene/PlayScene.hpp"
 
-#include "Engine/Point.hpp"
 #include "Engine/Sprite.hpp"
 
-class Bullet;
+class Enemy;
 class PlayScene;
-class Turret;
 
-class Enemy : public Engine::Sprite {
+typedef enum {
+    E_IDLE,
+    E_WALK,
+    E_RUN,
+    E_JUMP,
+    E_ATTACK,
+} EnemyState;
+
+
+class Enemy{
 protected:
-    std::vector<Engine::Point> path;
-    float speed;
-    float hp;
-    int money;
-    PlayScene *getPlayScene();
-    virtual void OnExplode();
+    int hp;
+    int speed;
+    int jump;
+    int damage;
+    float vy;
+    Direction dir;
+    ALLEGRO_BITMAP* idle_sheet;
+    std::map<State, Animation> animations;
+    State                      state;
+
 
 public:
-    float reachEndTime;
-    std::list<Turret *> lockedTurrets;
-    std::list<Bullet *> lockedBullets;
-    Enemy(std::string img, float x, float y, float radius, float speed, float hp, int money);
-    void Hit(float damage);
-    void UpdatePath(const std::vector<std::vector<int>> &mapDistance);
-    void Update(float deltaTime) override;
-    void Draw() const override;
+    int x, y;
+    Enemy(int hp, int x, int y, int speed, int damage);
+    ~Enemy();
+    virtual void Update(float deltaTime);
+    virtual void move(int keyCode);
+    virtual void Draw(Camera cam);
+    void Jump();
+    int flag;
+
+private:
+    void setState(State s);
 };
-#endif   // ENEMY_HPP
+#endif   // PLAYER_HPP

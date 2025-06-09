@@ -1,122 +1,151 @@
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/color.h>
 #include <cmath>
-#include <random>
-#include <string>
-#include <vector>
+#include <utility>
 
-#include "Bullet/Bullet.hpp"
-#include "Enemy.hpp"
-#include "Engine/AudioHelper.hpp"
+#include "Enemy/Enemy.hpp"
 #include "Engine/GameEngine.hpp"
 #include "Engine/Group.hpp"
+#include "Engine/IObject.hpp"
 #include "Engine/IScene.hpp"
-#include "Engine/LOG.hpp"
+#include "Engine/Point.hpp"
 #include "Scene/PlayScene.hpp"
-#include "Turret/Turret.hpp"
-#include "UI/Animation/DirtyEffect.hpp"
-#include "UI/Animation/ExplosionEffect.hpp"
+#include "Enemy.hpp"
+#include "Engine/map.hpp"
 
-PlayScene *Enemy::getPlayScene() {
-    return dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetActiveScene());
-}
-void Enemy::OnExplode() {
-    getPlayScene()->EffectGroup->AddNewObject(new ExplosionEffect(Position.x, Position.y));
-    std::random_device dev;
-    std::mt19937 rng(dev());
-    std::uniform_int_distribution<std::mt19937::result_type> distId(1, 3);
-    std::uniform_int_distribution<std::mt19937::result_type> dist(1, 20);
-    for (int i = 0; i < 10; i++) {
-        // Random add 10 dirty effects.
-        getPlayScene()->GroundEffectGroup->AddNewObject(new DirtyEffect("play/dirty-" + std::to_string(distId(rng)) + ".png", dist(rng), Position.x, Position.y));
+#include <iostream>
+#include <ostream>
+
+const int PLAYER_SIZE = 100;
+const int SPEED = PLAYER_SIZE / 16;
+
+const int GRAVITY = 8;
+const float JUMP_ACCELERATION = 1;
+const int INITIAL_JUMP_SPEED = 16;
+
+const int IDLE_FRAME_COUNT = 2;
+const double IDLE_FRAME_RATE = 0.3;
+
+const int JUMP_FRAME_COUNT = 2;
+const double JUMP_FRAME_RATE = 0.3;
+
+
+void Enemy::setState(State s) {
+    if (state != s) {
+        state = s;
+        auto &A = animations[state];
+        A.current = 0;
+        A.timer   = 0.0;
     }
 }
-Enemy::Enemy(std::string img, float x, float y, float radius, float speed, float hp, int money) : Engine::Sprite(img, x, y), speed(speed), hp(hp), money(money) {
-    CollisionRadius = radius;
-    reachEndTime = 0;
-}
-void Enemy::Hit(float damage) {
-    hp -= damage;
-    if (hp <= 0) {
-        OnExplode();
-        // Remove all turret's reference to target.
-        for (auto &it : lockedTurrets)
-            it->Target = nullptr;
-        for (auto &it : lockedBullets)
-            it->Target = nullptr;
-        getPlayScene()->EarnMoney(money);
-        getPlayScene()->EnemyGroup->RemoveObject(objectIterator);
-        AudioHelper::PlayAudio("explosion.wav");
-    }
-}
-void Enemy::UpdatePath(const std::vector<std::vector<int>> &mapDistance) {
-    int x = static_cast<int>(floor(Position.x / PlayScene::BlockSize));
-    int y = static_cast<int>(floor(Position.y / PlayScene::BlockSize));
-    if (x < 0) x = 0;
-    if (x >= PlayScene::MapWidth) x = PlayScene::MapWidth - 1;
-    if (y < 0) y = 0;
-    if (y >= PlayScene::MapHeight) y = PlayScene::MapHeight - 1;
-    Engine::Point pos(x, y);
-    int num = mapDistance[y][x];
-    if (num == -1) {
-        num = 0;
-        Engine::LOG(Engine::ERROR) << "Enemy path finding error";
-    }
-    path = std::vector<Engine::Point>(num + 1);
-    while (num != 0) {
-        std::vector<Engine::Point> nextHops;
-        for (auto &dir : PlayScene::directions) {
-            int x = pos.x + dir.x;
-            int y = pos.y + dir.y;
-            if (x < 0 || x >= PlayScene::MapWidth || y < 0 || y >= PlayScene::MapHeight || mapDistance[y][x] != num - 1)
-                continue;
-            nextHops.emplace_back(x, y);
-        }
-        // Choose arbitrary one.
-        std::random_device dev;
-        std::mt19937 rng(dev());
-        std::uniform_int_distribution<std::mt19937::result_type> dist(0, nextHops.size() - 1);
-        pos = nextHops[dist(rng)];
-        path[num] = pos;
-        num--;
-    }
-}
+
+
 void Enemy::Update(float deltaTime) {
-    // Pre-calculate the velocity.
-    float remainSpeed = speed * deltaTime;
-    while (remainSpeed != 0) {
-        if (path.empty()) {
-            // Reach end point.
-            Hit(hp);
-            getPlayScene()->Hit();
-            reachEndTime = 0;
-            return;
-        }
-        Engine::Point target = path.back() * PlayScene::BlockSize + Engine::Point(PlayScene::BlockSize / 2, PlayScene::BlockSize / 2);
-        Engine::Point vec = target - Position;
-        // Add up the distances:
-        // 1. to path.back()
-        // 2. path.back() to border
-        // 3. All intermediate block size
-        // 4. to end point
-        reachEndTime = (vec.Magnitude() + (path.size() - 1) * PlayScene::BlockSize - remainSpeed) / speed;
-        Engine::Point normalized = vec.Normalize();
-        if (remainSpeed - vec.Magnitude() > 0) {
-            Position = target;
-            path.pop_back();
-            remainSpeed -= vec.Magnitude();
-        } else {
-            Velocity = normalized * remainSpeed / deltaTime;
-            remainSpeed = 0;
-        }
+    PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
+    if (!scene) return;
+
+    // 1) Apply gravity (vy will grow by GRAVITY each frame):
+    vy += JUMP_ACCELERATION;
+
+    // 2) Figure out total vertical movement this frame:
+    //    For example, if vy==−12, you want to move up 12 pixels; if vy==+8, move down 8.
+    int totalDY   = vy;                      // could be negative (rising) or positive (falling)
+    int signDY    = (totalDY >= 0 ? +1 : -1);
+    int remaining = std::abs(totalDY);
+
+    auto &A = animations[state];
+    A.timer += deltaTime;
+    if (A.timer >= A.frame_time) {
+        A.timer -= A.frame_time;
+        A.current = (A.current + 1) % A.frames.size();
     }
-    Rotation = atan2(Velocity.y, Velocity.x);
-    Sprite::Update(deltaTime);
+
+    // 4) We do not change x here—that only happens when move(keyCode) is called.
+
+    // 5) Clamp inside world bounds (so you can’t fall off the map):
+    int mapPixelW = scene->MapWidth * scene->BlockSize;
+    int mapPixelH = scene->MapHeight * scene->BlockSize;
+    if (x < 0)                           x = 0;
+    if (x + PLAYER_SIZE > mapPixelW)     x = mapPixelW - PLAYER_SIZE;
+    if (y < 0)                           y = 0;
+    if (y + PLAYER_SIZE > mapPixelH)     y = mapPixelH - PLAYER_SIZE;
 }
-void Enemy::Draw() const {
-    Sprite::Draw();
-    if (PlayScene::DebugMode) {
-        // Draw collision radius.
-        al_draw_circle(Position.x, Position.y, CollisionRadius, al_map_rgb(255, 0, 0), 2);
+
+Enemy::Enemy(int hp, int x, int y, int speed, int damage){
+    flag = 0;
+    idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap" << std::endl;
     }
+    int frameW = al_get_bitmap_width(idle_sheet) / IDLE_FRAME_COUNT;
+    int frameH = al_get_bitmap_height(idle_sheet);
+    Animation idleAnim(IDLE_FRAME_RATE);
+    for (int i = 0; i < IDLE_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        );
+        idleAnim.frames.push_back(f);
+    }
+    animations[IDLE] = std::move(idleAnim);
+
+    animations[JUMP] = animations[IDLE];
+
+    this->damage = damage;
+    this->hp = hp;
+    this->x = x;
+    this->y = y;
+    this->speed = speed;
+    this->dir = RIGHT;
+    this->jump = 0;
+    state = IDLE;
+}
+
+Enemy::~Enemy() {
+    al_destroy_bitmap(idle_sheet);
+
+    // then free each frame
+    for (auto &kv : animations) {
+        for (auto* f : kv.second.frames) {
+            al_destroy_bitmap(f);
+        }
+    }
+}
+
+void Enemy::move(int keyCode) {
+    PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+    int dx = x;
+    int dy = y;
+
+    // move it
+
+    if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        x = dx;
+        y = dy;
+    }
+}
+
+void Enemy::Jump() {
+    if (jump < 1) {
+        jump++;
+        vy = -INITIAL_JUMP_SPEED;
+    }
+}
+
+void Enemy::Draw(Camera cam){
+    int dx = x - cam.x;
+    int dy = y - cam.y;
+    auto &A = animations[state];
+    ALLEGRO_BITMAP* bmp = A.frames[A.current];
+    al_draw_scaled_bitmap(
+        bmp,
+        0, 0,
+        al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+        dx, dy,
+        PLAYER_SIZE, PLAYER_SIZE,
+        flag
+    );
+
 }
