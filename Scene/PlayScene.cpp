@@ -9,8 +9,6 @@
 #include <vector>
 
 #include "Enemy/Enemy.hpp"
-#include "Enemy/SoldierEnemy.hpp"
-#include "Enemy/TankEnemy.hpp"
 #include "Engine/AudioHelper.hpp"
 #include "Engine/GameEngine.hpp"
 #include "Engine/Group.hpp"
@@ -18,11 +16,7 @@
 #include "Engine/map.hpp"
 #include "Engine/Resources.hpp"
 #include "PlayScene.hpp"
-#include "Turret/LaserTurret.hpp"
-#include "Turret/MachineGunTurret.hpp"
-#include "Turret/TurretButton.hpp"
 #include "UI/Animation/DirtyEffect.hpp"
-#include "UI/Animation/Plane.hpp"
 #include "UI/Component/Label.hpp"
 
 // TODO HACKATHON-4 (1/3): Trace how the game handles keyboard input.
@@ -65,12 +59,13 @@ void PlayScene::Initialize() {
     AddNewObject(GroundEffectGroup = new Group());
     AddNewObject(DebugIndicatorGroup = new Group());
     AddNewObject(TowerGroup = new Group());
-    AddNewObject(EnemyGroup = new Group());
     AddNewObject(BulletGroup = new Group());
     AddNewObject(EffectGroup = new Group());
     // Should support buttons.
     AddNewControlObject(UIGroup = new Group());
+    std::cout << "Reading map" << std::endl;
     ReadMap();
+    std::cout << "Map read" << std::endl;
     mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
     deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
@@ -85,6 +80,7 @@ void PlayScene::Terminate() {
     IScene::Terminate();
 }
 void PlayScene::Update(float deltaTime) {
+    std::cout << "Updating" << std::endl;
     IScene::Update(deltaTime);
     OnKeyHold();
     player.Update(deltaTime);
@@ -102,11 +98,20 @@ void PlayScene::Update(float deltaTime) {
 
     if (cam.x > MapWidth * BlockSize - w) cam.x = MapWidth * BlockSize - w;
     if (cam.y > MapHeight * BlockSize - h) cam.y = MapHeight * BlockSize - h;
+
+    for (Enemy* e : enemyGroup) {
+        e->Update(deltaTime);
+    }
+    std::cout << "Updated" << std::endl;
 }
 void PlayScene::Draw() const {
+    std::cout << "Drawing" << std::endl;
     IScene::Draw();
     map.DrawMap(cam);
     player.Draw(cam);
+    for (Enemy* e : enemyGroup) {
+        e->Draw(cam);
+    }
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
@@ -120,6 +125,7 @@ void PlayScene::Draw() const {
             }
         }
     }
+    std::cout << "Drawn" << std::endl;
 }
 void PlayScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
@@ -178,6 +184,7 @@ void PlayScene::ReadMap() {
             case '0': mapData.push_back(0); break;
             case '1': mapData.push_back(1); break;
             case 'S': mapData.push_back(2); break;
+            case 'E': mapData.push_back(3); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -202,6 +209,9 @@ void PlayScene::ReadMap() {
             } else if (num == 2) {
                 mapState[i][j] = TILE_SKY;
                 player.Create(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize));
+            } else if (num == 3) {
+                mapState[i][j] = TILE_SKY;
+                enemyGroup.push_back(new Enemy(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize), 12, 0));
             }
         }
     }
@@ -218,30 +228,6 @@ void PlayScene::UIBtnClicked(int id) {
    }
 
 bool PlayScene::CheckSpaceValid(int x, int y) {
-    if (x < 0 || x >= MapWidth || y < 0 || y >= MapHeight)
-        return false;
-    auto map00 = mapState[y][x];
-    mapState[y][x] = TILE_OCCUPIED;
-    std::vector<std::vector<int>> map = CalculateBFSDistance();
-    mapState[y][x] = map00;
-    if (map[0][0] == -1)
-        return false;
-    for (auto &it : EnemyGroup->GetObjects()) {
-        Engine::Point pnt;
-        pnt.x = floor(it->Position.x / BlockSize);
-        pnt.y = floor(it->Position.y / BlockSize);
-        if (pnt.x < 0) pnt.x = 0;
-        if (pnt.x >= MapWidth) pnt.x = MapWidth - 1;
-        if (pnt.y < 0) pnt.y = 0;
-        if (pnt.y >= MapHeight) pnt.y = MapHeight - 1;
-        if (map[pnt.y][pnt.x] == -1)
-            return false;
-    }
-    // All enemy have path to exit.
-    mapState[y][x] = TILE_OCCUPIED;
-    mapDistance = map;
-    for (auto &it : EnemyGroup->GetObjects())
-        dynamic_cast<Enemy *>(it)->UpdatePath(mapDistance);
     return true;
 }
 std::vector<std::vector<int>> PlayScene::CalculateBFSDistance() {

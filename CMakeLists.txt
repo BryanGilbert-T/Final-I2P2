@@ -20,15 +20,10 @@ file(COPY
 
 # Define executable
 add_executable(${PROJECT_NAME}
-        Bullet/Bullet.cpp
-        Bullet/FireBullet.cpp
-        Bullet/LaserBullet.cpp
-
         Resource/sha256/sha256.cpp
 
         Enemy/Enemy.cpp
-        Enemy/SoldierEnemy.cpp
-        Enemy/TankEnemy.cpp
+        Enemy/Enemy.hpp
 
         Engine/Allegro5Exception.cpp
         Engine/AudioHelper.cpp
@@ -67,14 +62,8 @@ add_executable(${PROJECT_NAME}
         Player/Player.cpp
         Player/Player.hpp
 
-        Turret/LaserTurret.cpp
-        Turret/MachineGunTurret.cpp
-        Turret/Turret.cpp
-        Turret/TurretButton.cpp
-
         UI/Animation/DirtyEffect.cpp
         UI/Animation/ExplosionEffect.cpp
-        UI/Animation/Plane.cpp
 
         UI/Component/Image.cpp
         UI/Component/ImageButton.cpp

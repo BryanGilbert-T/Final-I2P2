@@ -55,9 +55,9 @@ public:
     Group *DebugIndicatorGroup;
     Group *BulletGroup;
     Group *TowerGroup;
-    Group *EnemyGroup;
     Group *EffectGroup;
     Group *UIGroup;
+    std::list<Enemy*> enemyGroup;
     Engine::Label *UIMoney;
     Engine::Label *UILives;
     Engine::Image *imgTarget;
