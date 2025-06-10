@@ -22,6 +22,8 @@ private:
     ALLEGRO_BITMAP* loginText;
     ALLEGRO_BITMAP* logintextHov;
     ALLEGRO_BITMAP* BG;
+    ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* loadingBg;
 
     Engine::Label* UserExistLabel;
 
@@ -39,6 +41,7 @@ public:
     void OnKeyDown(int keyCode) override;
 
     void RaiseExist();
+    void DrawLoading(int step);
 };
 
 #endif   // STAGESELECTSCENE_HPP

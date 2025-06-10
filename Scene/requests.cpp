@@ -361,9 +361,8 @@ void RequestsScene::DrawLoading(int step) {
     al_use_transform(&identity);
 
     // 2) Grab real display size
-    ALLEGRO_DISPLAY* disp = al_get_current_display();
-    int W = al_get_display_width(disp);
-    int H = al_get_display_height(disp);
+    int W = Engine::GameEngine::GetInstance().getVirtW();
+    int H = Engine::GameEngine::GetInstance().getVirtH();
 
     // 3) Clear to white
     al_draw_scaled_bitmap(background, 0, 0,
