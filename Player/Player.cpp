@@ -122,7 +122,8 @@ void Player::Update(float deltaTime) {
             // moving down: check the two bottom corners
             // world-coords = (leftX, testY+PLAYER_SIZE-1) and (rightX, testY+PLAYER_SIZE-1)
             if (scene->map.IsCollision(leftX,           testY + PLAYER_SIZE - 1) ||
-                scene->map.IsCollision(rightX,          testY + PLAYER_SIZE - 1))
+                scene->map.IsCollision(rightX,          testY + PLAYER_SIZE - 1) ||
+                scene->map.IsCollision(leftX + PLAYER_SIZE / 2, testY + PLAYER_SIZE - 1))
             {
                 // We’ve hit the ground. Land here:
                 vy = 0;
@@ -134,7 +135,8 @@ void Player::Update(float deltaTime) {
             // moving up: check the two top corners
             // world-coords = (leftX, testY) and (rightX, testY)
             if (scene->map.IsCollision(leftX,           testY) ||
-                scene->map.IsCollision(rightX,          testY))
+                scene->map.IsCollision(rightX,          testY) ||
+                scene->map.IsCollision(leftX + PLAYER_SIZE / 2, testY))
             {
                 // We’ve hit a ceiling. Stop upward momentum:
                 vy = 0;

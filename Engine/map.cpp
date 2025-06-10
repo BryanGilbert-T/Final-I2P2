@@ -110,6 +110,7 @@ bool Map::IsCollision(int x, int y) {
     int dy = y / TILE_SIZE;
 
     if (MapState[dy][dx] == TILE_DIRT) {
+        std::cout << dy << " " << dx << std::endl;
         return true;
     }
 

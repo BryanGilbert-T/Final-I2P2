@@ -159,7 +159,6 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         if (dist > 100) {
             float nx = dx / dist;
             float ny = dy / dist;
-            std::cout << nx << std::endl;
 
             if (dx < 0) flag = 1;
             if (dx > 0) flag = 0;
@@ -178,7 +177,6 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         if (dist > 210) {
             float nx = dx / dist;
             float ny = dy / dist;
-            std::cout << nx << std::endl;
 
             if (dx < 0) flag = 1;
             if (dx > 0) flag = 0;
@@ -233,7 +231,6 @@ void KnightEnemy::Update(float deltaTime) {
     float dy   = py - y;
     float dist = std::sqrt(dx*dx + dy*dy);
 
-    std::cout << dist << " " << dx << std::endl;
 
     if (dx <= 0) {
         flag = 1;

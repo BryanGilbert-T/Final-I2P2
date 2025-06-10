@@ -208,7 +208,9 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
             }
+            std::cout << num;
         }
+        std::cout << std::endl;
     }
     map.Init(MapWidth, MapHeight, mapState);
 }
