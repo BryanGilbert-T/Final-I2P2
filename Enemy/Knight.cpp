@@ -165,6 +165,7 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
             if (dx > 0) flag = 0;
 
             int dx = x + (nx * speed * 2);
+            int dy = y;
 
             if (dx >= 0 && dy >= 0 &&
             dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
@@ -183,6 +184,7 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
             if (dx > 0) flag = 0;
 
             int dx = x + (nx * speed * 2);
+            int dy = y;
 
             if (dx >= 0 && dy >= 0 &&
             dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
