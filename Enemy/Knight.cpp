@@ -17,7 +17,7 @@
 #include <ostream>
 
 const int HP = 100;
-const int SPEED = 24;
+const int SPEED = 2;
 const int DAMAGE = 12;
 
 const int IDLE_FRAME_COUNT = 10;
@@ -75,10 +75,24 @@ void KnightEnemy::Draw(Camera cam) {
 
 void KnightEnemy::performPatrol(float dt) {
     // Move horizontally
-    x += patrolDir * speed * dt;
+    auto scene = dynamic_cast<PlayScene*>(
+        Engine::GameEngine::GetInstance().GetScene("play")
+    );
+    int dx = x + (patrolDir * speed);
+    int dy = y;
 
     // Flip direction at range limits
-    if (x > patrolOriginX + patrolRange || x < patrolOriginX - patrolRange) {
+    if (dx > patrolOriginX + patrolRange || dx < patrolOriginX - patrolRange) {
+        patrolDir = -patrolDir;
+    }
+
+    if (dx >= 0 && dy >= 0 &&
+        dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
+        !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+        x = dx;
+        }
+    else {
         patrolDir = -patrolDir;
     }
 
@@ -88,11 +102,20 @@ void KnightEnemy::performPatrol(float dt) {
 
 void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
     // Normalize direction
+    auto scene = dynamic_cast<PlayScene*>(
+        Engine::GameEngine::GetInstance().GetScene("play")
+    );
     if (dist > 1e-3f) {
         float nx = dx / dist;
         float ny = dy / dist;
-        x += nx * speed * dt;
-        y += ny * speed * dt;
+        int dx = x + (nx * speed * 2);
+
+        if (dx >= 0 && dy >= 0 &&
+        dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
+        !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+            x = dx;
+        }
     }
 
     // You can trigger an attack when very close:
@@ -115,6 +138,9 @@ void KnightEnemy::Update(float deltaTime) {
     if (dist < chaseRadius) {
         aiState = AIState::CHASE;
     } else {
+        if (aiState == AIState::CHASE) {
+            patrolOriginX = x;
+        }
         aiState = AIState::PATROL;
     }
 
