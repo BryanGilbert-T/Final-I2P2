@@ -42,8 +42,8 @@ void FriendListScene::Initialize() {
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
     DrawLoading(5);
-    const int iconW = 64;
-    const int iconH = 64;
+    const int iconW = 87;
+    const int iconH = 87;
 
     scrollOffset = 0;
 
@@ -221,8 +221,8 @@ void FriendListScene::Draw() const {
     // notification for requests
     if (requests.size() > 0) {
         al_draw_text(PlayFont,
-            al_map_rgb(255, 0, 0),
-            w * 0.5 + iconw/2, h * 0.11, ALLEGRO_ALIGN_LEFT,
+             al_map_rgb(130, 0, 0),
+             w * 0.5 + iconw/2, h * 0.05, ALLEGRO_ALIGN_LEFT,
             std::to_string(requests.size()).c_str());
     }
     if (requestHover) { // hover nya belum ada

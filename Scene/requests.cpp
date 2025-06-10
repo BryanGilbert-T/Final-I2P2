@@ -30,8 +30,11 @@ void RequestsScene::Initialize() {
     Engine::ImageButton *btn;
     DrawLoading(2);
 
-    PlayFont = al_load_font("Resource/fonts/imfell.ttf", 48, ALLEGRO_ALIGN_CENTER);
+    PlayFont = al_load_font("Resource/fonts/imfell.ttf", 45, ALLEGRO_ALIGN_CENTER);
     Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
+    background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
+    decor = al_load_bitmap("Resource/images/friendlist-scene/decor-line.png");
+
     DrawLoading(3);
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
@@ -39,34 +42,32 @@ void RequestsScene::Initialize() {
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 
+    DrawLoading(5);
     const int iconW = 64;
     const int iconH = 64;
 
     scrollOffset = 0;
 
-    friendsIcon = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
-    requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
-    searchIcon = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
-    DrawLoading(5);
-    friendsIconHover = al_load_bitmap("Resource/images/friendlist-scene/friendsicon.png");
-    requestsIconHover = al_load_bitmap("Resource/images/friendlist-scene/requestsicon.png");
-    searchIconHover = al_load_bitmap("Resource/images/friendlist-scene/searchicon.png");
+    friendsIcon = al_load_bitmap("Resource/images/friendlist-scene/friendlist-btn.png");
+    requestsIcon = al_load_bitmap("Resource/images/friendlist-scene/addfriend-btn.png");
+    searchIcon = al_load_bitmap("Resource/images/friendlist-scene/search-btn.png");
+    profile = al_load_bitmap("Resource/images/friendlist-scene/profile-icon.png");
+
     DrawLoading(6);
     std::ifstream in("Resource/account.txt");
     in >> curUser;
     friends = getRequests(curUser);
     DrawLoading(7);
 
-    btn = new Engine::ImageButton("stage-select/dirt.png", "stage-select/floor.png", halfW - 200, h * 0.9 - 50, 400, 100);
+    btn = new Engine::ImageButton("friendlist-scene/back-btn.png", "friendlist-scene/back-btn-hov.png", halfW - 496/2, h * 0.9 - 30, 496, 112);
     btn->SetOnClickCallback(std::bind(&RequestsScene::BackOnClick, this, 1));
     AddNewControlObject(btn);
-    AddNewObject(new Engine::Label("Back", "pirulen.ttf", 48, halfW, h * 0.9, 0, 0, 0, 255, 0.5, 0.5));
 
     online = find_online();
     DrawLoading(9);
 
-    checkIcon = al_load_bitmap("Resource/images/friendlist-scene/checkicon.png");
-    crossIcon = al_load_bitmap("Resource/images/friendlist-scene/crossicon.png");
+    checkIcon = al_load_bitmap("Resource/images/friendlist-scene/accept-btn.png");
+    crossIcon = al_load_bitmap("Resource/images/friendlist-scene/reject-btn.png");
 
     crossHover.assign(MaxVisible, false);
     checkHover.assign(MaxVisible, false);
@@ -98,11 +99,27 @@ void RequestsScene::Draw() const {
     int halfW = w / 2;
     int halfH = h / 2;
 
+
+    al_draw_scaled_bitmap(background, 0, 0,
+                           al_get_bitmap_width(background), al_get_bitmap_height(background),
+                           0, 0,
+                           w, h, 0);
+
+    al_draw_scaled_bitmap(decor, 0, 0,
+                        al_get_bitmap_width(decor), al_get_bitmap_height(decor),
+                        117, 140, al_get_bitmap_width(decor), al_get_bitmap_height(decor), 0);
+
+    al_draw_scaled_bitmap(decor, 0, 0,
+                        al_get_bitmap_width(decor), al_get_bitmap_height(decor),
+                        117, 900, al_get_bitmap_width(decor), al_get_bitmap_height(decor), 0);
+
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_bitmap_height(Logo);
 
-    int iconw = 64;
-    int iconh = 64;
+    int iconw = 87;
+    int iconh = 87;
+
+    al_draw_text(PlayFont, al_map_rgb(0, 0, 0), 117, 70, ALLEGRO_ALIGN_LEFT, "Friend Request");
 
     if (friends.size() == 0) {
         std::string nofriendTxt = "No requests.";
@@ -118,20 +135,23 @@ void RequestsScene::Draw() const {
         const int fontHeight = al_get_font_line_height(PlayFont);
         const int starth = h * 0.27;
         const int deltah = 125;
-        const int startw = w * 0.25;
-
-        al_draw_filled_circle(w * 0.22, starth + i * deltah + (fontHeight / 2),
-            25, (online.find(friends[idx])->second) ? al_map_rgb(0, 255, 0) : al_map_rgb(0, 0, 0));
+        const int startw = w * 0.25 + 120;
 
         // background
         al_draw_filled_rounded_rectangle(
-            w * 0.2 - offset, starth + i * deltah - offset,
-            w * 0.8 + offset, starth + i * deltah + fontHeight + offset,
-            25, 25, al_map_rgba(0, 0, 0, 100)
-        );
+           w * 0.2 - offset, starth + i * deltah - offset,
+           w * 0.8 + offset, starth + i * deltah + fontHeight + offset,
+           50, 50, al_map_rgba(0, 0, 0, 50)
+       );
         // text
+        al_draw_filled_circle(w * 0.22, starth + i * deltah + (fontHeight / 2),
+          25/2, (online.find(friends[idx])->second) ? al_map_rgb(46, 76, 12) : al_map_rgb(0, 0, 0));
+
+        al_draw_scaled_bitmap(profile, 0, 0, al_get_bitmap_width(profile), al_get_bitmap_height(profile),
+                                w*0.25, (starth - 10) + i * deltah - fontHeight/2,
+                                al_get_bitmap_width(profile), al_get_bitmap_height(profile),0);
         al_draw_text(
-            PlayFont, al_map_rgb(255,255,255),
+            PlayFont, al_map_rgb(0,0,0),
             startw, starth + i * deltah - fontHeight/2,
             ALLEGRO_ALIGN_LEFT, friends[idx].c_str()
         );
@@ -152,11 +172,11 @@ void RequestsScene::Draw() const {
         float checkX = crossX   - iconPadding - iconSize;
 
         ALLEGRO_COLOR checkTint = checkHover[i]
-            ? al_map_rgba(255,255,255,160)
-            : al_map_rgb(255,255,255);
+            ? al_map_rgba(255,255,255,255)
+            : al_map_rgba(255,255,255,100);
         ALLEGRO_COLOR crossTint = crossHover[i]
-            ? al_map_rgba(255,255,255,160)
-            : al_map_rgb(255,255,255);
+            ? al_map_rgba(255,255,255,255)
+            : al_map_rgba(255,255,255,100);
 
         // 4) draw them scaled into a square
         //    you can also use al_draw_tinted_scaled_bitmap if you need tinting
@@ -182,45 +202,45 @@ void RequestsScene::Draw() const {
     }
 
     if (friendsHover) { // hover nya belum ada
-        al_draw_tinted_scaled_bitmap(friendsIconHover, al_map_rgb(255, 255, 255),
-                    0, 0, al_get_bitmap_width(friendsIconHover), al_get_bitmap_height(friendsIconHover),
-                    w * 0.25 - iconw/2, h * 0.1, iconw, iconh,
+        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgba(255, 255, 255, 255),
+                    0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
+                    halfW-iconw/2 - 100 - iconw, 35, iconw, iconh,
                     0);
     } else {
-        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgb(255, 255, 255),
+        al_draw_tinted_scaled_bitmap(friendsIcon, al_map_rgba(255, 255, 255, 100),
             0, 0, al_get_bitmap_width(friendsIcon), al_get_bitmap_height(friendsIcon),
-            w * 0.25 - iconw/2, h * 0.1, iconw, iconh,
+            halfW-iconw/2 - 100 - iconw, 35, iconw, iconh,
             0);
     }
 
     // notification for requests
     if (friends.size() > 0) {
         al_draw_text(PlayFont,
-            al_map_rgb(255, 0, 0),
-            w * 0.5 + iconw/2, h * 0.11, ALLEGRO_ALIGN_LEFT,
+            al_map_rgb(130, 0, 0),
+            w * 0.5 + iconw/2, h * 0.05, ALLEGRO_ALIGN_LEFT,
             std::to_string(friends.size()).c_str());
     }
     if (requestHover) { // hover nya belum ada
-        al_draw_tinted_scaled_bitmap(requestsIconHover, al_map_rgb(255, 255, 255),
-                0, 0, al_get_bitmap_width(requestsIconHover), al_get_bitmap_height(requestsIconHover),
-                w * 0.5 - iconw/2, h * 0.1, iconw, iconh,
+        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgba(255, 255, 255, 255),
+                0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
+                halfW- iconw/2, 35, iconw, iconh,
                 0);
     } else {
-        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgb(255, 255, 255),
+        al_draw_tinted_scaled_bitmap(requestsIcon, al_map_rgba(255, 255, 255, 255),
         0, 0, al_get_bitmap_width(requestsIcon), al_get_bitmap_height(requestsIcon),
-        w * 0.5 - iconw/2, h * 0.1, iconw, iconh,
+        w * 0.5 - iconw/2, 35, iconw, iconh,
         0);
     }
 
     if (searchHover) { // hover nya belum ada
-        al_draw_tinted_scaled_bitmap(searchIconHover, al_map_rgb(255, 255, 255),
-              0, 0, al_get_bitmap_width(searchIconHover), al_get_bitmap_height(searchIconHover),
-              w * 0.75 - iconw/2, h * 0.1, iconw, iconh,
+        al_draw_tinted_scaled_bitmap(searchIcon, al_map_rgba(255, 255, 255, 255),
+              0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
+              halfW+iconw/2 + 100, 35, iconw, iconh,
               0);
     } else {
-        al_draw_tinted_scaled_bitmap(searchIcon, al_map_rgb(255, 255, 255),
+        al_draw_tinted_scaled_bitmap(searchIcon, al_map_rgba(255, 255, 255, 100),
       0, 0, al_get_bitmap_width(searchIcon), al_get_bitmap_height(searchIcon),
-      w * 0.75 - iconw/2, h * 0.1, iconw, iconh,
+      halfW+iconw/2 + 100, 35, iconw, iconh,
       0);
     }
 
@@ -243,17 +263,18 @@ void RequestsScene::Draw() const {
 
         // draw the track
         al_draw_filled_rectangle(
-            w*0.85f, trackTop,
-            w*0.87f, trackBottom,
-            al_map_rgb(200, 200, 200)
+            w*0.93f, trackTop,
+            w*0.94f, trackBottom,
+            al_map_rgba(130, 0, 0, 50)
         );
 
         // draw the thumb
-        al_draw_filled_rectangle(
-            w*0.85f, thumbY,
-            w*0.87f, thumbY + thumbH,
-            al_map_rgb(100, 100, 100)
-        );
+        al_draw_filled_rounded_rectangle(
+            w*0.93f, thumbY,
+            w*0.94f, thumbY + thumbH,
+            10, 10,
+            al_map_rgb(130, 0, 0)
+            );
     }
 
     Group::Draw();
@@ -306,20 +327,20 @@ void RequestsScene::Update(float deltatime) {
     int dxlogout = w * 0.8 - sw / 2;
     int dylogout = h * 0.8 - offset;
 
-    const int iconw = 64;
-    const int iconh = 64;
+    const int iconw = 87;
+    const int iconh = 87;
 
-    if (mouseIn(mouse.x, mouse.y, w * 0.25 - iconw/2, h * 0.1, iconw, iconh)) {
+    if (mouseIn(mouse.x, mouse.y, w/2 - iconw/2 - 100 - iconw, 35, iconw, iconh)) {
         friendsHover = true;
         requestHover = false;
         searchHover = false;
     }
-    else if (mouseIn(mouse.x, mouse.y, w * 0.5 - iconw/2, h * 0.1, iconw, iconh)) {
+    else if (mouseIn(mouse.x, mouse.y, w/2 - iconw/2, 35, iconw, iconh)) {
         friendsHover = false;
         requestHover = true;
         searchHover = false;
     }
-    else if (mouseIn(mouse.x, mouse.y, w * 0.75 - iconw/2, h * 0.1, iconw, iconh)) {
+    else if (mouseIn(mouse.x, mouse.y, w/2+iconw/2+100, 35, iconw, iconh)) {
         friendsHover = false;
         requestHover = false;
         searchHover = true;

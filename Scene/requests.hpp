@@ -56,6 +56,9 @@ public:
     void onCheckClicked(int idx);
     void onCrossClicked(int idx);
 
+    ALLEGRO_BITMAP* decor;
+    ALLEGRO_BITMAP* profile;
+
     ALLEGRO_BITMAP* friendsIcon;
     ALLEGRO_BITMAP* requestsIcon;
     ALLEGRO_BITMAP* searchIcon;

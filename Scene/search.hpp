@@ -53,9 +53,13 @@ public:
     bool requestHover = false;
     bool searchHover = false;
 
+    ALLEGRO_BITMAP* decor;
+    ALLEGRO_BITMAP* profile;
+
     ALLEGRO_BITMAP* friendsIcon;
     ALLEGRO_BITMAP* requestsIcon;
     ALLEGRO_BITMAP* searchIcon;
+    ALLEGRO_BITMAP* addIcon;
 
     ALLEGRO_BITMAP* friendsIconHover;
     ALLEGRO_BITMAP* requestsIconHover;
