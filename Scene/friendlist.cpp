@@ -84,6 +84,8 @@ void FriendListScene::Terminate() {
     al_destroy_bitmap(searchIcon);
 }
 void FriendListScene::DrawLoading(int step) {
+    int W = Engine::GameEngine::GetInstance().getVirtW();
+    int H = Engine::GameEngine::GetInstance().getVirtH();
     // 1) Reset transform so we're in true screen‐space
     ALLEGRO_TRANSFORM old;
     al_copy_transform(&old, al_get_current_transform());
@@ -92,8 +94,6 @@ void FriendListScene::DrawLoading(int step) {
     al_use_transform(&identity);
 
     // 2) Grab real display size
-    int W = Engine::GameEngine::GetInstance().getVirtW();
-    int H = Engine::GameEngine::GetInstance().getVirtH();
 
     // 3) Clear to white
     al_draw_scaled_bitmap(background, 0, 0,
