@@ -143,7 +143,7 @@ void SignupScene::Draw() const {
 
     ALLEGRO_COLOR clicked_color     = al_map_rgb(130, 0, 0);
     ALLEGRO_COLOR not_clicked_color = al_map_rgba(130, 0, 0, 50);
-    ALLEGRO_COLOR text_color        = al_map_rgb(255, 255, 255);
+    ALLEGRO_COLOR text_color        = al_map_rgb(0, 0, 0);
 
     int w     = Engine::GameEngine::GetInstance().getVirtW();
     int h     = Engine::GameEngine::GetInstance().getVirtH();
