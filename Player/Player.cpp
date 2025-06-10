@@ -59,7 +59,7 @@ void Player::Create(int hp, int x, int y){
 
 }
 
-void Player::Hit(int damage) {
+void Player::Hit(int damage, int flag) {
     hp -= damage;
     if (hp <= 0) hp = 0;
     // start the red flash + knockback
@@ -67,7 +67,7 @@ void Player::Hit(int damage) {
     hitTimer = 0.2f;  // flash for 0.2 seconds
     knockbackRemaining = KNOCKBACK_DISTANCE;
     // push away from the facing direction
-    knockbackDir = (dir == RIGHT) ? -1 : +1;
+    knockbackDir = flag;
     std::cout << "Player hp left: " << hp << std::endl;
 }
 

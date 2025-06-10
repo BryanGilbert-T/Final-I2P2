@@ -281,12 +281,12 @@ void KnightEnemy::performAttack(float dt, float dist) {
     Animation &anim = animations[ATTACK];
     if (anim.current == 1 || anim.current == 2) {
         if (dist < attackRadius && hitPlayer == false ||
-            (flag == 0 && dist < attackRadius + 220 && hitPlayer == false)) {
+            (flag == 0 && dist < attackRadius + 160 && hitPlayer == false)) {
             auto scene = dynamic_cast<PlayScene*>(
                 Engine::GameEngine::GetInstance().GetScene("play")
             );
             if (scene) {
-                scene->player.Hit(damage);
+                scene->player.Hit(damage, (flag == 1) ? -1 : 1);
             }
             hitPlayer = true;
         }

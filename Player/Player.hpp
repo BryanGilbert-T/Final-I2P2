@@ -53,7 +53,7 @@ public:
   float hitTimer;           // how long to keep flashing
   int  knockbackDir;        // +1 or -1
   int  knockbackRemaining;  // pixels left to be knocked back
-  static constexpr int KNOCKBACK_DISTANCE = 20; // total pixels to push back
+  static constexpr int KNOCKBACK_DISTANCE = 100; // total pixels to push back
 
   int x, y;
   void Create(int hp, int x, int y);
@@ -63,7 +63,7 @@ public:
   void move(int keyCode);
   void Draw(Camera cam);
   void Jump();
-  void Hit(int damage);
+  void Hit(int damage, int flag);
   int flag;
 
 private:
