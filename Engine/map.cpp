@@ -91,12 +91,12 @@ void Map::DrawMap(Camera cam) {
                     break;
                 }
                 case TILE_SKY:
-                    sw = al_get_bitmap_width(sky_bitmap);
-                    sh = al_get_bitmap_height(sky_bitmap);
-
-                    al_draw_scaled_bitmap(sky_bitmap,
-                        0, 0, sw, sh,
-                        dx, dy, TILE_SIZE, TILE_SIZE, 0);
+                    // sw = al_get_bitmap_width(sky_bitmap);
+                    // sh = al_get_bitmap_height(sky_bitmap);
+                    //
+                    // al_draw_scaled_bitmap(sky_bitmap,
+                    //     0, 0, sw, sh,
+                    //     dx, dy, TILE_SIZE, TILE_SIZE, 0);
                     break;
                 default:
                     break;

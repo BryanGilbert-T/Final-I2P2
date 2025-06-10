@@ -35,6 +35,7 @@ Player PlayScene::player;
 int PlayScene::MapWidth = 64;
 int PlayScene::MapHeight = 64;
 Camera PlayScene::cam;
+Engine::ParallaxBackground PlayScene::MountainSceneBg;
 const std::vector<int> PlayScene::code = {
     ALLEGRO_KEY_UP, ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_DOWN,
     ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT,
@@ -55,6 +56,15 @@ void PlayScene::Initialize() {
     SpeedMult = 1;
     cam.Update(0, 0);
 
+    std::vector<std::string> layers = {
+        "Resource/images/play-scene/mountains/clouds-01.png",
+        "Resource/images/play-scene/mountains/clouds-02.png",
+        "Resource/images/play-scene/mountains/mountains.png",
+        "Resource/images/play-scene/mountains/tree.png"
+    };
+    std::vector<float> factors = {0.2f, 0.5f, 0.8f, 1.0f};
+    MountainSceneBg.Initialize(layers, factors);
+
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());
     AddNewObject(GroundEffectGroup = new Group());
@@ -73,6 +83,7 @@ void PlayScene::Initialize() {
     bgmId = AudioHelper::PlayBGM("play.ogg");
 }
 void PlayScene::Terminate() {
+    MountainSceneBg.Terminate();
     AudioHelper::StopBGM(bgmId);
     AudioHelper::StopSample(deathBGMInstance);
     deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
@@ -103,6 +114,11 @@ void PlayScene::Update(float deltaTime) {
 }
 void PlayScene::Draw() const {
     IScene::Draw();
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+
+    // draw parallax behind everything
+    MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
