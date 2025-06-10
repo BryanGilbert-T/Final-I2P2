@@ -25,6 +25,8 @@ private:
     ALLEGRO_BITMAP* signupText;
     ALLEGRO_BITMAP* signupTextHov;
 
+    ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* loadingBg;
     ALLEGRO_BITMAP* BG;
 
     Engine::Label* NotFoundLabel;
@@ -46,6 +48,9 @@ public:
     void OnKeyUp(int keyCode) override;
     void RaiseNotFound();
     void RaiseWrongPassword();
+
+    void DrawLoading(int step);
+
 };
 
 #endif   // STAGESELECTSCENE_HPP

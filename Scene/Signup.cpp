@@ -23,6 +23,8 @@ const int MAX_PASS = 36;
 const float APPEAR_DURATION = 3.0;
 
 void SignupScene::Initialize() {
+    background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
+    loadingBg = al_load_bitmap("Resource/images/friendlist-scene/loading-bg.png");
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
@@ -34,7 +36,7 @@ void SignupScene::Initialize() {
     isSigningUp = true;
 
     font = al_load_font("Resource/fonts/imfell.ttf", 40, 0);
-    AddNewObject(UserExistLabel = new Engine::Label("User Already Exists", "imfell.ttf", 120, halfW, -140, 255, 255, 255, 255, 0.5, 0.5));
+    AddNewObject(UserExistLabel = new Engine::Label("User already exists", "imfell.ttf", 45,  108, 500, 130, 0, 0, 255, 0, 0));
 
     UserExistLabel->Visible = false;
 
@@ -82,10 +84,17 @@ void SignupScene::Signup(int stage) {
         this->RaiseExist();
         return;
     }
-
+    const int totalSteps = 10;
+    DrawLoading(1);
     createUser(name, pass);
+    DrawLoading(2);
     set_online(name, true);
+    DrawLoading(3);
     authUser(name, pass);
+    for (int step = 4; step <= totalSteps; ++step) {
+        al_rest(0.08);
+        DrawLoading(step);
+    }
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 
@@ -100,8 +109,8 @@ void SignupScene::Update(float deltaTime) {
     Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
     elapsed += deltaTime;
 
-    const float y_start = -140;
-    const float y_end = 90;
+    const float y_start = 500;
+    const float y_end = 518;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -222,6 +231,76 @@ void SignupScene::Draw() const {
     );
 }
 
+void SignupScene::DrawLoading(int step) {
+    // 1) Reset transform so we're in true screen‐space
+    ALLEGRO_TRANSFORM old;
+    al_copy_transform(&old, al_get_current_transform());
+    ALLEGRO_TRANSFORM identity;
+    al_identity_transform(&identity);
+    al_use_transform(&identity);
+
+    // 2) Grab real display size
+    int W = Engine::GameEngine::GetInstance().getVirtW();
+    int H = Engine::GameEngine::GetInstance().getVirtH();
+
+    // 3) Clear to white
+    al_draw_scaled_bitmap(background, 0, 0,
+                           al_get_bitmap_width(background), al_get_bitmap_height(background),
+                           0, 0,
+                           W, H, 0);
+
+    // 4) Outline rectangle parameters
+    const int totalSteps = 10;
+    int barW =  int(W * 0.35f);
+    int barH =  int(H * 0.65f);
+    int x0   = (W - barW) / 2;
+    int y0   = (H - barH) / 2;
+    int x1   = x0 + barW;
+    int y1   = y0 + barH;
+
+    // 6) Compute segment widths & spacing
+    //    inset from the border so we don’t overwrite the border
+    const int inset = 4;
+    float innerW    = float(barW - 2*inset);
+    float innerH    = float(barH - 2*inset);
+
+    // spacing between segments
+    float spacing   = 4.0f;
+    // solve: stepW * totalSteps + spacing*(totalSteps-1) = innerW
+    float stepW     = (innerW - spacing*(totalSteps-1)) / totalSteps;
+
+    step = std::clamp(step, 0, totalSteps);
+    float progress = float(step) / float(totalSteps);   // 0.0 → 1.0
+    float fillH    = innerH * progress;                 // how much of the bar to fill
+
+    float xL = x0 + inset;
+    float xR = x1 - inset;
+    float yB = y1 - inset;
+    float yT = yB - fillH;
+
+    // 3) DRAW THE FILL **FIRST** (behind the PNG):
+    al_draw_filled_rectangle(
+      xL, yT,
+      xR, yB,
+      al_map_rgb(0, 0, 0)
+    );
+
+    // 4) NOW DRAW YOUR PNG (with the hollow monkey) on top:
+    al_draw_scaled_bitmap(
+      loadingBg,
+      0,0,
+      al_get_bitmap_width(loadingBg),
+      al_get_bitmap_height(loadingBg),
+      0, 0,
+      W, H,
+      0
+    );
+
+    // 5) flip & restore transforms…
+    al_flip_display();
+    al_use_transform(&old);
+}
+
 void SignupScene::RaiseExist() {
     userExistTimeStamp = elapsed;
     UserExistLabel->Visible = true;
@@ -258,9 +337,17 @@ void SignupScene::OnKeyDown(int keyCode) {
             this->RaiseExist();
             return;
         }
+        const int totalSteps = 10;
+        DrawLoading(1);
         createUser(name, pass);
+        DrawLoading(2);
         set_online(name, true);
+        DrawLoading(3);
         authUser(name, pass);
+        for (int step = 4; step <= totalSteps; ++step) {
+            al_rest(0.08);
+            DrawLoading(step);
+        }
         Engine::GameEngine::GetInstance().ChangeScene("boarding");
     }
 }
