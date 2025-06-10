@@ -49,6 +49,12 @@ protected:
 
 
 public:
+  bool isHit;               // true while flashing red
+  float hitTimer;           // how long to keep flashing
+  int  knockbackDir;        // +1 or -1
+  int  knockbackRemaining;  // pixels left to be knocked back
+  static constexpr int KNOCKBACK_DISTANCE = 20; // total pixels to push back
+
   int x, y;
   void Create(int hp, int x, int y);
   Player();

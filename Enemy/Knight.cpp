@@ -155,22 +155,44 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
     auto scene = dynamic_cast<PlayScene*>(
         Engine::GameEngine::GetInstance().GetScene("play")
     );
-    if (dist > 1e-3f) {
-        float nx = dx / dist;
-        float ny = dy / dist;
+    if (flag == 1) {
+        if (dist > 100) {
+            float nx = dx / dist;
+            float ny = dy / dist;
+            std::cout << nx << std::endl;
 
-        if (nx < 0) flag = 1;
-        if (nx > 0) flag = 0;
+            if (dx < 0) flag = 1;
+            if (dx > 0) flag = 0;
 
-        int dx = x + (nx * speed * 2);
+            int dx = x + (nx * speed * 2);
 
-        if (dx >= 0 && dy >= 0 &&
-        dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
-        !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
-            x = dx;
+            if (dx >= 0 && dy >= 0 &&
+            dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+            !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
+            !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+                x = dx;
+            }
+        }
+    } else if (flag == 0) {
+        if (dist > 210) {
+            float nx = dx / dist;
+            float ny = dy / dist;
+            std::cout << nx << std::endl;
+
+            if (dx < 0) flag = 1;
+            if (dx > 0) flag = 0;
+
+            int dx = x + (nx * speed * 2);
+
+            if (dx >= 0 && dy >= 0 &&
+            dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+            !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
+            !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+                x = dx;
+            }
         }
     }
+
 
     // You can trigger an attack when very close:
     if (flag == 1) {
@@ -258,7 +280,8 @@ void KnightEnemy::performAttack(float dt, float dist) {
     // after the attack animation finishes, switch back to chase-walk
     Animation &anim = animations[ATTACK];
     if (anim.current == 1 || anim.current == 2) {
-        if (dist < attackRadius && hitPlayer == false) {
+        if (dist < attackRadius && hitPlayer == false ||
+            (flag == 0 && dist < attackRadius + 220 && hitPlayer == false)) {
             auto scene = dynamic_cast<PlayScene*>(
                 Engine::GameEngine::GetInstance().GetScene("play")
             );
