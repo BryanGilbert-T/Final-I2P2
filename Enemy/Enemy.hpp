@@ -43,6 +43,7 @@ public:
     virtual void move(int keyCode);
     virtual void Draw(Camera cam);
     void Jump();
+    void Hit(int dmg);
     int flag;
     void setState(State s);
 };

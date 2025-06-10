@@ -2,6 +2,7 @@
 #include <allegro5/color.h>
 #include <cmath>
 #include <utility>
+#include <algorithm>
 
 #include "Enemy/Enemy.hpp"
 #include "Engine/GameEngine.hpp"
@@ -19,6 +20,8 @@
 const int PLAYER_SIZE = 100;
 const int SPEED = PLAYER_SIZE / 16;
 
+const int ATTACK_RADIUS = 100;
+
 const int GRAVITY = 8;
 const float JUMP_ACCELERATION = 1;
 const int INITIAL_JUMP_SPEED = 16;
@@ -28,6 +31,8 @@ const double IDLE_FRAME_RATE = 0.3;
 
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
+
+const float ATTACK_COOLDOWN_MAX = 0.5f;
 
 
 void Player::Create(int hp, int x, int y){
@@ -84,6 +89,8 @@ void Player::setState(State s) {
 void Player::Update(float deltaTime) {
    PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
     if (!scene) return;
+
+    attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
 
     if (knockbackRemaining > 0) {
         int step = std::min(knockbackRemaining, speed);
@@ -193,6 +200,8 @@ Player::Player(){
     hitTimer = 0.0f;
     knockbackDir = 0;
     knockbackRemaining = 0;
+    attackRadius = ATTACK_RADIUS;
+    attackCooldown = 0;
 }
 
 Player::~Player() {
@@ -212,11 +221,13 @@ void Player::move(int keyCode) {
     int dy = y;
     if (keyCode == ALLEGRO_KEY_A) {
         dx -= this->speed;
+        dir = LEFT;
         flag = 1;
     } else if (keyCode == ALLEGRO_KEY_S) {
         dy += this->speed;
     } else if (keyCode == ALLEGRO_KEY_D) {
         dx += this->speed;
+        dir = RIGHT;
         flag = 0;
     }
     if (dx >= 0 && dy >= 0 &&
@@ -262,4 +273,32 @@ void Player::Draw(Camera cam){
         );
     }
 
+}
+
+bool Player::enemyInRange(int x, int y) {
+    if (dir == RIGHT) {
+        if (x > this->x &&
+            x < this->x + PLAYER_SIZE + attackRadius) {
+            return true;
+        }
+    } else if (dir == LEFT) {
+        if (x < this->x &&
+            x > this->x - attackRadius) {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Player::Attack(std::list<Enemy*> enemyGroup) {
+    if (attackCooldown > 0.0f) {
+        return;
+    }
+    attackCooldown = ATTACK_COOLDOWN_MAX;
+    for (Enemy* e : enemyGroup) {
+        if (enemyInRange(e->x + e->ENEMY_WIDTH / 2, e->y + e->ENEMY_HEIGHT /2)) {
+            e->Hit(10);
+            return;
+        }
+    }
 }

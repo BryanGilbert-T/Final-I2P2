@@ -36,6 +36,13 @@ void Enemy::setState(State s) {
     }
 }
 
+void Enemy::Hit(int dmg) {
+    hp -= dmg;
+    if (hp <= 0) {
+        hp = 0;
+    }
+    std::cout << "Enemy hp: " << hp << std::endl;
+}
 
 void Enemy::Update(float deltaTime) {
     PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
