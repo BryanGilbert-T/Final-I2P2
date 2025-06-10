@@ -200,6 +200,7 @@ void PlayScene::ReadMap() {
             case '1': mapData.push_back(1); break;
             case 'S': mapData.push_back(2); break;
             case 'E': mapData.push_back(3); break;
+            case 'P': mapData.push_back(4); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -227,6 +228,8 @@ void PlayScene::ReadMap() {
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
+            } else if (num == 4) {
+                mapState[i][j] = TILE_SKY;
             }
         }
     }
