@@ -20,10 +20,12 @@ namespace Engine {
         void Initialize(const std::vector<std::string>& paths, const std::vector<float>& factors);
         void Terminate();
         void Draw(const Camera& cam);
+        void SetLayerOffset(int layer, float dx, float dy);
 
     private:
         std::vector<ALLEGRO_BITMAP*> layers;
         std::vector<float> parallaxFactors;
+        std::vector<float> offsetX, offsetY;
     };
 }
 

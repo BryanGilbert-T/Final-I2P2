@@ -57,13 +57,13 @@ void PlayScene::Initialize() {
     cam.Update(0, 0);
 
     std::vector<std::string> layers = {
-        "Resource/images/play-scene/mountains/clouds-01.png",
-        "Resource/images/play-scene/mountains/clouds-02.png",
         "Resource/images/play-scene/mountains/mountains.png",
         "Resource/images/play-scene/mountains/tree.png"
     };
-    std::vector<float> factors = {0.2f, 0.5f, 0.8f, 1.0f};
+    std::vector<float> factors = {0.2f, 0.5f};
     MountainSceneBg.Initialize(layers, factors);
+    MountainSceneBg.SetLayerOffset(0, 80, 20);   // mountains shifted right/down
+    MountainSceneBg.SetLayerOffset(1, -50, 20 );   // trees shifted left/up
 
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());

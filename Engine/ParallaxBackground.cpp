@@ -10,6 +10,7 @@ namespace Engine {
 
     void ParallaxBackground::Initialize( const std::vector<std::string>& paths, const std::vector<float>& factors)
     {
+
         layers.clear();
         parallaxFactors = factors;
 
@@ -20,6 +21,10 @@ namespace Engine {
             }
             layers.push_back(bmp);
         }
+
+        offsetX.assign(layers.size(), 0);
+        offsetY.assign(layers.size(), 0);
+
     }
 
     void ParallaxBackground::Terminate() {
@@ -29,30 +34,34 @@ namespace Engine {
         layers.clear();
     }
 
+    void ParallaxBackground::SetLayerOffset(int layer, float dx, float dy) {
+        offsetX[layer] = dx;
+        offsetY[layer] = dy;
+    }
+
     void ParallaxBackground::Draw(const Camera& cam) {
         int screenW = static_cast<int>(cam.width);
-        int screenH = static_cast<int>(cam.height);
+        //int screenH = static_cast<int>(cam.height);
 
         for (size_t i = 0; i < layers.size(); i++) {
             ALLEGRO_BITMAP* bmp = layers[i];
             if (!bmp) continue;
 
             int bw = al_get_bitmap_width(bmp);
-            int bh = al_get_bitmap_height(bmp);
+            //int bh = al_get_bitmap_height(bmp);
             float factor = parallaxFactors[i];
 
-            // compute “wrapped” offset
-            float ox = std::fmod(cam.x * factor, bw);
-            float oy = std::fmod(cam.y * factor, bh);
+            // inside ParallaxBackground::Draw(...)
+            float rawX = cam.x * parallaxFactors[i] + offsetX[i];
+            float wrapX = std::fmod(rawX, bw);
+            if (wrapX < 0) wrapX += bw;
+            float ox = -wrapX;
 
-            if (ox > 0) ox -= bw;
-            if (oy > 0) oy -= bh;
+            // if you only want one vertical row:
+            float oy = -cam.y + offsetY[i];
 
-            // tile in X and Y to cover the screen
-            for (float y = oy; y < screenH; y += bh) {
-                for (float x = ox; x < screenW; x += bw) {
-                    al_draw_bitmap(bmp, x, y, 0);
-                }
+            for (float x = ox; x < screenW + bw; x += bw) {
+                al_draw_bitmap(bmp, x, oy, 0);
             }
         }
     }
