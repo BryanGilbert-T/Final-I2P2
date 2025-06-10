@@ -32,6 +32,8 @@ public:
     float     chaseRadius;       // start chasing when player closer than this
     float     attackRadius;      // optional: trigger attack when even closer
 
+    void performAttack(float dt);
+
     // helper to fetch player position:
     std::pair<float,float> getPlayerPos() const;
     void performPatrol(float dt);

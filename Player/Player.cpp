@@ -59,6 +59,14 @@ void Player::Create(int hp, int x, int y){
 
 }
 
+void Player::Hit(int damage) {
+    this->hp -= damage;
+    if (this->hp <= 0) {
+        this->hp = 0;
+        this->state = DEAD;
+    }
+}
+
 void Player::setState(State s) {
     if (state != s) {
         state = s;

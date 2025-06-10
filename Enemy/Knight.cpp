@@ -26,15 +26,22 @@ const double IDLE_FRAME_RATE = 0.1;
 const int WALK_FRAME_COUNT = 10;
 const double WALK_FRAME_RATE = 0.1;
 
+const int ATTACK_FRAME_COUNT = 4;
+const double ATTACK_FRAME_RATE = 0.2;
+
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
 const int WIDTH = 120*2.5;
 const int HEIGHT = 80*2.5;
 
+const float attackCooldownMax = 1.0f;
+float attackCooldown     = 0.0f;
+
 const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
 const std::string walkfile = "Resource/images/character/knight/_Run.png";
+const std::string attackfile = "Resource/images/character/knight/_Attack.png";
 
 KnightEnemy::KnightEnemy(int x, int y):
     Enemy(HP, x, y, SPEED, DAMAGE, WIDTH, HEIGHT),
@@ -43,7 +50,7 @@ KnightEnemy::KnightEnemy(int x, int y):
     patrolDir(1),
     patrolRange(200.0f),    // e.g. ±200px from spawn
     chaseRadius(300.0f),    // e.g. start chasing if closer than 300px
-    attackRadius(50.0f)   // optional melee range
+    attackRadius(105.0f)   // optional melee range
 {
     flag = 0;
     idle_sheet = al_load_bitmap(idlefile.c_str());
@@ -75,6 +82,21 @@ KnightEnemy::KnightEnemy(int x, int y):
         walkAnim.frames.push_back(f);
     }
     animations[WALK] = std::move(walkAnim);
+
+    idle_sheet = al_load_bitmap(attackfile.c_str());
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet) / ATTACK_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation attackAnim(ATTACK_FRAME_RATE);
+    for (int i = 0; i < ATTACK_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        );
+        attackAnim.frames.push_back(f);
+    }
+    animations[ATTACK] = std::move(attackAnim);
 
     animations[JUMP] = animations[IDLE];
 }
@@ -130,7 +152,7 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
     if (dist > 1e-3f) {
         float nx = dx / dist;
         float ny = dy / dist;
-        std::cout << dist << " " << nx<< std::endl;
+
         if (nx <= 0) flag = 1;
         else flag = 0;
 
@@ -144,11 +166,13 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         }
     }
 
+    std::cout << dist << " " << attackRadius << " " << state << std::endl;
     // You can trigger an attack when very close:
     if (dist < attackRadius) {
         // e.g. launch projectile or deal melee damage
         // attackPlayer();
-        setState(JUMP); // placeholder for attack animation
+        setState(ATTACK); // placeholder for attack animation
+        performAttack(dt);
     } else {
         setState(WALK); // or chase‐walk animation
     }
@@ -187,3 +211,30 @@ void KnightEnemy::move(int keyCode) {
 KnightEnemy::~KnightEnemy() {
 }
 
+void KnightEnemy::performAttack(float dt) {
+    // tick down until we can hit again
+    attackCooldown = std::max(0.0f, attackCooldown - dt);
+
+    // once inside attackRadius & animation playing:
+    if (attackCooldown <= 0.0f) {
+        // deal damage exactly once per cooldown
+        auto scene = dynamic_cast<PlayScene*>(
+            Engine::GameEngine::GetInstance().GetScene("play")
+        );
+        if (scene) {
+            scene->player.Hit(damage);
+        }
+        attackCooldown = attackCooldownMax;
+
+        // restart attack animation from frame 0
+        animations[ATTACK].current = 0;
+        animations[ATTACK].timer   = 0;
+    }
+
+    // after the attack animation finishes, switch back to chase-walk
+    Animation &anim = animations[ATTACK];
+    if (anim.current >= anim.frames.size()) {
+        // reset to WALK once animation is done
+        setState(WALK);
+    }
+}

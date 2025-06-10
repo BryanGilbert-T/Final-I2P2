@@ -16,6 +16,7 @@ typedef enum {
   RUN,
   JUMP,
   ATTACK,
+  DEAD
 } State;
 
 typedef enum {
@@ -56,6 +57,7 @@ public:
   void move(int keyCode);
   void Draw(Camera cam);
   void Jump();
+  void Hit(int damage);
   int flag;
 
 private:
