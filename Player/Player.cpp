@@ -60,11 +60,15 @@ void Player::Create(int hp, int x, int y){
 }
 
 void Player::Hit(int damage) {
-    this->hp -= damage;
-    if (this->hp <= 0) {
-        this->hp = 0;
-    }
-    std::cout << "Player hp left: " << this->hp << std::endl;
+    hp -= damage;
+    if (hp <= 0) hp = 0;
+    // start the red flash + knockback
+    isHit = true;
+    hitTimer = 0.2f;  // flash for 0.2 seconds
+    knockbackRemaining = KNOCKBACK_DISTANCE;
+    // push away from the facing direction
+    knockbackDir = (dir == RIGHT) ? -1 : +1;
+    std::cout << "Player hp left: " << hp << std::endl;
 }
 
 void Player::setState(State s) {
@@ -80,6 +84,13 @@ void Player::setState(State s) {
 void Player::Update(float deltaTime) {
    PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
     if (!scene) return;
+
+    if (knockbackRemaining > 0) {
+        int step = std::min(knockbackRemaining, speed);
+        x += knockbackDir * step;
+        knockbackRemaining -= step;
+        // (optional) you can check collisions here if you don’t want them shoved into walls
+    }
 
     // 1) Apply gravity (vy will grow by GRAVITY each frame):
     vy += JUMP_ACCELERATION;
@@ -143,6 +154,13 @@ void Player::Update(float deltaTime) {
     }
 
     // 4) We do not change x here—that only happens when move(keyCode) is called.
+    if (isHit) {
+        hitTimer -= deltaTime;
+        if (hitTimer <= 0.0f) {
+            isHit = false;
+            hitTimer = 0.0f;
+        }
+    }
 
     // 5) Clamp inside world bounds (so you can’t fall off the map):
     int mapPixelW = scene->MapWidth * scene->BlockSize;
@@ -161,6 +179,10 @@ Player::Player(){
     dir = RIGHT;
     jump = 0;
     vy = 0;
+    isHit = false;
+    hitTimer = 0.0f;
+    knockbackDir = 0;
+    knockbackRemaining = 0;
 }
 
 Player::~Player() {
@@ -208,13 +230,26 @@ void Player::Draw(Camera cam){
     int dy = y - cam.y;
     auto &A = animations[state];
     ALLEGRO_BITMAP* bmp = A.frames[A.current];
-    al_draw_scaled_bitmap(
-        bmp,
-        0, 0,
-        al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
-        dx, dy,
-        PLAYER_SIZE, PLAYER_SIZE,
-        flag
-    );
+    if (isHit) {
+        // red tint with some alpha
+        ALLEGRO_COLOR redTint = al_map_rgba(255, 0, 0, 200);
+        al_draw_tinted_scaled_bitmap(
+          bmp, redTint,
+          0, 0,
+          al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+          dx, dy,
+          PLAYER_SIZE, PLAYER_SIZE,
+          flag
+        );
+    } else {
+        al_draw_scaled_bitmap(
+          bmp,
+          0, 0,
+          al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+          dx, dy,
+          PLAYER_SIZE, PLAYER_SIZE,
+          flag
+        );
+    }
 
 }
