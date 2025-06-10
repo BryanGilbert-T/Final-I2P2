@@ -49,7 +49,7 @@ KnightEnemy::KnightEnemy(int x, int y):
     patrolDir(1),
     patrolRange(200.0f),    // e.g. ±200px from spawn
     chaseRadius(300.0f),    // e.g. start chasing if closer than 300px
-    attackRadius(115.0f)   // optional melee range
+    attackRadius(135.0f)   // optional melee range
 {
     float attackCooldown = 0.0f;
     hitPlayer = false;
@@ -124,6 +124,13 @@ void KnightEnemy::performPatrol(float dt) {
     int dx = x + (patrolDir * speed);
     int dy = y;
 
+    if (patrolDir == -1) {
+        flag = 1;
+    }
+    if (patrolDir == 1) {
+        flag = 0;
+    }
+
     // Flip direction at range limits
     if (dx > patrolOriginX + patrolRange || dx < patrolOriginX - patrolRange) {
         patrolDir = -patrolDir;
@@ -133,7 +140,7 @@ void KnightEnemy::performPatrol(float dt) {
         dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
         !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
         !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
-        x = dx;
+            x = dx;
         }
     else {
         patrolDir = -patrolDir;
@@ -152,6 +159,9 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         float nx = dx / dist;
         float ny = dy / dist;
 
+        if (nx < 0) flag = 1;
+        if (nx > 0) flag = 0;
+
         int dx = x + (nx * speed * 2);
 
         if (dx >= 0 && dy >= 0 &&
@@ -163,19 +173,34 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
     }
 
     // You can trigger an attack when very close:
-    if (dist < attackRadius && attackCooldown <= 0.0f) {
-        // e.g. launch projectile or deal melee damage
-        // attackPlayer();
-        setState(ATTACK); // placeholder for attack animation
-        performAttack(dt, dist);
+    if (flag == 1) {
+        if (dist < attackRadius && attackCooldown <= 0.0f) {
+            // e.g. launch projectile or deal melee damage
+            // attackPlayer();
+            setState(ATTACK); // placeholder for attack animation
+            performAttack(dt, dist);
 
-        attackCooldown = attackCooldownMax;
-        animations[ATTACK].current = 0;
-        animations[ATTACK].timer   = 0;
+            attackCooldown = attackCooldownMax;
+            animations[ATTACK].current = 0;
+            animations[ATTACK].timer   = 0;
+        } else {
+            setState(WALK); // or chase‐walk animation
+        }
+    } else if (flag == 0) {
+        if (dist < attackRadius + ENEMY_WIDTH && attackCooldown <= 0.0f) {
+            // e.g. launch projectile or deal melee damage
+            // attackPlayer();
+            setState(ATTACK); // placeholder for attack animation
+            performAttack(dt, dist);
 
-    } else {
-        setState(WALK); // or chase‐walk animation
+            attackCooldown = attackCooldownMax;
+            animations[ATTACK].current = 0;
+            animations[ATTACK].timer   = 0;
+        } else {
+            setState(WALK); // or chase‐walk animation
+        }
     }
+
 }
 
 void KnightEnemy::Update(float deltaTime) {
@@ -184,14 +209,19 @@ void KnightEnemy::Update(float deltaTime) {
     float dy   = py - y;
     float dist = std::sqrt(dx*dx + dy*dy);
 
-    flag = (dx <= 0) ? 1 : 0;
-    attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
+    std::cout << dist << " " << dx << std::endl;
 
+    if (dx <= 0) {
+        flag = 1;
+    } else {
+        flag = 0;
+    }
+    attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
 
     // Choose state
     if (state == ATTACK) {
         performAttack(deltaTime, dist);
-    } else if (dist < chaseRadius) {
+    } else if (dist < chaseRadius || (dx > 0 && dist < chaseRadius + ENEMY_WIDTH)) {
         aiState = AIState::CHASE;
     } else {
         if (aiState == AIState::CHASE) {
