@@ -87,9 +87,17 @@ void Player::Update(float deltaTime) {
 
     if (knockbackRemaining > 0) {
         int step = std::min(knockbackRemaining, speed);
-        x += knockbackDir * step;
+        int dx = x + knockbackDir * step;
+        int dy = y;
         knockbackRemaining -= step;
         // (optional) you can check collisions here if you don’t want them shoved into walls
+        if (dx >= 0 && dy >= 0 &&
+        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+            x = dx;
+            y = dy;
+        }
     }
 
     // 1) Apply gravity (vy will grow by GRAVITY each frame):

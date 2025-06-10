@@ -48,7 +48,7 @@ KnightEnemy::KnightEnemy(int x, int y):
     patrolOriginX(static_cast<float>(x)),
     patrolDir(1),
     patrolRange(200.0f),    // e.g. ±200px from spawn
-    chaseRadius(300.0f),    // e.g. start chasing if closer than 300px
+    chaseRadius(400.0f),    // e.g. start chasing if closer than 300px
     attackRadius(135.0f)   // optional melee range
 {
     float attackCooldown = 0.0f;
@@ -281,7 +281,7 @@ void KnightEnemy::performAttack(float dt, float dist) {
     Animation &anim = animations[ATTACK];
     if (anim.current == 1 || anim.current == 2) {
         if (dist < attackRadius && hitPlayer == false ||
-            (flag == 0 && dist < attackRadius + 160 && hitPlayer == false)) {
+            (flag == 0 && dist < attackRadius + 170 && hitPlayer == false)) {
             auto scene = dynamic_cast<PlayScene*>(
                 Engine::GameEngine::GetInstance().GetScene("play")
             );
