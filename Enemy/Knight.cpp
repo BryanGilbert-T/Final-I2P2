@@ -27,7 +27,7 @@ const int WALK_FRAME_COUNT = 10;
 const double WALK_FRAME_RATE = 0.1;
 
 const int ATTACK_FRAME_COUNT = 4;
-const double ATTACK_FRAME_RATE = 0.2;
+const double ATTACK_FRAME_RATE = 0.275;
 
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
@@ -35,8 +35,7 @@ const double JUMP_FRAME_RATE = 0.3;
 const int WIDTH = 120*2.5;
 const int HEIGHT = 80*2.5;
 
-const float attackCooldownMax = 1.0f;
-float attackCooldown     = 0.0f;
+const float attackCooldownMax = 1.75f;
 
 const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
@@ -50,8 +49,10 @@ KnightEnemy::KnightEnemy(int x, int y):
     patrolDir(1),
     patrolRange(200.0f),    // e.g. ±200px from spawn
     chaseRadius(300.0f),    // e.g. start chasing if closer than 300px
-    attackRadius(105.0f)   // optional melee range
+    attackRadius(115.0f)   // optional melee range
 {
+    float attackCooldown = 0.0f;
+    hitPlayer = false;
     flag = 0;
     idle_sheet = al_load_bitmap(idlefile.c_str());
     if (!idle_sheet) {
@@ -126,7 +127,6 @@ void KnightEnemy::performPatrol(float dt) {
     // Flip direction at range limits
     if (dx > patrolOriginX + patrolRange || dx < patrolOriginX - patrolRange) {
         patrolDir = -patrolDir;
-        flag = (flag == 0) ? 1 : 0;
     }
 
     if (dx >= 0 && dy >= 0 &&
@@ -137,7 +137,6 @@ void KnightEnemy::performPatrol(float dt) {
         }
     else {
         patrolDir = -patrolDir;
-        flag = (flag == 0) ? 1 : 0;
     }
 
     // Choose idle or walk animation based on patrolDir
@@ -153,9 +152,6 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         float nx = dx / dist;
         float ny = dy / dist;
 
-        if (nx <= 0) flag = 1;
-        else flag = 0;
-
         int dx = x + (nx * speed * 2);
 
         if (dx >= 0 && dy >= 0 &&
@@ -166,13 +162,17 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         }
     }
 
-    std::cout << dist << " " << attackRadius << " " << state << std::endl;
     // You can trigger an attack when very close:
-    if (dist < attackRadius) {
+    if (dist < attackRadius && attackCooldown <= 0.0f) {
         // e.g. launch projectile or deal melee damage
         // attackPlayer();
         setState(ATTACK); // placeholder for attack animation
-        performAttack(dt);
+        performAttack(dt, dist);
+
+        attackCooldown = attackCooldownMax;
+        animations[ATTACK].current = 0;
+        animations[ATTACK].timer   = 0;
+
     } else {
         setState(WALK); // or chase‐walk animation
     }
@@ -184,8 +184,14 @@ void KnightEnemy::Update(float deltaTime) {
     float dy   = py - y;
     float dist = std::sqrt(dx*dx + dy*dy);
 
+    flag = (dx <= 0) ? 1 : 0;
+    attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
+
+
     // Choose state
-    if (dist < chaseRadius) {
+    if (state == ATTACK) {
+        performAttack(deltaTime, dist);
+    } else if (dist < chaseRadius) {
         aiState = AIState::CHASE;
     } else {
         if (aiState == AIState::CHASE) {
@@ -195,7 +201,9 @@ void KnightEnemy::Update(float deltaTime) {
     }
 
     // Act
-    if (aiState == AIState::PATROL) {
+    if (state == ATTACK) {
+
+    } else if (aiState == AIState::PATROL) {
         performPatrol(deltaTime);
     } else {
         performChase(deltaTime, dx, dy, dist);
@@ -211,30 +219,28 @@ void KnightEnemy::move(int keyCode) {
 KnightEnemy::~KnightEnemy() {
 }
 
-void KnightEnemy::performAttack(float dt) {
+void KnightEnemy::performAttack(float dt, float dist) {
     // tick down until we can hit again
-    attackCooldown = std::max(0.0f, attackCooldown - dt);
 
     // once inside attackRadius & animation playing:
-    if (attackCooldown <= 0.0f) {
-        // deal damage exactly once per cooldown
-        auto scene = dynamic_cast<PlayScene*>(
-            Engine::GameEngine::GetInstance().GetScene("play")
-        );
-        if (scene) {
-            scene->player.Hit(damage);
-        }
-        attackCooldown = attackCooldownMax;
-
-        // restart attack animation from frame 0
-        animations[ATTACK].current = 0;
-        animations[ATTACK].timer   = 0;
-    }
-
+    // deal damage exactly once per cooldown
+    // restart attack animation from frame 0
     // after the attack animation finishes, switch back to chase-walk
     Animation &anim = animations[ATTACK];
-    if (anim.current >= anim.frames.size()) {
+    if (anim.current == 1 || anim.current == 2) {
+        if (dist < attackRadius && hitPlayer == false) {
+            auto scene = dynamic_cast<PlayScene*>(
+                Engine::GameEngine::GetInstance().GetScene("play")
+            );
+            if (scene) {
+                scene->player.Hit(damage);
+            }
+            hitPlayer = true;
+        }
+    }
+    if (anim.current >= anim.frames.size() - 1) {
         // reset to WALK once animation is done
         setState(WALK);
+        hitPlayer = false;
     }
 }
