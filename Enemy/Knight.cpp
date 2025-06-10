@@ -23,6 +23,9 @@ const int DAMAGE = 12;
 const int IDLE_FRAME_COUNT = 10;
 const double IDLE_FRAME_RATE = 0.1;
 
+const int WALK_FRAME_COUNT = 10;
+const double WALK_FRAME_RATE = 0.1;
+
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
@@ -31,6 +34,7 @@ const int HEIGHT = 80*2.5;
 
 const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
+const std::string walkfile = "Resource/images/character/knight/_Run.png";
 
 KnightEnemy::KnightEnemy(int x, int y):
     Enemy(HP, x, y, SPEED, DAMAGE, WIDTH, HEIGHT),
@@ -56,6 +60,22 @@ KnightEnemy::KnightEnemy(int x, int y):
         idleAnim.frames.push_back(f);
     }
     animations[IDLE] = std::move(idleAnim);
+
+    idle_sheet = al_load_bitmap(walkfile.c_str());
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet) / WALK_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation walkAnim(WALK_FRAME_RATE);
+    for (int i = 0; i < WALK_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        );
+        walkAnim.frames.push_back(f);
+    }
+    animations[WALK] = std::move(walkAnim);
+
     animations[JUMP] = animations[IDLE];
 }
 
@@ -84,6 +104,7 @@ void KnightEnemy::performPatrol(float dt) {
     // Flip direction at range limits
     if (dx > patrolOriginX + patrolRange || dx < patrolOriginX - patrolRange) {
         patrolDir = -patrolDir;
+        flag = (flag == 0) ? 1 : 0;
     }
 
     if (dx >= 0 && dy >= 0 &&
@@ -94,10 +115,11 @@ void KnightEnemy::performPatrol(float dt) {
         }
     else {
         patrolDir = -patrolDir;
+        flag = (flag == 0) ? 1 : 0;
     }
 
     // Choose idle or walk animation based on patrolDir
-    setState(IDLE);  // or a WALK state if you have one
+    setState(WALK);  // or a WALK state if you have one
 }
 
 void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
@@ -108,6 +130,10 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
     if (dist > 1e-3f) {
         float nx = dx / dist;
         float ny = dy / dist;
+        std::cout << dist << " " << nx<< std::endl;
+        if (nx <= 0) flag = 1;
+        else flag = 0;
+
         int dx = x + (nx * speed * 2);
 
         if (dx >= 0 && dy >= 0 &&
@@ -124,7 +150,7 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
         // attackPlayer();
         setState(JUMP); // placeholder for attack animation
     } else {
-        setState(IDLE); // or chase‐walk animation
+        setState(WALK); // or chase‐walk animation
     }
 }
 
