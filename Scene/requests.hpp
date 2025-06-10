@@ -36,6 +36,8 @@ public:
     ALLEGRO_BITMAP* Logo;
 
     ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* loadingBg;
+
 
     ALLEGRO_BITMAP* checkIcon;
     ALLEGRO_BITMAP* crossIcon;

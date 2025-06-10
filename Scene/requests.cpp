@@ -22,6 +22,8 @@
 #include "UI/Component/Slider.hpp"
 
 void RequestsScene::Initialize() {
+    background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
+    loadingBg = al_load_bitmap("Resource/images/friendlist-scene/loading-bg.png");
     DrawLoading(1);
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -32,7 +34,6 @@ void RequestsScene::Initialize() {
 
     PlayFont = al_load_font("Resource/fonts/imfell.ttf", 45, ALLEGRO_ALIGN_CENTER);
     Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
-    background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
     decor = al_load_bitmap("Resource/images/friendlist-scene/decor-line.png");
 
     DrawLoading(3);
@@ -365,22 +366,19 @@ void RequestsScene::DrawLoading(int step) {
     int H = al_get_display_height(disp);
 
     // 3) Clear to white
-    al_clear_to_color(al_map_rgb(255,255,255));
+    al_draw_scaled_bitmap(background, 0, 0,
+                           al_get_bitmap_width(background), al_get_bitmap_height(background),
+                           0, 0,
+                           W, H, 0);
 
     // 4) Outline rectangle parameters
     const int totalSteps = 10;
-    int barW =  int(W * 0.3f);
-    int barH =  int(H * 0.05f);
+    int barW =  int(W * 0.35f);
+    int barH =  int(H * 0.65f);
     int x0   = (W - barW) / 2;
     int y0   = (H - barH) / 2;
     int x1   = x0 + barW;
     int y1   = y0 + barH;
-
-    // 5) Draw the border
-    al_draw_rectangle(float(x0), float(y0),
-                      float(x1), float(y1),
-                      al_map_rgb(20,20,20),
-                      4);
 
     // 6) Compute segment widths & spacing
     //    inset from the border so we don’t overwrite the border
@@ -393,21 +391,35 @@ void RequestsScene::DrawLoading(int step) {
     // solve: stepW * totalSteps + spacing*(totalSteps-1) = innerW
     float stepW     = (innerW - spacing*(totalSteps-1)) / totalSteps;
 
-    // 7) Draw filled segments up to `step`
-    for (int i = 0; i < step && i < totalSteps; ++i) {
-        float sx0 = x0 + inset + i * (stepW + spacing);
-        float sy0 = y0 + inset;
-        float sx1 = sx0 + stepW;
-        float sy1 = sy0 + innerH;
+    step = std::clamp(step, 0, totalSteps);
+    float progress = float(step) / float(totalSteps);   // 0.0 → 1.0
+    float fillH    = innerH * progress;                 // how much of the bar to fill
 
-        al_draw_filled_rectangle(sx0, sy0, sx1, sy1,
-                                 al_map_rgb(255,0,0));
-    }
+    float xL = x0 + inset;
+    float xR = x1 - inset;
+    float yB = y1 - inset;
+    float yT = yB - fillH;
 
-    // 8) Present & pump events
+    // 3) DRAW THE FILL **FIRST** (behind the PNG):
+    al_draw_filled_rectangle(
+      xL, yT,
+      xR, yB,
+      al_map_rgb(0, 0, 0)
+    );
+
+    // 4) NOW DRAW YOUR PNG (with the hollow monkey) on top:
+    al_draw_scaled_bitmap(
+      loadingBg,
+      0,0,
+      al_get_bitmap_width(loadingBg),
+      al_get_bitmap_height(loadingBg),
+      0, 0,
+      W, H,
+      0
+    );
+
+    // 5) flip & restore transforms…
     al_flip_display();
-
-    // 9) Restore previous transform
     al_use_transform(&old);
 }
 void RequestsScene::onCheckClicked(int idx) {

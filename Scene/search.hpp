@@ -37,6 +37,8 @@ public:
     ALLEGRO_BITMAP* Logo;
 
     ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* loadingBg;
+
 
     std::string curUser;
     std::vector<std::string> friends;

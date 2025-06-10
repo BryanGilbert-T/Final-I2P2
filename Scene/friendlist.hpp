@@ -51,6 +51,8 @@ public:
     ALLEGRO_BITMAP* decor;
     ALLEGRO_BITMAP* profile;
 
+    ALLEGRO_BITMAP* loadingBg;
+
     ALLEGRO_BITMAP* friendsIcon;
     ALLEGRO_BITMAP* requestsIcon;
     ALLEGRO_BITMAP* searchIcon;
