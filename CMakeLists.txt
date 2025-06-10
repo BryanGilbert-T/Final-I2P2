@@ -73,6 +73,8 @@ add_executable(${PROJECT_NAME}
         UI/Component/Slider.cpp
 
         main.cpp
+        Engine/ParallaxBackground.hpp
+        Engine/ParallaxBackground.cpp
 )
 
 # Vendored libcurl

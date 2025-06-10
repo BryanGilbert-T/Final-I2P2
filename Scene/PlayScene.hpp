@@ -10,6 +10,7 @@
 #include "Engine/IScene.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/map.hpp"
+#include "Engine/ParallaxBackground.hpp"
 #include "Engine/utility.hpp"
 #include "Player/Player.hpp"
 
@@ -34,6 +35,7 @@ protected:
     int SpeedMult;
 
 public:
+    static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
     static Player player;
     std::set<int> keyHeld;
     static Camera cam;
