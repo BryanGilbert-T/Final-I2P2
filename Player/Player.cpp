@@ -63,8 +63,8 @@ void Player::Hit(int damage) {
     this->hp -= damage;
     if (this->hp <= 0) {
         this->hp = 0;
-        this->state = DEAD;
     }
+    std::cout << "Player hp left: " << this->hp << std::endl;
 }
 
 void Player::setState(State s) {
