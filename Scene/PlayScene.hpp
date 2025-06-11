@@ -94,6 +94,8 @@ public:
     std::vector<Engine::Point> teleportLeft;
     std::vector<Engine::Point> teleportRight;
 
+    bool changeScene = false;
+
     void findTeleport();
 };
 #endif   // PLAYSCENE_HPP
