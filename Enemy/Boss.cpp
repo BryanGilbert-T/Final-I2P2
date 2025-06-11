@@ -267,7 +267,7 @@ void BossEnemy::move(int keyCode) {
     // find the nearest path to player
 }
 
-BossEnemy::~KnightEnemy() {
+BossEnemy::~BossEnemy() {
 }
 
 void BossEnemy::performAttack(float dt, float dist) {
