@@ -40,6 +40,8 @@ void Enemy::Hit(int dmg, int dir) {
     hp -= dmg;
     if (hp <= 0) {
         hp = 0;
+        auto scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetActiveScene());
+        scene->enemyGroup.remove(this);
     }
     isHit        = true;
     hitTimer     = 0.5f;                     // flash duration
