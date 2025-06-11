@@ -1,5 +1,5 @@
-#ifndef KNIGHTENEMY_HPP
-#define KNIGHTENEMY_HPP
+#ifndef BOSSENEMY_HPP
+#define BOSSENEMY_HPP
 #include <allegro5/base.h>
 #include <list>
 #include <string>
@@ -10,14 +10,13 @@
 #include "Engine/Sprite.hpp"
 
 
-
 class Enemy;
 class PlayScene;
 
-class KnightEnemy: public Enemy{
+class BossEnemy: public Enemy{
 public:
-    KnightEnemy(int x, int y);
-    ~KnightEnemy();
+    BossEnemy(int x, int y);
+    ~BossEnemy();
     void Update(float deltaTime) override;
     void move(int keyCode) override;
     void Draw(Camera cam) override;

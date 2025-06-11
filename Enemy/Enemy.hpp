@@ -19,6 +19,11 @@ typedef enum {
     E_ATTACK,
 } EnemyState;
 
+enum class AIState {
+    PATROL,
+    CHASE
+};
+
 
 class Enemy{
 protected:
