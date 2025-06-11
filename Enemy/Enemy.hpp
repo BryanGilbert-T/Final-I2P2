@@ -47,6 +47,8 @@ public:
 
     void Hit(int dmg, int dir);
 
+    bool timetoDie = false;
+
     int x, y;
     int ENEMY_WIDTH;
     int ENEMY_HEIGHT;

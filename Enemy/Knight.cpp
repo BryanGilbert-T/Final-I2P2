@@ -32,6 +32,9 @@ const double ATTACK_FRAME_RATE = 0.275;
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
+const int DEAD_FRAME_COUNT = 10;
+const double DEAD_FRAME_RATE = 0.1;
+
 const int WIDTH = 120*2.5;
 const int HEIGHT = 80*2.5;
 
@@ -41,6 +44,7 @@ const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
 const std::string walkfile = "Resource/images/character/knight/_Run.png";
 const std::string attackfile = "Resource/images/character/knight/_Attack.png";
+const std::string deadfile = "Resource/images/character/knight/_DeathNoMovement.png";
 
 KnightEnemy::KnightEnemy(int x, int y):
     Enemy(HP, x, y, SPEED, DAMAGE, WIDTH, HEIGHT),
@@ -98,6 +102,21 @@ KnightEnemy::KnightEnemy(int x, int y):
         attackAnim.frames.push_back(f);
     }
     animations[ATTACK] = std::move(attackAnim);
+
+    idle_sheet = al_load_bitmap(deadfile.c_str());
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet) / DEAD_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation deadAnim(DEAD_FRAME_RATE);
+    for (int i = 0; i < DEAD_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        );
+        deadAnim.frames.push_back(f);
+    }
+    animations[DEAD] = std::move(deadAnim);
 
     animations[JUMP] = animations[IDLE];
 }
@@ -226,6 +245,10 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
 }
 
 void KnightEnemy::Update(float deltaTime) {
+    if (state == DEAD) {
+        Enemy::Update(deltaTime);
+        return;
+    }
     auto [px, py] = getPlayerPos();
     float dx   = px - x;
     float dy   = py - y;

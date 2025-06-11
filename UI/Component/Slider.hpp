@@ -10,6 +10,7 @@ private:
     Image Bar;
     Image End1;
     Image End2;
+    ImageButton Arrow;
     std::function<void(float value)> OnValueChangedCallback;
     float value = 0;
 
