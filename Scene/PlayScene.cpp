@@ -51,6 +51,7 @@ Engine::Point PlayScene::GetClientSize() {
 void PlayScene::Initialize() {
     background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
     loadingBg = al_load_bitmap("Resource/images/friendlist-scene/loading-bg.png");
+    DrawLoading(1);
     Engine::Point SpawnGridPoint = Engine::Point(-1, 0);
     Engine::Point EndGridPoint = Engine::Point(-1, 0);
     mapState.clear();
@@ -62,7 +63,7 @@ void PlayScene::Initialize() {
     money = 150;
     SpeedMult = 1;
     cam.Update(0, 0);
-
+    DrawLoading(2);
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -73,6 +74,7 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/pause-btn.png", "play-scene/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
+    DrawLoading(3);
 
     std::vector<std::string> layers = {
         "Resource/images/play-scene/mountains/mountains.png",
@@ -83,7 +85,6 @@ void PlayScene::Initialize() {
     MountainSceneBg.SetLayerOffset(0, 0, 30);   // mountains shifted right/down
     MountainSceneBg.SetLayerOffset(1, 0, 50 );   // trees shifted left/up
     finishBmp = al_load_bitmap("Resource/images/play-scene/mountains/finish.png");
-
     teleportLeft.clear();
     teleportRight.clear();
 
@@ -113,7 +114,6 @@ void PlayScene::Initialize() {
     AddNewControlObject(UIGroup = new Group());
     ReadMap();
     std::cout << player.x << " " << player.y << std::endl;
-    mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
     deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
     Engine::Resources::GetInstance().GetBitmap("lose/benjamin-happy.png");
@@ -124,21 +124,24 @@ void PlayScene::Initialize() {
     if (!PauseFont) {
         std::cerr << "Failed to load pause menu font\n";
     }
+    for (int i = 3; i <= 10; i++) {
+        DrawLoading(i);
+        al_rest(0.1);
+    }
 }
 void PlayScene::Pause(int stage) {
     pause = !pause;
 }
 void PlayScene::Terminate() {
-    DrawLoading(1);
     MountainSceneBg.Terminate();
     AudioHelper::StopBGM(bgmId);
     AudioHelper::StopSample(deathBGMInstance);
     deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
-    DrawLoading(2);
 
 
     if (changeScene == false) {
+        DrawLoading(1);
         std::ofstream file("Resource/account.txt"); // truncate mode by default
         if (!file) {
             std::cerr << "Failed to open file for writing.\n";
@@ -149,14 +152,17 @@ void PlayScene::Terminate() {
         << " " << 0 << " " << player.hp;
 
         file.close();
+        DrawLoading(2);
 
         updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
+
+        for (int i = 3; i <= 10; i++) {
+            DrawLoading(i);
+            al_rest(0.1);
+        }
     }
 
-    for (int i = 3; i <= 10; i++) {
-        DrawLoading(i);
-        al_rest(0.1);
-    }
+
 
     if (PauseFont) {
         al_destroy_font(PauseFont);
@@ -479,6 +485,7 @@ void PlayScene::ReadMap() {
             case 'E': mapData.push_back(3); break;
             case 'W': mapData.push_back(4); break;
             case 'L': mapData.push_back(5); break;
+            case 'B': mapData.push_back(6); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -511,6 +518,8 @@ void PlayScene::ReadMap() {
             } else if (num == 5) {
                 mapState[i][j] = TILE_SKY;
                 teleportLeft.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
+            } else if (num == 6) {
+                mapState[i][j] = TILE_SKY;
             }
         }
     }
