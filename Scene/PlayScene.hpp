@@ -34,8 +34,11 @@ protected:
     int lives;
     int money;
     int SpeedMult;
+    ALLEGRO_BITMAP* background;
+    ALLEGRO_BITMAP* loadingBg;
 
 public:
+    void DrawLoading(int step);
     ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
     static Player player;

@@ -49,6 +49,8 @@ Engine::Point PlayScene::GetClientSize() {
     return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
 void PlayScene::Initialize() {
+    background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
+    loadingBg = al_load_bitmap("Resource/images/friendlist-scene/loading-bg.png");
     Engine::Point SpawnGridPoint = Engine::Point(-1, 0);
     Engine::Point EndGridPoint = Engine::Point(-1, 0);
     mapState.clear();
@@ -60,6 +62,7 @@ void PlayScene::Initialize() {
     money = 150;
     SpeedMult = 1;
     cam.Update(0, 0);
+
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -126,11 +129,14 @@ void PlayScene::Pause(int stage) {
     pause = !pause;
 }
 void PlayScene::Terminate() {
+    DrawLoading(1);
     MountainSceneBg.Terminate();
     AudioHelper::StopBGM(bgmId);
     AudioHelper::StopSample(deathBGMInstance);
     deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
+    DrawLoading(2);
+
 
     if (changeScene == false) {
         std::ofstream file("Resource/account.txt"); // truncate mode by default
@@ -147,10 +153,83 @@ void PlayScene::Terminate() {
         updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
     }
 
+    for (int i = 3; i <= 10; i++) {
+        DrawLoading(i);
+        al_rest(0.1);
+    }
+
     if (PauseFont) {
         al_destroy_font(PauseFont);
         PauseFont = nullptr;
     }
+}
+void PlayScene::DrawLoading(int step) {
+    ALLEGRO_DISPLAY* d = al_get_current_display();
+    int W = al_get_display_width(d);
+    int H = al_get_display_height(d);
+
+    ALLEGRO_TRANSFORM old;
+    al_copy_transform(&old, al_get_current_transform());
+    ALLEGRO_TRANSFORM identity;
+    al_identity_transform(&identity);
+    al_use_transform(&identity);
+
+    // 3) Clear to white
+    al_draw_scaled_bitmap(background, 0, 0,
+                           al_get_bitmap_width(background), al_get_bitmap_height(background),
+                           0, 0,
+                           W, H, 0);
+
+    // 4) Outline rectangle parameters
+    const int totalSteps = 10;
+    int barW =  int(W * 0.35f);
+    int barH =  int(H * 0.65f);
+    int x0   = (W - barW) / 2;
+    int y0   = (H - barH) / 2;
+    int x1   = x0 + barW;
+    int y1   = y0 + barH;
+
+    // 6) Compute segment widths & spacing
+    //    inset from the border so we don’t overwrite the border
+    const int inset = 4;
+    float innerW    = float(barW - 2*inset);
+    float innerH    = float(barH - 2*inset);
+
+    // spacing between segments
+    float spacing   = 4.0f;
+    // solve: stepW * totalSteps + spacing*(totalSteps-1) = innerW
+    float stepW     = (innerW - spacing*(totalSteps-1)) / totalSteps;
+
+    step = std::clamp(step, 0, totalSteps);
+    float progress = float(step) / float(totalSteps);   // 0.0 → 1.0
+    float fillH    = innerH * progress;                 // how much of the bar to fill
+
+    float xL = x0 + inset;
+    float xR = x1 - inset;
+    float yB = y1 - inset;
+    float yT = yB - fillH;
+
+    // 3) DRAW THE FILL **FIRST** (behind the PNG):
+    al_draw_filled_rectangle(
+      xL, yT,
+      xR, yB,
+      al_map_rgb(0, 0, 0)
+    );
+
+    // 4) NOW DRAW YOUR PNG (with the hollow monkey) on top:
+    al_draw_scaled_bitmap(
+      loadingBg,
+      0,0,
+      al_get_bitmap_width(loadingBg),
+      al_get_bitmap_height(loadingBg),
+      0, 0,
+      W, H,
+      0
+    );
+
+    // 5) flip & restore transforms…
+    al_flip_display();
+    al_use_transform(&old);
 }
 void PlayScene::findTeleport() {
     for (Engine::Point p : teleportLeft) {
