@@ -63,7 +63,7 @@ namespace Engine {
             int BLOCK_SIZE = 64;
             int mapH = scene->MapHeight * BLOCK_SIZE;
 
-            float baselineY = mapH - (1.5 * screenH);     // where the bottom of the bitmap lines up with bottom of screen
+            float baselineY = mapH - (1.5 * 1080);     // where the bottom of the bitmap lines up with bottom of screen
             float camJump   = std::min(cam.y, float(screenH)); // only care when cam.y < 0 (you’ve jumped up)
             float vertFactor = parallaxFactors[i];
             float fy         = baselineY - (camJump * vertFactor);
