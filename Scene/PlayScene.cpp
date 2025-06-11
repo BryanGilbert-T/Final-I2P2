@@ -284,7 +284,7 @@ void PlayScene::findTeleport() {
             }
             if(MapId + 1 == 3) {
                 int nextx = 2 * BlockSize - (100 - BlockSize);
-                int nexty = 20 * BlockSize - (100 - BlockSize);
+                int nexty = 19 * BlockSize - (100 - BlockSize);
 
                 std::ofstream file("Resource/account.txt"); // truncate mode by default
                 if (!file) {
