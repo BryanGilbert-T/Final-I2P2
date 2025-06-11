@@ -41,6 +41,7 @@ namespace Engine {
     }
 
     void ParallaxBackground::Draw(const Camera& cam) {
+        al_clear_to_color(al_map_rgb(0, 0, 0));
         int screenW = static_cast<int>(cam.width);
         int screenH = static_cast<int>(cam.height);
 
