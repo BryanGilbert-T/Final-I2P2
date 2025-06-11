@@ -283,8 +283,8 @@ void PlayScene::findTeleport() {
                 file.close();
             }
             if(MapId + 1 == 3) {
-                int nextx = 10 * BlockSize - (100 - BlockSize);
-                int nexty = 3 * BlockSize - (100 - BlockSize);
+                int nextx = 2 * BlockSize - (100 - BlockSize);
+                int nexty = 20 * BlockSize - (100 - BlockSize);
 
                 std::ofstream file("Resource/account.txt"); // truncate mode by default
                 if (!file) {
@@ -326,8 +326,18 @@ void PlayScene::Update(float deltaTime) {
     if (cam.x > MapWidth * BlockSize - w) cam.x = MapWidth * BlockSize - w;
     if (cam.y > MapHeight * BlockSize - h) cam.y = MapHeight * BlockSize - h;
 
-    for (Enemy* e : enemyGroup) {
+    auto it = enemyGroup.begin();
+    while (it != enemyGroup.end()) {
+        Enemy* e = *it;
         e->Update(deltaTime);
+
+        if (e->timetoDie) {
+            // unlink from list and advance iterator in one call:
+            it = enemyGroup.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
 }
 void PlayScene::Draw() const {

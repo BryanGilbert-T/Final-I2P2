@@ -40,8 +40,9 @@ void Enemy::Hit(int dmg, int dir) {
     hp -= dmg;
     if (hp <= 0) {
         hp = 0;
-        auto scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetActiveScene());
-        scene->enemyGroup.remove(this);
+        animations[DEAD].current = 0;
+        animations[DEAD].timer   = 0;
+        setState(DEAD);
     }
     isHit        = true;
     hitTimer     = 0.5f;                     // flash duration
@@ -54,6 +55,24 @@ void Enemy::Hit(int dmg, int dir) {
 void Enemy::Update(float deltaTime) {
     PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
     if (!scene) return;
+
+    if (state == DEAD) {
+        hitTimer -= deltaTime;
+        if (hitTimer <= 0.0f) {
+            isHit    = false;
+            hitTimer = 0.0f;
+        }
+        auto &A = animations[state];
+        A.timer += deltaTime;
+        if (A.timer >= A.frame_time) {
+            A.timer -= A.frame_time;
+            A.current = (A.current + 1) % A.frames.size();
+        }
+        if (animations[DEAD].current == animations[DEAD].frames.size() - 1) {
+            timetoDie = true;
+        }
+        return;
+    }
 
     if (knockbackRem > 0) {
         int step = std::min(knockbackRem, speed);
@@ -162,6 +181,7 @@ Enemy::Enemy(int hp, int x, int y, int speed, int damage, int w, int h){
     this->dir = RIGHT;
     this->jump = 0;
     state = IDLE;
+    timetoDie = false;
 }
 
 Enemy::~Enemy() {
