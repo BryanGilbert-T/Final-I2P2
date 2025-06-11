@@ -62,10 +62,11 @@ void PlayScene::Initialize() {
         "Resource/images/play-scene/mountains/mountains.png",
         "Resource/images/play-scene/mountains/tree.png"
     };
-    std::vector<float> factors = {0.2f, 0.5f};
+    std::vector<float> factors = {0.1f, 0.25f};
     MountainSceneBg.Initialize(layers, factors);
-    MountainSceneBg.SetLayerOffset(0, 80, 20);   // mountains shifted right/down
-    MountainSceneBg.SetLayerOffset(1, -50, 20 );   // trees shifted left/up
+    MountainSceneBg.SetLayerOffset(0, 0, 30);   // mountains shifted right/down
+    MountainSceneBg.SetLayerOffset(1, 0, 50 );   // trees shifted left/up
+    finishBmp = al_load_bitmap("Resource/images/play-scene/mountains/finish.png");
 
     teleportLeft.clear();
     teleportRight.clear();
@@ -219,6 +220,27 @@ void PlayScene::Draw() const {
 
     // draw parallax behind everything
     MountainSceneBg.Draw(cam);
+    //
+    // float fw = float(al_get_bitmap_width (finishBmp));
+    // float fh = float(al_get_bitmap_height(finishBmp));
+    //
+    // // 1) compute world‐space position
+    // float groundY = MapHeight * BlockSize - BlockSize;
+    // float worldX = MapWidth * BlockSize - fw;
+    // float worldY = groundY - fh;
+    //
+    // // 2) convert to screen‐space
+    // float screenX = worldX - cam.x;
+    // float screenY = worldY - cam.y;
+    //
+    // // 3) only draw if on screen
+    // if (screenX + fw  > 0 &&
+    //     screenX       < w &&
+    //     screenY + fh  > 0 &&
+    //     screenY       < h)
+    // {
+    //     al_draw_bitmap(finishBmp, screenX, screenY, 0);
+    // }
     map.DrawMap(cam);
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
