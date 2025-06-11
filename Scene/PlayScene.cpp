@@ -59,14 +59,15 @@ void PlayScene::Initialize() {
     cam.Update(0, 0);
 
     std::vector<std::string> layers = {
+        "Resource/images/play-scene/mountains/sky.png",
         "Resource/images/play-scene/mountains/mountains.png",
         "Resource/images/play-scene/mountains/tree.png"
     };
-    std::vector<float> factors = {0.1f, 0.25f};
+    std::vector<float> factors = {0.0f, 0.1f, 0.25f};
     MountainSceneBg.Initialize(layers, factors);
-    MountainSceneBg.SetLayerOffset(0, 0, 30);   // mountains shifted right/down
-    MountainSceneBg.SetLayerOffset(1, 0, 50 );   // trees shifted left/up
-    finishBmp = al_load_bitmap("Resource/images/play-scene/mountains/finish.png");
+    MountainSceneBg.SetLayerOffset(0, 0, 200);
+    MountainSceneBg.SetLayerOffset(1, 0, 50);   // mountains shifted right/down
+    MountainSceneBg.SetLayerOffset(2, 0, 150 );   // trees shifted left/up
 
     teleportLeft.clear();
     teleportRight.clear();
