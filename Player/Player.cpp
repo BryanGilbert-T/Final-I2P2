@@ -298,7 +298,7 @@ void Player::Attack(std::list<Enemy*> enemyGroup) {
     attackCooldown = ATTACK_COOLDOWN_MAX;
     for (Enemy* e : enemyGroup) {
         if (enemyInRange(e->x + e->ENEMY_WIDTH / 2, e->y + e->ENEMY_HEIGHT /2)) {
-            e->Hit(10);
+            e->Hit(10, (flag == 1) ? -1 : 1);
             return;
         }
     }

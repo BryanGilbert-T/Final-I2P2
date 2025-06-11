@@ -36,17 +36,47 @@ void Enemy::setState(State s) {
     }
 }
 
-void Enemy::Hit(int dmg) {
+void Enemy::Hit(int dmg, int dir) {
     hp -= dmg;
     if (hp <= 0) {
         hp = 0;
     }
+    isHit        = true;
+    hitTimer     = 0.5f;                     // flash duration
+    knockbackDir = dir;     // ensure it’s ±1
+    knockbackRem = KNOCKBACK_DISTANCE;
+
     std::cout << "Enemy hp: " << hp << std::endl;
 }
 
 void Enemy::Update(float deltaTime) {
     PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
     if (!scene) return;
+
+    if (knockbackRem > 0) {
+        int step = std::min(knockbackRem, speed);
+        int dx = x + knockbackDir * step;
+        int dy = y;
+        // optional: test collisions before you assign newX…
+        if (dx >= 0 && dy >= 0 &&
+        dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
+        !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+            x = dx;
+            y = dy;
+        }
+        knockbackRem -= step;
+
+        // flash timer
+        hitTimer -= deltaTime;
+        if (hitTimer <= 0.0f) {
+            isHit    = false;
+            hitTimer = 0.0f;
+        }
+
+        // don't do gravity/AI this frame — we’re still being knocked back
+        return;
+    }
 
     // 1) Apply gravity (vy will grow by GRAVITY each frame):
     vy += JUMP_ACCELERATION;
@@ -116,6 +146,10 @@ void Enemy::Update(float deltaTime) {
 }
 
 Enemy::Enemy(int hp, int x, int y, int speed, int damage, int w, int h){
+    isHit = false;
+    hitTimer = 0.0f;
+    knockbackDir = 0;
+    knockbackRem = 0;
     ENEMY_WIDTH = w;
     ENEMY_HEIGHT = h;
     this->damage = damage;
@@ -167,13 +201,26 @@ void Enemy::Draw(Camera cam){
     int dy = y - cam.y;
     auto &A = animations[state];
     ALLEGRO_BITMAP* bmp = A.frames[A.current];
-    al_draw_scaled_bitmap(
-        bmp,
-        0, 0,
-        al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
-        dx, dy,
-        ENEMY_WIDTH, ENEMY_HEIGHT,
-        flag
-    );
+    if (isHit) {
+        ALLEGRO_COLOR tint = al_map_rgba(255,0,0,180);
+        al_draw_tinted_scaled_bitmap(
+            bmp, tint,
+            0,0,
+            al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+            dx, dy,
+            ENEMY_WIDTH, ENEMY_HEIGHT,
+            flag
+        );
+    }
+    else {
+        al_draw_scaled_bitmap(
+            bmp,
+            0,0,
+            al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
+            dx, dy,
+            ENEMY_WIDTH, ENEMY_HEIGHT,
+            flag
+        );
+    }
 
 }

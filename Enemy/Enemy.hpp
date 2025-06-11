@@ -34,6 +34,14 @@ protected:
 
 
 public:
+    bool  isHit        = false;    // true while we’re being knocked back
+    float hitTimer     = 0.0f;     // how long to flash red
+    int   knockbackDir = 0;        // +1 or -1
+    int   knockbackRem = 0;        // pixels left to push
+    static constexpr int KNOCKBACK_DISTANCE = 64;
+
+    void Hit(int dmg, int dir);
+
     int x, y;
     int ENEMY_WIDTH;
     int ENEMY_HEIGHT;
