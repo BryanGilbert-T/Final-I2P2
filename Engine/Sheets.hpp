@@ -11,6 +11,11 @@ struct UserData {
     std::vector<std::string> pending;
 };
 
+struct LdbData {
+    std::string name;
+    int point;
+};
+
 std::map<std::string, std::string> getUser(const std::string& name);
 void createUser(const std::string& name, const std::string& password);
 void updateUser(const std::string& name, int px, int py, int coin, int hp, int stage);
@@ -27,6 +32,7 @@ std::vector<std::string> getPendings(const std::string& name);
 void addPending(const std::string& player1, const std::string& player2);
 void removePending(const std::string& player1, const std::string& player2);
 UserData getUserData(const std::string& name);
+std::vector<LdbData> getLdbData();
 extern bool isSigningUp;
 
 

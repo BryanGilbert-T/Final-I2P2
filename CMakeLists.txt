@@ -62,6 +62,7 @@ add_executable(${PROJECT_NAME}
         Scene/search.hpp
         Scene/requests.hpp
         Scene/requests.cpp
+        Scene/leaderboard.cpp
 
         Player/Player.cpp
         Player/Player.hpp

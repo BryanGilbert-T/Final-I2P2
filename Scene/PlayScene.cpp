@@ -437,7 +437,7 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
 
     if (button & 1) {
-        player.Attack(enemyGroup);
+        player.Attack();
     }
 }
 void PlayScene::OnMouseMove(int mx, int my) {

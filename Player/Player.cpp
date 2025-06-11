@@ -29,10 +29,13 @@ const int INITIAL_JUMP_SPEED = 16;
 const int IDLE_FRAME_COUNT = 2;
 const double IDLE_FRAME_RATE = 0.3;
 
+const int ATTACK_FRAME_COUNT = 4;
+const double ATTACK_FRAME_RATE = 0.15;
+
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
-const float ATTACK_COOLDOWN_MAX = 0.5f;
+const float ATTACK_COOLDOWN_MAX = 1.0f;
 
 
 void Player::Create(int hp, int x, int y, std::string name){
@@ -53,6 +56,21 @@ void Player::Create(int hp, int x, int y, std::string name){
     }
     animations[IDLE] = std::move(idleAnim);
 
+    idle_sheet = al_load_bitmap("Resource/images/character/attack-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet) / ATTACK_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation attackAnim(ATTACK_FRAME_RATE);
+    for (int i = 0; i < ATTACK_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        );
+        attackAnim.frames.push_back(f);
+    }
+    animations[ATTACK] = std::move(attackAnim);
+
     animations[JUMP] = animations[IDLE];
 
     this->hp = hp;
@@ -62,7 +80,7 @@ void Player::Create(int hp, int x, int y, std::string name){
     this->dir = RIGHT;
     this->jump = 0;
     state = IDLE;
-
+    attacked = false;
 }
 
 void Player::Hit(int damage, int flag) {
@@ -92,6 +110,26 @@ void Player::Update(float deltaTime) {
     if (!scene) return;
 
     attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
+
+    if (state == ATTACK) {
+        Animation &anim = animations[ATTACK];
+        if (anim.current == 1 || anim.current == 2) {
+            for (Enemy* e : scene->enemyGroup) {
+                if (attacked == false) {
+                    if (enemyInRange(e->x + e->ENEMY_WIDTH / 2, e->y + e->ENEMY_HEIGHT /2)) {
+                        e->Hit(10, (flag == 1) ? -1 : 1);
+                        attacked = true;
+                        return;
+                    }
+                }
+            }
+        }
+        if (anim.current >= anim.frames.size() - 1) {
+            // reset to WALK once animation is done
+            attacked = false;
+            setState(IDLE);
+        }
+    }
 
     if (knockbackRemaining > 0) {
         int step = std::min(knockbackRemaining, speed);
@@ -160,9 +198,11 @@ void Player::Update(float deltaTime) {
             remaining--;
         }
     }
-    if (jump > 0 && vy < 0)        setState(JUMP);
-    else if (jump > 0 && vy > 0)   setState(JUMP);  // falling could be separate
-    else if (state != IDLE)        setState(IDLE);
+    if (state != ATTACK) {
+        if (jump > 0 && vy < 0)        setState(JUMP);
+        else if (jump > 0 && vy > 0)   setState(JUMP);  // falling could be separate
+        else if (state != IDLE)        setState(IDLE);
+    }
 
     auto &A = animations[state];
     A.timer += deltaTime;
@@ -252,6 +292,7 @@ void Player::Draw(Camera cam){
     int dy = y - cam.y;
     auto &A = animations[state];
     ALLEGRO_BITMAP* bmp = A.frames[A.current];
+
     if (isHit) {
         // red tint with some alpha
         ALLEGRO_COLOR redTint = al_map_rgba(255, 0, 0, 200);
@@ -291,15 +332,14 @@ bool Player::enemyInRange(int x, int y) {
     return false;
 }
 
-void Player::Attack(std::list<Enemy*> enemyGroup) {
+void Player::Attack() {
     if (attackCooldown > 0.0f) {
         return;
     }
+    std::cout << "Attack" << std::endl;
+    setState(ATTACK);
     attackCooldown = ATTACK_COOLDOWN_MAX;
-    for (Enemy* e : enemyGroup) {
-        if (enemyInRange(e->x + e->ENEMY_WIDTH / 2, e->y + e->ENEMY_HEIGHT /2)) {
-            e->Hit(10, (flag == 1) ? -1 : 1);
-            return;
-        }
-    }
+    animations[ATTACK].current = 0;
+    animations[ATTACK].timer   = 0;
+
 }

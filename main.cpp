@@ -19,6 +19,7 @@
 #include "Scene/Signup.hpp"
 
 #include "fstream"
+#include "Scene/leaderboard.hpp"
 
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
@@ -38,6 +39,7 @@ int main(int argc, char **argv) {
 	game.AddNewScene("friendlist", new FriendListScene());
 	game.AddNewScene("requests", new RequestsScene());
 	game.AddNewScene("search", new SearchScene());
+	game.AddNewScene("leaderboard", new LeaderboardScene());
 
 	std::string curUser;
 	std::ifstream in("Resource/account.txt");

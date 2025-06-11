@@ -69,7 +69,9 @@ public:
   bool enemyInRange(int x, int y);
   int flag;
 
-  void Attack(std::list<Enemy*> enemyGroup);
+  void Attack();
+
+  bool attacked = false;
 
   float attackCooldown;
 

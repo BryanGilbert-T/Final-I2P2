@@ -723,3 +723,91 @@ UserData getUserData(const std::string& name) {
 
     return ud;
 }
+
+std::vector<LdbData> getLdbData() {
+     std::vector<LdbData> leaderboard;
+
+    // 1) Build a Firestore query URL to get all player documents with their coin values
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents:runQuery";
+
+    // 2) Prepare the JSON payload for the query
+    std::string json = R"({
+        "structuredQuery": {
+            "from": [{"collectionId": "players"}],
+            "select": {
+                "fields": [
+                    {"fieldPath": "name"},
+                    {"fieldPath": "coin"}
+                ]
+            }
+        }
+    })";
+
+    // 3) Perform the POST request
+    CURL* curl = curl_easy_init();
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return leaderboard;
+    }
+
+    struct curl_slist* headers = nullptr;
+    headers = curl_slist_append(headers, "Content-Type: application/json");
+
+    std::string response;
+    curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+    curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+    CURLcode res = curl_easy_perform(curl);
+    curl_easy_cleanup(curl);
+    curl_slist_free_all(headers);
+
+    if (res != CURLE_OK) {
+        std::cerr << "curl_easy_perform failed: " << curl_easy_strerror(res) << "\n";
+        return leaderboard;
+    }
+
+    // 4) Parse the response
+    try {
+        auto j = nlohmann::json::parse(response);
+
+        for (const auto& doc : j) {
+            if (!doc.contains("document")) continue;
+
+            // Extract player name from document ID
+            std::string fullName = doc["document"].value("name", "");
+            auto pos = fullName.find_last_of('/');
+            std::string playerName = (pos == std::string::npos)
+                                   ? fullName
+                                   : fullName.substr(pos + 1);
+
+            // Extract coin value
+            int coin = 0;
+            if (doc["document"].contains("fields") &&
+                doc["document"]["fields"].contains("coin") &&
+                doc["document"]["fields"]["coin"].contains("integerValue")) {
+                coin = std::stoi(doc["document"]["fields"]["coin"]["integerValue"].get<std::string>());
+            }
+
+            leaderboard.push_back({playerName, coin});
+        }
+
+        // Sort descending by coin value
+        std::sort(leaderboard.begin(), leaderboard.end(),
+            [](const LdbData& a, const LdbData& b) {
+                return a.point > b.point;
+            });
+
+    } catch (const std::exception& e) {
+        std::cerr << "JSON parse error in getLdbData: " << e.what() << "\n";
+    }
+
+    return leaderboard;
+}
