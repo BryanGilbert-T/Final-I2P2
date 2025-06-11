@@ -23,6 +23,7 @@
 #include "PlayScene.hpp"
 #include "UI/Animation/DirtyEffect.hpp"
 #include "UI/Component/Label.hpp"
+#include "Enemy/Boss.hpp"
 
 // TODO HACKATHON-4 (1/3): Trace how the game handles keyboard input.
 // TODO HACKATHON-4 (2/3): Find the cheat code sequence in this file.
@@ -90,6 +91,7 @@ void PlayScene::Initialize() {
 
     changeScene = false;
     pause = false;
+    DrawLoading(1);
 
     std::ifstream file("Resource/account.txt");
     if (!file) {
@@ -102,6 +104,7 @@ void PlayScene::Initialize() {
     file.close();
     this->MapId = level;
     this->player.Create(hp, x, y, username);
+    DrawLoading(2);
 
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());
@@ -125,21 +128,23 @@ void PlayScene::Initialize() {
     if (!PauseFont) {
         std::cerr << "Failed to load pause menu font\n";
     }
+    for (int i = 3; i <= 10; i++) {
+        DrawLoading(i);
+        al_rest(0.1);
+    }
 }
 void PlayScene::Pause(int stage) {
     pause = !pause;
 }
 void PlayScene::Terminate() {
-    DrawLoading(1);
     MountainSceneBg.Terminate();
     AudioHelper::StopBGM(bgmId);
     AudioHelper::StopSample(deathBGMInstance);
     deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
-    DrawLoading(2);
-
 
     if (changeScene == false) {
+        DrawLoading(1);
         std::ofstream file("Resource/account.txt"); // truncate mode by default
         if (!file) {
             std::cerr << "Failed to open file for writing.\n";
@@ -148,16 +153,18 @@ void PlayScene::Terminate() {
         // Write new values into the file
         file << player.username << " " << MapId << " " << player.x << " " << player.y
         << " " << 0 << " " << player.hp;
+        DrawLoading(2);
 
         file.close();
 
         updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
+        for (int i = 3; i <= 10; i++) {
+            DrawLoading(i);
+            al_rest(0.1);
+        }
     }
 
-    for (int i = 3; i <= 10; i++) {
-        DrawLoading(i);
-        al_rest(0.1);
-    }
+
 
     if (PauseFont) {
         al_destroy_font(PauseFont);
@@ -480,6 +487,7 @@ void PlayScene::ReadMap() {
             case 'E': mapData.push_back(3); break;
             case 'W': mapData.push_back(4); break;
             case 'L': mapData.push_back(5); break;
+            case 'B': mapData.push_back(6); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -512,6 +520,10 @@ void PlayScene::ReadMap() {
             } else if (num == 5) {
                 mapState[i][j] = TILE_SKY;
                 teleportLeft.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
+            } else if (num == 6) {
+                mapState[i][j] = TILE_SKY;
+                enemyGroup.push_back(new BossEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
+
             }
         }
     }
