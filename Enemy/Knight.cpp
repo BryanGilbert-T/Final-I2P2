@@ -35,7 +35,7 @@ const double JUMP_FRAME_RATE = 0.3;
 const int WIDTH = 120*2.5;
 const int HEIGHT = 80*2.5;
 
-const float attackCooldownMax = 1.75f;
+const float attackCooldownMax = 2.0f;
 
 const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
@@ -51,7 +51,7 @@ KnightEnemy::KnightEnemy(int x, int y):
     chaseRadius(400.0f),    // e.g. start chasing if closer than 300px
     attackRadius(135.0f)   // optional melee range
 {
-    float attackCooldown = 0.0f;
+    attackCooldown = 0.0f;
     hitPlayer = false;
     flag = 0;
     idle_sheet = al_load_bitmap(idlefile.c_str());
