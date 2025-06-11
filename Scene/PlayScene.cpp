@@ -49,6 +49,7 @@ void PlayScene::Initialize() {
     Engine::Point EndGridPoint = Engine::Point(-1, 0);
     mapState.clear();
     keyStrokes.clear();
+    enemyGroup.clear();
     ticks = 0;
     deathCountDown = -1;
     lives = 10;
@@ -65,6 +66,9 @@ void PlayScene::Initialize() {
     MountainSceneBg.SetLayerOffset(0, 80, 20);   // mountains shifted right/down
     MountainSceneBg.SetLayerOffset(1, -50, 20 );   // trees shifted left/up
 
+    teleportLeft.clear();
+    teleportRight.clear();
+
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());
     AddNewObject(GroundEffectGroup = new Group());
@@ -75,6 +79,7 @@ void PlayScene::Initialize() {
     // Should support buttons.
     AddNewControlObject(UIGroup = new Group());
     ReadMap();
+    std::cout << player.x << " " << player.y << std::endl;
     mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
     deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
@@ -89,10 +94,40 @@ void PlayScene::Terminate() {
     deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
 }
+void PlayScene::findTeleport() {
+    for (Engine::Point p : teleportLeft) {
+        if (player.x >= p.x && player.x <= p.x + BlockSize &&
+            player.y >= p.y && player.y <= p.y + BlockSize) {
+            PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+            scene->MapId = this->MapId - 1;
+            if(scene->MapId == 1) {
+                scene->player.x = 100 * BlockSize - (100 - BlockSize);
+                scene->player.y = 26 * BlockSize - (100 - BlockSize);
+            }
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            return;
+        }
+    }
+    for (Engine::Point p : teleportRight) {
+        if (player.x >= p.x && player.x <= p.x + BlockSize &&
+            player.y >= p.y && player.y <= p.y + BlockSize) {
+            PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+            scene->MapId = this->MapId + 1;
+            if(scene->MapId == 2) {
+                scene->player.x = 3 * BlockSize - (100 - BlockSize);
+                scene->player.y = 21 * BlockSize - (100 - BlockSize);
+            }
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            return;
+        }
+    }
+}
+
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     OnKeyHold();
     player.Update(deltaTime);
+    findTeleport();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -200,7 +235,8 @@ void PlayScene::ReadMap() {
             case '1': mapData.push_back(1); break;
             case 'S': mapData.push_back(2); break;
             case 'E': mapData.push_back(3); break;
-            case 'P': mapData.push_back(4); break;
+            case 'W': mapData.push_back(4); break;
+            case 'L': mapData.push_back(5); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -230,6 +266,10 @@ void PlayScene::ReadMap() {
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
             } else if (num == 4) {
                 mapState[i][j] = TILE_SKY;
+                teleportRight.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
+            } else if (num == 5) {
+                mapState[i][j] = TILE_SKY;
+                teleportLeft.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
             }
         }
     }

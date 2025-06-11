@@ -91,5 +91,9 @@ public:
     bool CheckSpaceValid(int x, int y);
     std::vector<std::vector<int>> CalculateBFSDistance();
     // void ModifyReadMapTiles();
+    std::vector<Engine::Point> teleportLeft;
+    std::vector<Engine::Point> teleportRight;
+
+    void findTeleport();
 };
 #endif   // PLAYSCENE_HPP
