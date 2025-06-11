@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <allegro5/allegro.h>
+#include <allegro5/allegro_ttf.h>
+#include <allegro5/allegro_primitives.h>
 #include <cmath>
 #include <fstream>
 #include <functional>
@@ -16,6 +18,7 @@
 #include "Engine/LOG.hpp"
 #include "Engine/map.hpp"
 #include "Engine/Resources.hpp"
+#include "UI/Component/ImageButton.hpp"
 #include "Engine/Sheets.hpp"
 #include "PlayScene.hpp"
 #include "UI/Animation/DirtyEffect.hpp"
@@ -58,6 +61,16 @@ void PlayScene::Initialize() {
     SpeedMult = 1;
     cam.Update(0, 0);
 
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
+    int halfH = h / 2;
+
+    Engine::ImageButton *btn;
+    btn = new Engine::ImageButton("play-scene/pause-btn.png", "play-scene/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
+    btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
+    AddNewControlObject(btn);
+
     std::vector<std::string> layers = {
         "Resource/images/play-scene/mountains/mountains.png",
         "Resource/images/play-scene/mountains/tree.png"
@@ -72,6 +85,7 @@ void PlayScene::Initialize() {
     teleportRight.clear();
 
     changeScene = false;
+    pause = false;
 
     std::ifstream file("Resource/account.txt");
     if (!file) {
@@ -102,6 +116,14 @@ void PlayScene::Initialize() {
     Engine::Resources::GetInstance().GetBitmap("lose/benjamin-happy.png");
     // Start BGM.
     bgmId = AudioHelper::PlayBGM("play.ogg");
+
+    PauseFont = al_load_ttf_font("Resource/fonts/imfell.ttf", 16, 0);
+    if (!PauseFont) {
+        std::cerr << "Failed to load pause menu font\n";
+    }
+}
+void PlayScene::Pause(int stage) {
+    pause = !pause;
 }
 void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
@@ -123,6 +145,11 @@ void PlayScene::Terminate() {
         file.close();
 
         updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
+    }
+
+    if (PauseFont) {
+        al_destroy_font(PauseFont);
+        PauseFont = nullptr;
     }
 }
 void PlayScene::findTeleport() {
@@ -191,6 +218,9 @@ void PlayScene::findTeleport() {
 
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+    if (pause) {
+        return;
+    }
     OnKeyHold();
     player.Update(deltaTime);
     findTeleport();
@@ -214,38 +244,19 @@ void PlayScene::Update(float deltaTime) {
     }
 }
 void PlayScene::Draw() const {
-    IScene::Draw();
+
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
 
     // draw parallax behind everything
     MountainSceneBg.Draw(cam);
-    //
-    // float fw = float(al_get_bitmap_width (finishBmp));
-    // float fh = float(al_get_bitmap_height(finishBmp));
-    //
-    // // 1) compute world‐space position
-    // float groundY = MapHeight * BlockSize - BlockSize;
-    // float worldX = MapWidth * BlockSize - fw;
-    // float worldY = groundY - fh;
-    //
-    // // 2) convert to screen‐space
-    // float screenX = worldX - cam.x;
-    // float screenY = worldY - cam.y;
-    //
-    // // 3) only draw if on screen
-    // if (screenX + fw  > 0 &&
-    //     screenX       < w &&
-    //     screenY + fh  > 0 &&
-    //     screenY       < h)
-    // {
-    //     al_draw_bitmap(finishBmp, screenX, screenY, 0);
-    // }
+
     map.DrawMap(cam);
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
         e->Draw(cam);
     }
+    Group::Draw();
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
@@ -259,8 +270,73 @@ void PlayScene::Draw() const {
             }
         }
     }
+    if (pause) {
+        const int recw = 600;
+        const int rech = 400;
+        int left = w/2 - recw/2;
+        int top  = h/2 - rech/2;
+
+        const int ButtonW = 200;
+        const int ButtonH = 50;
+
+        // Compute center‐aligned button positions
+        int bx = w/2 - ButtonW/2;
+        int byContinue = top + 100;
+        int byExit     = byContinue + ButtonH + 20;
+
+        // draw button backgrounds
+        ALLEGRO_COLOR bg = al_map_rgb(60,60,60);
+        ALLEGRO_COLOR fg = al_map_rgb(255,255,255);
+        al_draw_filled_rectangle(bx,              byContinue,
+                                 bx + ButtonW,   byContinue + ButtonH,
+                                 bg);
+        al_draw_filled_rectangle(bx,              byExit,
+                                 bx + ButtonW,   byExit     + ButtonH,
+                                 bg);
+
+        // draw labels
+        al_draw_text(PauseFont, fg,
+                     bx + ButtonW/2, byContinue + ButtonH/2 - 8,
+                     ALLEGRO_ALIGN_CENTER, "Continue");
+        al_draw_text(PauseFont, fg,
+                     bx + ButtonW/2, byExit + ButtonH/2 - 8,
+                     ALLEGRO_ALIGN_CENTER, "Exit");
+
+    }
 }
 void PlayScene::OnMouseDown(int button, int mx, int my) {
+    if (pause && (button & 1)) {
+        const int w = Engine::GameEngine::GetInstance().getVirtW();
+        const int h = Engine::GameEngine::GetInstance().getVirtH();
+
+        const int recw = 600;
+        const int rech = 400;
+        int left = w/2 - recw/2;
+        int top  = h/2 - rech/2;
+
+        const int ButtonW = 200;
+        const int ButtonH = 50;
+
+        int bx   = w/2 - ButtonW/2;
+        int byC  = top + 100;
+        int byE  = byC + ButtonH + 20;
+
+        // Continue?
+        if (mx >= bx && mx <= bx + ButtonW &&
+            my >= byC && my <= byC + ButtonH)
+        {
+            pause = false;
+            return;   // don’t fall through to normal click logic
+        }
+        // Exit?
+        if (mx >= bx && mx <= bx + ButtonW &&
+            my >= byE && my <= byE + ButtonH)
+        {
+            Engine::GameEngine::GetInstance().ChangeScene("boarding");
+        }
+        return;
+    }
+
     IScene::OnMouseDown(button, mx, my);
 
     if (button & 1) {

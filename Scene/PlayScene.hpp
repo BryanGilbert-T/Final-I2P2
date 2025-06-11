@@ -1,6 +1,7 @@
 #ifndef PLAYSCENE_HPP
 #define PLAYSCENE_HPP
 #include <allegro5/allegro_audio.h>
+#include <allegro5/allegro_font.h>
 #include <list>
 #include <memory>
 #include <utility>
@@ -35,6 +36,7 @@ protected:
     int SpeedMult;
 
 public:
+    ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
     static Player player;
     std::set<int> keyHeld;
@@ -96,6 +98,8 @@ public:
     std::vector<Engine::Point> teleportRight;
 
     bool changeScene = false;
+    void Pause(int stage);
+    bool pause = false;
 
     void findTeleport();
 };

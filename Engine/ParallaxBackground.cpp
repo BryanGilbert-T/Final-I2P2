@@ -69,8 +69,6 @@ namespace Engine {
             float fy         = baselineY - (camJump * vertFactor);
             float oy        = fy;
 
-            std::cout << camJump << std::endl;
-            std::cout << oy << std::endl;
 
             for (float x = ox; x <= screenW + (2*bw); x += bw) {
                 al_draw_bitmap(bmp, x, oy, 0);
