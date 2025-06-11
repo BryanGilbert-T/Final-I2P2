@@ -73,8 +73,8 @@ void createUser(const std::string& name,
             "name": {"stringValue": ")" + name + R"("},
             "pass": {"stringValue": ")" + hash + R"("},
             "stage": {"integerValue": 1},
-            "px": {"integerValue": 0},
-            "py": {"integerValue": 0},
+            "px": {"integerValue": 860},
+            "py": {"integerValue": 1372},
             "coin": {"integerValue": 0},
             "hp": {"integerValue": 100},
             "friends": {
@@ -239,39 +239,60 @@ std::map<std::string, bool> find_online() {
 }
 
 void updateUser(const std::string& name,
-                int px, int py, int coin, int hp)
+                int px, int py, int coin, int hp, int stage)
 {
-    std::string url = "https://firestore.googleapis.com/v1/projects/" +
-                      project_id + "/databases/(default)/documents/players/" + name;
+    // 1) Build URL with updateMask for each field we’re updating:
+    std::string url =
+        "https://firestore.googleapis.com/v1/projects/" +
+        project_id +
+        "/databases/(default)/documents/players/" + name +
+        "?updateMask.fieldPaths=px"
+        "&updateMask.fieldPaths=py"
+        "&updateMask.fieldPaths=coin"
+        "&updateMask.fieldPaths=hp"
+        "&updateMask.fieldPaths=stage";
 
+    // 2) JSON payload for just those five fields:
     std::string json = R"({
-        "fields": {
-            "px": {"integerValue": )" + std::to_string(px) + R"(},
-            "py": {"integerValue": )" + std::to_string(py) + R"(},
-            "coin": {"integerValue": )" + std::to_string(coin) + R"(},
-            "hp": {"integerValue": )" + std::to_string(hp) + R"(}
-        }
+      "fields": {
+        "px":    { "integerValue": )" + std::to_string(px)    + R"( },
+        "py":    { "integerValue": )" + std::to_string(py)    + R"( },
+        "coin":  { "integerValue": )" + std::to_string(coin)  + R"( },
+        "hp":    { "integerValue": )" + std::to_string(hp)    + R"( },
+        "stage": { "integerValue": )" + std::to_string(stage) + R"( }
+      }
     })";
 
+    // 3) cURL setup
     CURL* curl = curl_easy_init();
-    if (!curl) { std::cerr << "curl init failed\n"; return; }
+    if (!curl) {
+        std::cerr << "curl init failed\n";
+        return;
+    }
     struct curl_slist* headers = nullptr;
     headers = curl_slist_append(headers, "Content-Type: application/json");
 
-    std::string response;
+    // 4) Configure PATCH
     curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PATCH");
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, json.c_str());
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_cb);
+
+    std::string response;
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
 
+    // (optional) if you’ve disabled SSL checks elsewhere:
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
+    // 5) Perform & clean up
     CURLcode res = curl_easy_perform(curl);
-    if (res != CURLE_OK)
-        std::cerr << "curl_easy_perform failed: " << curl_easy_strerror(res) << "\n";
+    if (res != CURLE_OK) {
+        std::cerr << "updateUser failed: "
+                  << curl_easy_strerror(res) << "\n"
+                  << "response: " << response << "\n";
+    }
     curl_easy_cleanup(curl);
     curl_slist_free_all(headers);
 }

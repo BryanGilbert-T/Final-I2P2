@@ -79,8 +79,9 @@ void SearchScene::Initialize() {
     DrawLoading(10);
 }
 void SearchScene::DrawLoading(int step) {
-    int W = Engine::GameEngine::GetInstance().getVirtW();
-    int H = Engine::GameEngine::GetInstance().getVirtH();
+    ALLEGRO_DISPLAY* d = al_get_current_display();
+    int W = al_get_display_width(d);
+    int H = al_get_display_height(d);
 
     ALLEGRO_TRANSFORM old;
     al_copy_transform(&old, al_get_current_transform());

@@ -35,7 +35,8 @@ const double JUMP_FRAME_RATE = 0.3;
 const float ATTACK_COOLDOWN_MAX = 0.5f;
 
 
-void Player::Create(int hp, int x, int y){
+void Player::Create(int hp, int x, int y, std::string name){
+    username = name;
     flag = 0;
     idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
     if (!idle_sheet) {

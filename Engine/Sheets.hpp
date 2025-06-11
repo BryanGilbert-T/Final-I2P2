@@ -13,7 +13,7 @@ struct UserData {
 
 std::map<std::string, std::string> getUser(const std::string& name);
 void createUser(const std::string& name, const std::string& password);
-void updateUser(const std::string& name, int px, int py, int coin, int hp);
+void updateUser(const std::string& name, int px, int py, int coin, int hp, int stage);
 int authUser(const std::string& name, const std::string& password);
 std::vector<std::string> getFriends(const std::string& name);
 std::vector<std::string> getRequests(const std::string& name);

@@ -38,7 +38,6 @@ struct Animation {
 
 class Player{
 protected:
-  int hp;
   int speed;
   int jump;
   float vy;
@@ -57,7 +56,9 @@ public:
   int attackRadius;
 
   int x, y;
-  void Create(int hp, int x, int y);
+  int hp;
+  std::string username;
+  void Create(int hp, int x, int y, std::string name);
   Player();
   ~Player();
   void Update(float deltaTime);

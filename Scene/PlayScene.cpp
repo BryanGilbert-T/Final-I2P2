@@ -16,6 +16,7 @@
 #include "Engine/LOG.hpp"
 #include "Engine/map.hpp"
 #include "Engine/Resources.hpp"
+#include "Engine/Sheets.hpp"
 #include "PlayScene.hpp"
 #include "UI/Animation/DirtyEffect.hpp"
 #include "UI/Component/Label.hpp"
@@ -49,6 +50,7 @@ void PlayScene::Initialize() {
     Engine::Point EndGridPoint = Engine::Point(-1, 0);
     mapState.clear();
     keyStrokes.clear();
+    enemyGroup.clear();
     ticks = 0;
     deathCountDown = -1;
     lives = 10;
@@ -66,6 +68,23 @@ void PlayScene::Initialize() {
     MountainSceneBg.SetLayerOffset(1, 0, 50 );   // trees shifted left/up
     finishBmp = al_load_bitmap("Resource/images/play-scene/mountains/finish.png");
 
+    teleportLeft.clear();
+    teleportRight.clear();
+
+    changeScene = false;
+
+    std::ifstream file("Resource/account.txt");
+    if (!file) {
+        std::cerr << "Failed to open file.\n";
+    }
+    std::string username;
+    int level, x, y, score, hp;
+    // Read values from the file
+    file >> username >> level >> x >> y >> score >> hp;
+    file.close();
+    this->MapId = level;
+    this->player.Create(hp, x, y, username);
+
     // Add groups from bottom to top.
     AddNewObject(TileMapGroup = new Group());
     AddNewObject(GroundEffectGroup = new Group());
@@ -76,6 +95,7 @@ void PlayScene::Initialize() {
     // Should support buttons.
     AddNewControlObject(UIGroup = new Group());
     ReadMap();
+    std::cout << player.x << " " << player.y << std::endl;
     mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
     deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
@@ -89,11 +109,91 @@ void PlayScene::Terminate() {
     AudioHelper::StopSample(deathBGMInstance);
     deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
+
+    if (changeScene == false) {
+        std::ofstream file("Resource/account.txt"); // truncate mode by default
+        if (!file) {
+            std::cerr << "Failed to open file for writing.\n";
+        }
+
+        // Write new values into the file
+        file << player.username << " " << MapId << " " << player.x << " " << player.y
+        << " " << 0 << " " << player.hp;
+
+        file.close();
+
+        updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
+    }
 }
+void PlayScene::findTeleport() {
+    for (Engine::Point p : teleportLeft) {
+        if (player.x >= p.x && player.x <= p.x + BlockSize &&
+            player.y >= p.y && player.y <= p.y + BlockSize) {
+            changeScene = true;
+            if(MapId - 1 == 1) {
+                int nextx = 99 * BlockSize - (100 - BlockSize);
+                int nexty = 24 * BlockSize - (100 - BlockSize);
+
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 1 << " " << nextx << " " << nexty
+                << " " << 0 << " " << player.hp;
+
+                file.close();
+            }
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            return;
+        }
+    }
+    for (Engine::Point p : teleportRight) {
+        if (player.x >= p.x && player.x <= p.x + BlockSize &&
+            player.y >= p.y && player.y <= p.y + BlockSize) {
+            changeScene = true;
+            if(MapId + 1 == 2) {
+                int nextx = 3 * BlockSize - (100 - BlockSize);
+                int nexty = 21 * BlockSize - (100 - BlockSize);
+
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 2 << " " << nextx << " " << nexty
+                << " " << 0 << " " << player.hp;
+
+                file.close();
+            }
+            if(MapId + 1 == 3) {
+                int nextx = 10 * BlockSize - (100 - BlockSize);
+                int nexty = 3 * BlockSize - (100 - BlockSize);
+
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 3 << " " << nextx << " " << nexty
+                << " " << 0 << " " << player.hp;
+
+                file.close();
+            }
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            return;
+        }
+    }
+}
+
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     OnKeyHold();
     player.Update(deltaTime);
+    findTeleport();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -222,7 +322,8 @@ void PlayScene::ReadMap() {
             case '1': mapData.push_back(1); break;
             case 'S': mapData.push_back(2); break;
             case 'E': mapData.push_back(3); break;
-            case 'P': mapData.push_back(4); break;
+            case 'W': mapData.push_back(4); break;
+            case 'L': mapData.push_back(5); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -246,12 +347,15 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_DIRT;
             } else if (num == 2) {
                 mapState[i][j] = TILE_SKY;
-                player.Create(100, j * BlockSize - (100 - BlockSize), i * BlockSize - (100 - BlockSize));
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
             } else if (num == 4) {
                 mapState[i][j] = TILE_SKY;
+                teleportRight.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
+            } else if (num == 5) {
+                mapState[i][j] = TILE_SKY;
+                teleportLeft.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
             }
         }
     }
