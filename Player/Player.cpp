@@ -17,8 +17,9 @@
 #include <iostream>
 #include <ostream>
 
-const int PLAYER_SIZE = 100;
-const int SPEED = PLAYER_SIZE / 16;
+const int PLAYER_WIDTH  = 157;
+const int PLAYER_HEIGHT = 100;
+const int SPEED = PLAYER_HEIGHT / 16;
 
 const int ATTACK_RADIUS = 100;
 
@@ -43,7 +44,7 @@ void Player::Create(int hp, int x, int y, std::string name){
     flag = 0;
     idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
     if (!idle_sheet) {
-        std::cerr << "Failed to load player_bitmap" << std::endl;
+        std::cerr << "Failed to load player_bitmap(idle-sheet.png)" << std::endl;
     }
     int frameW = al_get_bitmap_width(idle_sheet) / IDLE_FRAME_COUNT;
     int frameH = al_get_bitmap_height(idle_sheet);
@@ -58,7 +59,7 @@ void Player::Create(int hp, int x, int y, std::string name){
 
     idle_sheet = al_load_bitmap("Resource/images/character/attack-sheet.png");
     if (!idle_sheet) {
-        std::cerr << "Failed to load player_bitmap" << std::endl;
+        std::cerr << "Failed to load player_bitmap(atk)" << std::endl;
     }
     frameW = al_get_bitmap_width(idle_sheet) / ATTACK_FRAME_COUNT;
     frameH = al_get_bitmap_height(idle_sheet);
@@ -138,9 +139,9 @@ void Player::Update(float deltaTime) {
         knockbackRemaining -= step;
         // (optional) you can check collisions here if you don’t want them shoved into walls
         if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        dx + PLAYER_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy + PLAYER_HEIGHT - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_HEIGHT - 1) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy)) {
             x = dx;
             y = dy;
         }
@@ -161,15 +162,15 @@ void Player::Update(float deltaTime) {
         // test a one-pixel step
         int testY = y + signDY;
         int leftX = x;
-        int rightX = x + PLAYER_SIZE - 1;
+        int rightX = x + PLAYER_WIDTH - 1;
         bool collided = false;
 
         if (signDY > 0) {
             // moving down: check the two bottom corners
             // world-coords = (leftX, testY+PLAYER_SIZE-1) and (rightX, testY+PLAYER_SIZE-1)
-            if (scene->map.IsCollision(leftX,           testY + PLAYER_SIZE - 1) ||
-                scene->map.IsCollision(rightX,          testY + PLAYER_SIZE - 1) ||
-                scene->map.IsCollision(leftX + PLAYER_SIZE / 2, testY + PLAYER_SIZE - 1))
+            if (scene->map.IsCollision(leftX,           testY + PLAYER_HEIGHT - 1) ||
+                scene->map.IsCollision(rightX,          testY + PLAYER_HEIGHT - 1) ||
+                scene->map.IsCollision(leftX + PLAYER_WIDTH / 2, testY + PLAYER_HEIGHT - 1))
             {
                 // We’ve hit the ground. Land here:
                 vy = 0;
@@ -182,7 +183,7 @@ void Player::Update(float deltaTime) {
             // world-coords = (leftX, testY) and (rightX, testY)
             if (scene->map.IsCollision(leftX,           testY) ||
                 scene->map.IsCollision(rightX,          testY) ||
-                scene->map.IsCollision(leftX + PLAYER_SIZE / 2, testY))
+                scene->map.IsCollision(leftX + PLAYER_WIDTH / 2, testY))
             {
                 // We’ve hit a ceiling. Stop upward momentum:
                 vy = 0;
@@ -224,9 +225,9 @@ void Player::Update(float deltaTime) {
     int mapPixelW = scene->MapWidth * scene->BlockSize;
     int mapPixelH = scene->MapHeight * scene->BlockSize;
     if (x < 0)                           x = 0;
-    if (x + PLAYER_SIZE > mapPixelW)     x = mapPixelW - PLAYER_SIZE;
+    if (x + PLAYER_WIDTH > mapPixelW)     x = mapPixelW - PLAYER_WIDTH;
     if (y < 0)                           y = 0;
-    if (y + PLAYER_SIZE > mapPixelH)     y = mapPixelH - PLAYER_SIZE;
+    if (y + PLAYER_HEIGHT > mapPixelH)     y = mapPixelH - PLAYER_HEIGHT;
 }
 
 Player::Player(){
@@ -272,9 +273,9 @@ void Player::move(int keyCode) {
         flag = 0;
     }
     if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_SIZE - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_SIZE - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy + PLAYER_SIZE - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_SIZE - 1) && !scene->map.IsCollision(dx + PLAYER_SIZE - 1, dy)) {
+        dx + PLAYER_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy + PLAYER_HEIGHT - 1) &&
+        !scene->map.IsCollision(dx, dy + PLAYER_HEIGHT - 1) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy)) {
         x = dx;
         y = dy;
     }
@@ -301,7 +302,7 @@ void Player::Draw(Camera cam){
           0, 0,
           al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
           dx, dy,
-          PLAYER_SIZE, PLAYER_SIZE,
+          PLAYER_WIDTH, PLAYER_HEIGHT,
           flag
         );
     } else {
@@ -310,7 +311,7 @@ void Player::Draw(Camera cam){
           0, 0,
           al_get_bitmap_width(bmp), al_get_bitmap_height(bmp),
           dx, dy,
-          PLAYER_SIZE, PLAYER_SIZE,
+          PLAYER_WIDTH, PLAYER_HEIGHT,
           flag
         );
     }
@@ -320,7 +321,7 @@ void Player::Draw(Camera cam){
 bool Player::enemyInRange(int x, int y) {
     if (dir == RIGHT) {
         if (x > this->x &&
-            x < this->x + PLAYER_SIZE + attackRadius) {
+            x < this->x + PLAYER_WIDTH + attackRadius) {
             return true;
         }
     } else if (dir == LEFT) {
