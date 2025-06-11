@@ -16,6 +16,7 @@
 #include "Engine/LOG.hpp"
 #include "Engine/map.hpp"
 #include "Engine/Resources.hpp"
+#include "Engine/Sheets.hpp"
 #include "PlayScene.hpp"
 #include "UI/Animation/DirtyEffect.hpp"
 #include "UI/Component/Label.hpp"
@@ -119,6 +120,8 @@ void PlayScene::Terminate() {
         << " " << 0 << " " << player.hp;
 
         file.close();
+
+        updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
     }
 }
 void PlayScene::findTeleport() {
