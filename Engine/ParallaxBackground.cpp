@@ -3,6 +3,7 @@
 //
 #include "ParallaxBackground.hpp"
 #include "GameEngine.hpp"
+#include "Engine/map.hpp"
 #include <iostream>
 #include <cmath>
 
@@ -57,7 +58,12 @@ namespace Engine {
             if (wrapX < 0) wrapX += bw;
             float ox = -wrapX;
 
-            float baselineY = 150;     // where the bottom of the bitmap lines up with bottom of screen
+            PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
+            //scene->MapId = stage;
+            int BLOCK_SIZE = 64;
+            int mapH = scene->MapHeight * BLOCK_SIZE;
+
+            float baselineY = mapH - (1.5 * screenH);     // where the bottom of the bitmap lines up with bottom of screen
             float camJump   = std::min(cam.y, float(screenH)); // only care when cam.y < 0 (you’ve jumped up)
             float vertFactor = parallaxFactors[i];
             float fy         = baselineY - (camJump * vertFactor);

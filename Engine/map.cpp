@@ -7,6 +7,7 @@
 #include "Sprite.hpp"
 #include "UI/Component/Image.hpp"
 #include "Engine/GameEngine.hpp"
+#include "Engine/map.hpp"
 #include <iostream>
 
 using namespace Engine;
