@@ -63,13 +63,14 @@ void BoardingScene::Draw() const {
     ALLEGRO_COLOR backcolor = (backHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR logoutcolor = (logoutHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR friendlistcolor = (friendlistHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
+    ALLEGRO_COLOR leaderboardcolor = (leaderboardHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
 
     al_draw_text(PlayFont, playcolor, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
     al_draw_text(PlayFont, settingcolor, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
     al_draw_text(PlayFont, backcolor, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
     al_draw_text(PlayFont, logoutcolor, w * 0.8, h * 0.8, ALLEGRO_ALIGN_CENTER, "LOGOUT");
     al_draw_text(PlayFont, friendlistcolor, w * 0.8, h * 0.175, ALLEGRO_ALIGN_CENTER, "FRIENDLIST");
-
+    al_draw_text(PlayFont, leaderboardcolor, w * 0.8, h * 0.275, ALLEGRO_ALIGN_CENTER, "LEADERBOARD");
 
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
         0, 0, sw, sh,
@@ -105,6 +106,7 @@ void BoardingScene::Update(float deltatime) {
         backHover = false;
         logoutHover = false;
         friendlistHover = false;
+        leaderboardHover = false;
     }
     else if(mouseIn(mouse.x, mouse.y, startx, h * 0.675 - offset, sw, sh)) {
         playHover = false;
@@ -112,6 +114,7 @@ void BoardingScene::Update(float deltatime) {
         backHover = false;
         logoutHover = false;
         friendlistHover = false;
+        leaderboardHover = false;
     }
     else if(mouseIn(mouse.x, mouse.y, startx, h * 0.775 - offset, sw, sh)) {
         playHover = false;
@@ -119,6 +122,7 @@ void BoardingScene::Update(float deltatime) {
         backHover = true;
         logoutHover = false;
         friendlistHover = false;
+        leaderboardHover = false;
     }
     else if (mouseIn(mouse.x, mouse.y, dxlogout, dylogout, sw, sh)) {
         playHover = false;
@@ -126,6 +130,7 @@ void BoardingScene::Update(float deltatime) {
         backHover = false;
         logoutHover = true;
         friendlistHover = false;
+        leaderboardHover = false;
     }
     else if (mouseIn(mouse.x, mouse.y, dxlogout - 20, h * 0.175 - offset, sw + 20, sh)) {
         playHover = false;
@@ -133,6 +138,15 @@ void BoardingScene::Update(float deltatime) {
         backHover = false;
         logoutHover = false;
         friendlistHover = true;
+        leaderboardHover = false;
+    }
+    else if (mouseIn(mouse.x, mouse.y, dxlogout - 20, h * 0.275 - offset, sw + 20, sh)) {
+        playHover = false;
+        settingHover = false;
+        backHover = false;
+        logoutHover = false;
+        friendlistHover = false;
+        leaderboardHover = true;
     }
     else {
         playHover = false;
@@ -140,6 +154,7 @@ void BoardingScene::Update(float deltatime) {
         backHover = false;
         logoutHover = false;
         friendlistHover = false;
+        leaderboardHover = false;
     }
 }
 void BoardingScene::OnMouseDown(int button, int mx, int my) {
@@ -179,6 +194,9 @@ void BoardingScene::OnMouseDown(int button, int mx, int my) {
         }
         else if (mouseIn(mx, my, logoutdx - 20, h * 0.175 - offset, sw + 20, sh)) {
             Engine::GameEngine::GetInstance().ChangeScene("friendlist");
+        }
+        else if (mouseIn(mx, my, logoutdx - 20, h * 0.275 - offset, sw + 20, sh)) {
+            Engine::GameEngine::GetInstance().ChangeScene("leaderboard");
         }
     }
 }

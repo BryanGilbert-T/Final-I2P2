@@ -30,6 +30,7 @@ public:
     bool backHover = false;
     bool logoutHover = false;
     bool friendlistHover = false;
+    bool leaderboardHover = false;
 
 
     ALLEGRO_FONT* PlayFont;
