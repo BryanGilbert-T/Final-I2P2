@@ -167,6 +167,21 @@ void PlayScene::findTeleport() {
 
                 file.close();
             }
+            if(MapId + 1 == 3) {
+                int nextx = 10 * BlockSize - (100 - BlockSize);
+                int nexty = 3 * BlockSize - (100 - BlockSize);
+
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 3 << " " << nextx << " " << nexty
+                << " " << 0 << " " << player.hp;
+
+                file.close();
+            }
             Engine::GameEngine::GetInstance().ChangeScene("play");
             return;
         }
