@@ -41,28 +41,35 @@ namespace Engine {
 
     void ParallaxBackground::Draw(const Camera& cam) {
         int screenW = static_cast<int>(cam.width);
-        //int screenH = static_cast<int>(cam.height);
+        int screenH = static_cast<int>(cam.height);
 
         for (size_t i = 0; i < layers.size(); i++) {
             ALLEGRO_BITMAP* bmp = layers[i];
             if (!bmp) continue;
 
             int bw = al_get_bitmap_width(bmp);
-            //int bh = al_get_bitmap_height(bmp);
+            int bh = al_get_bitmap_height(bmp);
             float factor = parallaxFactors[i];
 
             // inside ParallaxBackground::Draw(...)
-            float rawX = cam.x * parallaxFactors[i] + offsetX[i];
+            float rawX = cam.x * factor + offsetX[i];
             float wrapX = std::fmod(rawX, bw);
             if (wrapX < 0) wrapX += bw;
             float ox = -wrapX;
 
-            // if you only want one vertical row:
-            float oy = -cam.y + offsetY[i];
+            float baselineY = 150;     // where the bottom of the bitmap lines up with bottom of screen
+            float camJump   = std::min(cam.y, float(screenH)); // only care when cam.y < 0 (you’ve jumped up)
+            float vertFactor = parallaxFactors[i];
+            float fy         = baselineY - (camJump * vertFactor);
+            float oy        = fy;
 
-            for (float x = ox; x < screenW + bw; x += bw) {
+            std::cout << camJump << std::endl;
+            std::cout << oy << std::endl;
+
+            for (float x = ox; x <= screenW + (2*bw); x += bw) {
                 al_draw_bitmap(bmp, x, oy, 0);
             }
+
         }
     }
 
