@@ -70,7 +70,7 @@ void PlayScene::Initialize() {
     int halfH = h / 2;
 
     Engine::ImageButton *btn;
-    btn = new Engine::ImageButton("play-scene/pause-btn.png", "play-scene/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
+    btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
 
@@ -81,9 +81,9 @@ void PlayScene::Initialize() {
     };
     std::vector<float> factors = {0.0f, 0.1f, 0.25f};
     MountainSceneBg.Initialize(layers, factors);
-    MountainSceneBg.SetLayerOffset(0, 0, 200);
-    MountainSceneBg.SetLayerOffset(1, 0, 50);   // mountains shifted right/down
-    MountainSceneBg.SetLayerOffset(2, 0, 150 );   // trees shifted left/up
+    MountainSceneBg.SetLayerOffset(0, 0, -700);
+    MountainSceneBg.SetLayerOffset(1, 0, 0);   // mountains shifted right/down
+    MountainSceneBg.SetLayerOffset(2, 0, 0 );   // trees shifted left/up
 
     teleportLeft.clear();
     teleportRight.clear();

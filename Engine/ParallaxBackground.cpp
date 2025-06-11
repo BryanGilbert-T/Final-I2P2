@@ -68,8 +68,7 @@ namespace Engine {
             float camJump   = std::min(cam.y, float(screenH)); // only care when cam.y < 0 (you’ve jumped up)
             float vertFactor = parallaxFactors[i];
             float fy         = baselineY - (camJump * vertFactor);
-            float oy        = fy;
-
+            float oy        = fy + offsetY[i];
 
             for (float x = ox; x <= screenW + (2*bw); x += bw) {
                 al_draw_bitmap(bmp, x, oy, 0);
