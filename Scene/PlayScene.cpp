@@ -64,7 +64,7 @@ void PlayScene::Initialize() {
     money = 150;
     SpeedMult = 1;
     cam.Update(0, 0);
-
+    elapsedTime = 0.0f;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -346,6 +346,7 @@ void PlayScene::findTeleport() {
 
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+    elapsedTime += deltaTime;
     if (player.hp == 0) {
         player.isHit = false;
         player.hitTimer = 0;
@@ -418,6 +419,30 @@ void PlayScene::Draw() const {
     al_draw_scaled_bitmap(HealthUIBg, 0, 0, al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg),
                     halfW - al_get_bitmap_width(HealthUIBg)/2, h * 0.9 + 10,
                     al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg), 0);
+
+    //LOCATION
+    const float delay = 1.0f;
+    const float fade  = 1.0f;
+    const float hold  = 3.0f;
+
+    // compute the 4 phase boundaries:
+    const float t0 = delay;           // end of delay
+    const float t1 = t0 + fade;       // end of fade-in
+    const float t2 = t1 + hold;       // end of hold
+    const float t3 = t2 + fade;       // end of fade-out
+
+    float alpha;
+    if      (elapsedTime < t0)        alpha = 0.0f;                                        // still in delay
+    else if (elapsedTime < t1)        alpha = (elapsedTime - t0) / fade;                   // fade-in (0→1)
+    else if (elapsedTime < t2)        alpha = 1.0f;                                        // hold at full alpha
+    else if (elapsedTime < t3)        alpha = 1.0f - (elapsedTime - t2) / fade;            // fade-out (1→0)
+    else                              alpha = 0.0f;
+
+    ALLEGRO_BITMAP* bmp = Locations[MapId-1];
+    al_draw_tinted_scaled_bitmap(bmp, al_map_rgba_f(1, 1, 1, alpha), 0, 0, al_get_bitmap_width(bmp), al_get_bitmap_height(bmp), halfW - al_get_bitmap_width(bmp)/2, h * 0.07,
+        al_get_bitmap_width(bmp), al_get_bitmap_height(bmp), 0);
+
+
 
     if (player.hp == 0) {
         const int recw = 600;
