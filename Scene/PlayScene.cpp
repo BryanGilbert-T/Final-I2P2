@@ -65,6 +65,9 @@ void PlayScene::Initialize() {
     SpeedMult = 1;
     cam.Update(0, 0);
 
+    shop = nullptr;
+
+    rng.seed(std::random_device{}());
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -350,6 +353,42 @@ void PlayScene::Update(float deltaTime) {
     if (ambientTimer >= AmbientCycle)
         ambientTimer -= AmbientCycle;
 
+    int newPhase = int((ambientTimer / AmbientCycle) * 6.0f) % 6;
+
+    // if we just entered a new phase:
+    if (newPhase != currentPhase) {
+        currentPhase = newPhase;
+        // roll 1-in-5 chance:
+        isRaining = (rainRoll(rng) == 0);
+        // clear any leftover drops
+        drops.clear();
+    }
+
+    // if raining, spawn & update raindrops
+    if (isRaining) {
+        // spawn e.g. 50 drops per second:
+        static const float spawnRate = 50.0f;
+        static float    spawnAcc  = 0.0f;
+        spawnAcc += spawnRate * deltaTime;
+        while (spawnAcc >= 1.0f) {
+            spawnAcc -= 1.0f;
+            Raindrop d;
+            d.x     = float(rng() % Engine::GameEngine::GetInstance().getVirtW());
+            d.y     = -10.0f;                     // start just above screen
+            d.speed = 400.0f + float(rng()%200);  // px/sec
+            drops.push_back(d);
+        }
+
+        // move drops
+        for (auto &d : drops) {
+            d.y += d.speed * deltaTime;
+        }
+        // remove off‐screen
+        drops.erase(std::remove_if(drops.begin(), drops.end(),
+            [&](auto &d){ return d.y > Engine::GameEngine::GetInstance().getVirtH(); }),
+            drops.end());
+    }
+
     if (player.hp == 0) {
         player.isHit = false;
         player.hitTimer = 0;
@@ -363,6 +402,10 @@ void PlayScene::Update(float deltaTime) {
     OnKeyHold();
     player.Update(deltaTime);
     findTeleport();
+
+    if (shop) {
+        shop->Update(deltaTime);
+    }
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -439,7 +482,6 @@ void PlayScene::Draw() const {
     for (int i = 0; i < 3; i++) {
         amb[i] = A[i] + localT * (B[i] - A[i]);
     }
-    std::cout << segment << " " << amb[0] << " " << amb[1] << " " << amb[2] << std::endl;
 
     // feed to shader
     al_use_shader(lightShader);
@@ -448,11 +490,27 @@ void PlayScene::Draw() const {
 
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
+    if (shop) {
+        shop->Draw(cam);
+    }
 
     al_use_shader(nullptr);
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
         e->Draw(cam);
+    }
+    if (isRaining) {
+        for (auto &d : drops) {
+            float lx = d.x;
+            float ly = d.y;
+            float ly2 = ly + 15.0f; // length of the streak
+
+            // draw a thin semi-transparent line:
+            al_draw_line(lx,  ly,
+                         lx,  ly2,
+                         al_map_rgba(200,200,255,120),
+                         3.0f);
+        }
     }
     Group::Draw();
     //HEALTH UI
@@ -713,6 +771,8 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_DIRT;
             } else if (num == 2) {
                 mapState[i][j] = TILE_SKY;
+                shop = new Shop(j * BlockSize - (200 - BlockSize), i * BlockSize - (200 - BlockSize));
+                // shop
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
@@ -725,7 +785,6 @@ void PlayScene::ReadMap() {
             } else if (num == 6) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new BossEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
-
             }
         }
     }

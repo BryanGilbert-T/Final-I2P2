@@ -7,8 +7,10 @@
 #include <utility>
 #include <vector>
 #include <set>
+#include <random>
 
 #include "Engine/IScene.hpp"
+#include "Shop/Shop.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/map.hpp"
 #include "Engine/ParallaxBackground.hpp"
@@ -38,8 +40,19 @@ protected:
     ALLEGRO_BITMAP* loadingBg;
 
 public:
+    Shop* shop;
     float ambientTimer    = 0.0f;                         // seconds elapsed
     static constexpr float AmbientCycle = 4.0f * 60.0f;  // 720 seconds
+    bool    isRaining     = false;
+    int     currentPhase  = -1;       // last‐seen index 0…5
+    std::mt19937 rng;                 // random engine
+    std::uniform_int_distribution<int> rainRoll{0,1}; // 0…4
+
+    struct Raindrop {
+        float x, y, speed;
+    };
+    std::vector<Raindrop> drops;
+
     void DrawLoading(int step);
     ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND

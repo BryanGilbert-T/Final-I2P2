@@ -67,6 +67,8 @@ add_executable(${PROJECT_NAME}
         Player/Player.cpp
         Player/Player.hpp
 
+        Shop/Shop.cpp
+
         UI/Animation/DirtyEffect.cpp
         UI/Animation/ExplosionEffect.cpp
 
