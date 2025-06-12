@@ -316,7 +316,7 @@ namespace Engine {
         float offX  = (dispW - outW) * 0.5f;
         float offY  = (dispH - outH) * 0.5f;
         int vx = int((st.x - offX) / scale);
-        int vy = int((st.y - offY) / scale);
+        int vy = int((st.y - offY) / scale) + 25;
         return Point(vx, vy);
     }
     bool GameEngine::IsKeyDown(int keyCode) const {
