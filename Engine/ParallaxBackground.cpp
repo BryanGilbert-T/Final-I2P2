@@ -41,7 +41,6 @@ namespace Engine {
     }
 
     void ParallaxBackground::Draw(const Camera& cam) {
-        al_clear_to_color(al_map_rgb(0, 0, 0));
         int screenW = static_cast<int>(cam.width);
         int screenH = static_cast<int>(cam.height);
 
@@ -71,6 +70,7 @@ namespace Engine {
             float oy        = fy + offsetY[i];
 
             for (float x = ox; x <= screenW + (2*bw); x += bw) {
+                al_set_shader_sampler("texture", bmp, 0);
                 al_draw_bitmap(bmp, x, oy, 0);
             }
 

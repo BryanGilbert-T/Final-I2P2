@@ -76,6 +76,7 @@ public:
     std::list<int> keyStrokes;
     ALLEGRO_BITMAP* HealthUIBg;
     ALLEGRO_BITMAP* HealthUIValue;
+    ALLEGRO_SHADER* lightShader;
     float hpDraw;
     std::vector<ALLEGRO_BITMAP*> Locations;
     static Engine::Point GetClientSize();

@@ -54,6 +54,7 @@ void Map::DrawMap(Camera cam) {
     get_map_offset();
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
+    ALLEGRO_SHADER* shader = al_get_current_shader();
 
     for (int i = 0; i < MapHeight; i++) {
         for (int j = 0; j < MapWidth; j++) {
@@ -65,6 +66,7 @@ void Map::DrawMap(Camera cam) {
             switch (MapState[i][j]) {
                 case TILE_DIRT: {
                     ALLEGRO_BITMAP* center = floor_bitmap[1][1];
+                    if (shader) al_set_shader_sampler("texture", center, 0);
                     al_draw_scaled_bitmap(center,
                         0,0,
                         al_get_bitmap_width(center),
@@ -80,6 +82,7 @@ void Map::DrawMap(Camera cam) {
                         int row = idx/3;
                         int col = idx%3;
                         ALLEGRO_BITMAP* variant = floor_bitmap[row][col];
+                        if (shader) al_set_shader_sampler("texture", variant, 0);
                         al_draw_scaled_bitmap(variant,
                             0,0,
                             al_get_bitmap_width(variant),

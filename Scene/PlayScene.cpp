@@ -9,6 +9,7 @@
 #include <queue>
 #include <string>
 #include <vector>
+#include <filesystem>
 
 #include "Enemy/Enemy.hpp"
 #include "Enemy/Knight.hpp"
@@ -69,6 +70,38 @@ void PlayScene::Initialize() {
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
+
+    //SHADER
+    lightShader = al_create_shader(ALLEGRO_SHADER_AUTO);
+    std::cerr << "CWD: " << std::filesystem::current_path() << "\n";
+    std::ifstream v("Resource/light.vert"), f("Resource/light.frag");
+    if (!v.is_open()) std::cerr << "→ Cannot open Resource/light.vert\n";
+    if (!f.is_open()) std::cerr << "→ Cannot open Resource/light.frag\n";
+
+    // (2) Attach once, check those bools:
+    bool okV = al_attach_shader_source_file(lightShader,
+                    ALLEGRO_VERTEX_SHADER,
+                    "Resource/light.vert");
+    bool okF = al_attach_shader_source_file(lightShader,
+                    ALLEGRO_PIXEL_SHADER,
+                    "Resource/light.frag");
+    std::cerr << "attach vertex: " << okV
+              << ", attach fragment: " << okF << "\n";
+
+    if (!okV || !okF) {
+        std::cerr << "→ Make sure Resource/light.vert & .frag live under your CWD/Resource/\n";
+    }
+    bool built = al_build_shader(lightShader);
+    const char* log = al_get_shader_log(lightShader);
+    std::cerr
+      << (built ? "[OK]  " : "[FAIL] ")
+      << "Shader build result:\n"
+      << log << "\n";
+    // (3) Only now build the shader:
+    if (!al_build_shader(lightShader)) {
+        std::cerr << "Shader build error:\n"
+                  << al_get_shader_log(lightShader) << "\n";
+    }
 
     //UI
     Engine::ImageButton *btn;
@@ -171,6 +204,7 @@ void PlayScene::Terminate() {
         }
     }
 
+    if (lightShader) al_destroy_shader(lightShader);
 
 
     if (PauseFont) {
@@ -350,15 +384,22 @@ void PlayScene::Update(float deltaTime) {
     }
 }
 void PlayScene::Draw() const {
+    //al_clear_to_color(al_map_rgb(0, 0, 0));
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
 
     // draw parallax behind everything
-    MountainSceneBg.Draw(cam);
+    al_use_shader(lightShader);
+    float amb[3] = {0.7, 0.7, 0.55}; // White ambient light
+    al_set_shader_float_vector("ambient", 3, amb, 1);
+    al_set_shader_int("numLights", 1); // No dynamic lights for static geometry
 
+    MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
+
+    al_use_shader(nullptr);
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
         e->Draw(cam);
