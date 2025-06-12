@@ -346,6 +346,10 @@ void PlayScene::findTeleport() {
 
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+    ambientTimer += deltaTime;
+    if (ambientTimer >= AmbientCycle)
+        ambientTimer -= AmbientCycle;
+
     if (player.hp == 0) {
         player.isHit = false;
         player.hitTimer = 0;
@@ -398,10 +402,49 @@ void PlayScene::Draw() const {
     int halfW = w / 2;
 
     // draw parallax behind everything
+    float phase = ambientTimer / AmbientCycle;
+
+    // Option A: smooth cosine-based brightness in [0,1]:
+    //    at phase=0 → brightness=1 (full day)
+    //    at phase=0.5 → brightness=0 (midnight)
+    float brightness = 0.5f * (cosf(phase * 2.0f * M_PI) + 1.0f);
+
+    // Define your day‐ and night‐colours:
+    static constexpr float MorningAmb[3]   = { 0.5f, 0.35f, 0.4f };   // cool dawn
+    static constexpr float NoonAmb[3]      = { 0.7f, 0.7f, 0.55f };   // bright day
+    static constexpr float NormalAmb[3]    = { 1.0f, 1.0f, 1.0f };
+    static constexpr float AfternoonAmb[3] = { 0.8f, 0.6f, 0.4f };    // warm late day
+    static constexpr float DuskNightAmb[3]    = { 0.5f, 0.3f, 0.5f };
+    static constexpr float EveningAmb[3]   = { 0.2f, 0.15f, 0.3f };   // purple dusk
+
+    // Interpolate each channel:
+    float scaled = phase * 6.0f;
+    int   segment = static_cast<int>(scaled) % 6;      // 0,1,2,3
+    float localT = scaled - float(segment);            // 0→1 within the segment
+
+    // pick endpoints
+    const float* A;
+    const float* B;
+    switch (segment) {
+        case 0: A = NormalAmb;   B = AfternoonAmb;    break;
+        case 1: A = AfternoonAmb; B = DuskNightAmb; break;
+        case 2: A = DuskNightAmb; B = EveningAmb;  break;
+        case 3: A = EveningAmb; B = MorningAmb;  break;
+        case 4: A = MorningAmb; B = NoonAmb;  break;
+        default: A = NoonAmb; B = NormalAmb;  break;
+    }
+
+    // interpolate
+    float amb[3];
+    for (int i = 0; i < 3; i++) {
+        amb[i] = A[i] + localT * (B[i] - A[i]);
+    }
+    std::cout << segment << " " << amb[0] << " " << amb[1] << " " << amb[2] << std::endl;
+
+    // feed to shader
     al_use_shader(lightShader);
-    float amb[3] = {0.7, 0.7, 0.55}; // White ambient light
     al_set_shader_float_vector("ambient", 3, amb, 1);
-    al_set_shader_int("numLights", 1); // No dynamic lights for static geometry
+    al_set_shader_int("numLights", 1);
 
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);

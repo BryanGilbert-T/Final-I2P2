@@ -38,6 +38,8 @@ protected:
     ALLEGRO_BITMAP* loadingBg;
 
 public:
+    float ambientTimer    = 0.0f;                         // seconds elapsed
+    static constexpr float AmbientCycle = 4.0f * 60.0f;  // 720 seconds
     void DrawLoading(int step);
     ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
