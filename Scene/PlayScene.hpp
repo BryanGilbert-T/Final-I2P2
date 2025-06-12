@@ -74,7 +74,10 @@ public:
     std::vector<std::vector<int>> mapDistance;
     std::list<std::pair<int, float>> enemyWaveData;
     std::list<int> keyStrokes;
-    ALLEGRO_BITMAP* finishBmp;
+    ALLEGRO_BITMAP* HealthUIBg;
+    ALLEGRO_BITMAP* HealthUIValue;
+    float hpDraw;
+    std::vector<ALLEGRO_BITMAP*> Locations;
     static Engine::Point GetClientSize();
     explicit PlayScene() = default;
     void Initialize() override;
