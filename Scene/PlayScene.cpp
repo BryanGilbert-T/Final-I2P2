@@ -426,11 +426,11 @@ void PlayScene::Draw() const {
     const float* A;
     const float* B;
     switch (segment) {
-        case 0: A = NormalAmb;   B = AfternoonAmb;    break;
-        case 1: A = AfternoonAmb; B = DuskNightAmb; break;
-        case 2: A = DuskNightAmb; B = EveningAmb;  break;
-        case 3: A = EveningAmb; B = MorningAmb;  break;
-        case 4: A = MorningAmb; B = NoonAmb;  break;
+        case 1: A = NormalAmb;   B = AfternoonAmb;    break;
+        case 2: A = AfternoonAmb; B = DuskNightAmb; break;
+        case 3: A = DuskNightAmb; B = EveningAmb;  break;
+        case 4: A = EveningAmb; B = MorningAmb;  break;
+        case 5: A = MorningAmb; B = NoonAmb;  break;
         default: A = NoonAmb; B = NormalAmb;  break;
     }
 
