@@ -13,6 +13,7 @@
 #include "Shop/Shop.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/map.hpp"
+#include "Engine/Location.hpp"
 #include "Engine/ParallaxBackground.hpp"
 #include "Engine/utility.hpp"
 #include "Player/Player.hpp"
@@ -24,6 +25,7 @@ namespace Engine {
     class Label;
     class Sprite;
     class Map;
+    class Location;
 }   // namespace Engine
 
 
@@ -54,12 +56,14 @@ public:
     std::vector<Raindrop> drops;
 
     void DrawLoading(int step);
+    void DrawLocation(float elapsedTime);
     ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
     static Player player;
     std::set<int> keyHeld;
     static Camera cam;
     static Engine::Map map;
+    static Engine::Location location;
     static bool DebugMode;
     static const std::vector<Engine::Point> directions;
     static int MapWidth, MapHeight;
@@ -92,6 +96,7 @@ public:
     ALLEGRO_BITMAP* HealthUIBg;
     ALLEGRO_BITMAP* HealthUIValue;
     ALLEGRO_SHADER* lightShader;
+    float elapsedTime;
     float hpDraw;
     std::vector<ALLEGRO_BITMAP*> Locations;
     static Engine::Point GetClientSize();

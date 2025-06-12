@@ -25,6 +25,7 @@
 #include "UI/Animation/DirtyEffect.hpp"
 #include "UI/Component/Label.hpp"
 #include "Enemy/Boss.hpp"
+#include "Engine/Location.hpp"
 
 // TODO HACKATHON-4 (1/3): Trace how the game handles keyboard input.
 // TODO HACKATHON-4 (2/3): Find the cheat code sequence in this file.
@@ -38,6 +39,7 @@ const int PlayScene::BlockSize = 64;
 const float PlayScene::DangerTime = 7.61;
 Engine::Map PlayScene::map;
 Player PlayScene::player;
+Engine::Location PlayScene::location;
 int PlayScene::MapWidth = 64;
 int PlayScene::MapHeight = 64;
 Camera PlayScene::cam;
@@ -64,10 +66,7 @@ void PlayScene::Initialize() {
     money = 150;
     SpeedMult = 1;
     cam.Update(0, 0);
-
-    shop = nullptr;
-
-    rng.seed(std::random_device{}());
+    location.Initialize();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -107,13 +106,11 @@ void PlayScene::Initialize() {
     }
 
     //UI
+    elapsedTime = 0.0f;
     Engine::ImageButton *btn;
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
-    Locations = {
-        al_load_bitmap("Resource/images/play-scene/ui/loc-mount-huaguo.png")
-    };
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
 
@@ -343,46 +340,7 @@ void PlayScene::findTeleport() {
 
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
-    ambientTimer += deltaTime;
-    if (ambientTimer >= AmbientCycle)
-        ambientTimer -= AmbientCycle;
-
-    int newPhase = int((ambientTimer / AmbientCycle) * 6.0f) % 6;
-
-    // if we just entered a new phase:
-    if (newPhase != currentPhase) {
-        currentPhase = newPhase;
-        // roll 1-in-5 chance:
-        isRaining = (rainRoll(rng) == 0);
-        // clear any leftover drops
-        drops.clear();
-    }
-
-    // if raining, spawn & update raindrops
-    if (isRaining) {
-        // spawn e.g. 50 drops per second:
-        static const float spawnRate = 50.0f;
-        static float    spawnAcc  = 0.0f;
-        spawnAcc += spawnRate * deltaTime;
-        while (spawnAcc >= 1.0f) {
-            spawnAcc -= 1.0f;
-            Raindrop d;
-            d.x     = float(rng() % Engine::GameEngine::GetInstance().getVirtW());
-            d.y     = -10.0f;                     // start just above screen
-            d.speed = 400.0f + float(rng()%200);  // px/sec
-            drops.push_back(d);
-        }
-
-        // move drops
-        for (auto &d : drops) {
-            d.y += d.speed * deltaTime;
-        }
-        // remove off‐screen
-        drops.erase(std::remove_if(drops.begin(), drops.end(),
-            [&](auto &d){ return d.y > Engine::GameEngine::GetInstance().getVirtH(); }),
-            drops.end());
-    }
-
+    location.Update(deltaTime);
     if (player.hp == 0) {
         player.isHit = false;
         player.hitTimer = 0;
@@ -396,10 +354,6 @@ void PlayScene::Update(float deltaTime) {
     OnKeyHold();
     player.Update(deltaTime);
     findTeleport();
-
-    if (shop) {
-        shop->Update(deltaTime);
-    }
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -439,74 +393,21 @@ void PlayScene::Draw() const {
     int halfW = w / 2;
 
     // draw parallax behind everything
-    float phase = ambientTimer / AmbientCycle;
-
-    // Option A: smooth cosine-based brightness in [0,1]:
-    //    at phase=0 → brightness=1 (full day)
-    //    at phase=0.5 → brightness=0 (midnight)
-    float brightness = 0.5f * (cosf(phase * 2.0f * M_PI) + 1.0f);
-
-    // Define your day‐ and night‐colours:
-    static constexpr float MorningAmb[3]   = { 0.5f, 0.35f, 0.4f };   // cool dawn
-    static constexpr float NoonAmb[3]      = { 0.7f, 0.7f, 0.55f };   // bright day
-    static constexpr float NormalAmb[3]    = { 1.0f, 1.0f, 1.0f };
-    static constexpr float AfternoonAmb[3] = { 0.8f, 0.6f, 0.4f };    // warm late day
-    static constexpr float DuskNightAmb[3]    = { 0.5f, 0.3f, 0.5f };
-    static constexpr float EveningAmb[3]   = { 0.2f, 0.15f, 0.3f };   // purple dusk
-
-    // Interpolate each channel:
-    float scaled = phase * 6.0f;
-    int   segment = static_cast<int>(scaled) % 6;      // 0,1,2,3
-    float localT = scaled - float(segment);            // 0→1 within the segment
-
-    // pick endpoints
-    const float* A;
-    const float* B;
-    switch (segment) {
-        case 1: A = NormalAmb;   B = AfternoonAmb;    break;
-        case 2: A = AfternoonAmb; B = DuskNightAmb; break;
-        case 3: A = DuskNightAmb; B = EveningAmb;  break;
-        case 4: A = EveningAmb; B = MorningAmb;  break;
-        case 5: A = MorningAmb; B = NoonAmb;  break;
-        default: A = NoonAmb; B = NormalAmb;  break;
-    }
-
-    // interpolate
-    float amb[3];
-    for (int i = 0; i < 3; i++) {
-        amb[i] = A[i] + localT * (B[i] - A[i]);
-    }
-
-    // feed to shader
     al_use_shader(lightShader);
+    float amb[3] = {0.7, 0.7, 0.55}; // White ambient light
     al_set_shader_float_vector("ambient", 3, amb, 1);
-    al_set_shader_int("numLights", 1);
+    al_set_shader_int("numLights", 1); // No dynamic lights for static geometry
 
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
-    if (shop) {
-        shop->Draw(cam);
-    }
 
     al_use_shader(nullptr);
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
         e->Draw(cam);
     }
-    if (isRaining) {
-        for (auto &d : drops) {
-            float lx = d.x;
-            float ly = d.y;
-            float ly2 = ly + 15.0f; // length of the streak
-
-            // draw a thin semi-transparent line:
-            al_draw_line(lx,  ly,
-                         lx,  ly2,
-                         al_map_rgba(200,200,255,120),
-                         3.0f);
-        }
-    }
     Group::Draw();
+    location.Draw(MapId);
     //HEALTH UI
     al_draw_scaled_bitmap(HealthUIValue, 0, 0, al_get_bitmap_width(HealthUIValue), al_get_bitmap_height(HealthUIValue),
                         halfW - 224, h * 0.9 + 10 + 15, al_get_bitmap_width(HealthUIValue) * hpDraw, al_get_bitmap_height(HealthUIValue),0);
@@ -595,6 +496,7 @@ void PlayScene::Draw() const {
 
     }
 }
+
 void PlayScene::OnMouseDown(int button, int mx, int my) {
     if (pause && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();
@@ -765,8 +667,6 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_DIRT;
             } else if (num == 2) {
                 mapState[i][j] = TILE_SKY;
-                shop = new Shop(j * BlockSize - (200 - BlockSize), i * BlockSize - (200 - BlockSize));
-                // shop
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
@@ -779,6 +679,7 @@ void PlayScene::ReadMap() {
             } else if (num == 6) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new BossEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
+
             }
         }
     }
