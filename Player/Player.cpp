@@ -326,7 +326,7 @@ bool Player::enemyInRange(int x, int y) {
         }
     } else if (dir == LEFT) {
         if (x < this->x &&
-            x > this->x - attackRadius) {
+            x > this->x - attackRadius / 2) {
             return true;
         }
     }
