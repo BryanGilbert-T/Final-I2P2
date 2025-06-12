@@ -70,10 +70,16 @@ void PlayScene::Initialize() {
     int halfW = w / 2;
     int halfH = h / 2;
 
+    //UI
     Engine::ImageButton *btn;
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
+    Locations = {
+        al_load_bitmap("Resource/images/play-scene/ui/loc-mount-huaguo.png")
+    };
+    HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
+    HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
 
     std::vector<std::string> layers = {
         "Resource/images/play-scene/mountains/sky.png",
@@ -81,6 +87,7 @@ void PlayScene::Initialize() {
         "Resource/images/play-scene/mountains/tree.png"
     };
     std::vector<float> factors = {0.0f, 0.1f, 0.25f};
+
     MountainSceneBg.Initialize(layers, factors);
     MountainSceneBg.SetLayerOffset(0, 0, -700);
     MountainSceneBg.SetLayerOffset(1, 0, 0);   // mountains shifted right/down
@@ -317,6 +324,8 @@ void PlayScene::Update(float deltaTime) {
     int halfW = w / 2;
     int halfH = h / 2;
 
+    hpDraw = std::clamp( float(player.hp) / 100.0f, 0.0f, 1.0f );
+
     cam.x = player.x - halfW - BlockSize / 2;
     cam.y = player.y - halfH - BlockSize / 2;
 
@@ -344,6 +353,7 @@ void PlayScene::Draw() const {
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
 
     // draw parallax behind everything
     MountainSceneBg.Draw(cam);
@@ -354,6 +364,12 @@ void PlayScene::Draw() const {
         e->Draw(cam);
     }
     Group::Draw();
+    //HEALTH UI
+    al_draw_scaled_bitmap(HealthUIValue, 0, 0, al_get_bitmap_width(HealthUIValue), al_get_bitmap_height(HealthUIValue),
+                        halfW - 224, h * 0.9 + 10 + 15, al_get_bitmap_width(HealthUIValue) * hpDraw, al_get_bitmap_height(HealthUIValue),0);
+    al_draw_scaled_bitmap(HealthUIBg, 0, 0, al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg),
+                    halfW - al_get_bitmap_width(HealthUIBg)/2, h * 0.9 + 10,
+                    al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg), 0);
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
