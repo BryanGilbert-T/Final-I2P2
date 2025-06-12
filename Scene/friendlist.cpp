@@ -39,10 +39,8 @@ void FriendListScene::Initialize() {
 
     DrawLoading(3);
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
     DrawLoading(4);
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
     DrawLoading(5);
     const int iconW = 87;
     const int iconH = 87;
@@ -73,8 +71,6 @@ void FriendListScene::Logout(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("login");
 }
 void FriendListScene::Terminate() {
-    AudioHelper::StopSample(bgmInstance);
-    bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
     if (Logo) al_destroy_bitmap(Logo);
     if (PlayFont) al_destroy_font(PlayFont);

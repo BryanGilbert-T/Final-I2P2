@@ -162,10 +162,7 @@ void PlayScene::Initialize() {
     std::cout << player.x << " " << player.y << std::endl;
     mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
-    deathBGMInstance = Engine::Resources::GetInstance().GetSampleInstance("astronomia.ogg");
-    Engine::Resources::GetInstance().GetBitmap("lose/benjamin-happy.png");
     // Start BGM.
-    bgmId = AudioHelper::PlayBGM("play.ogg");
 
     PauseFont = al_load_ttf_font("Resource/fonts/imfell.ttf", 16, 0);
     if (!PauseFont) {
@@ -181,9 +178,6 @@ void PlayScene::Pause(int stage) {
 }
 void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
-    AudioHelper::StopBGM(bgmId);
-    AudioHelper::StopSample(deathBGMInstance);
-    deathBGMInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
 
     if (changeScene == false) {

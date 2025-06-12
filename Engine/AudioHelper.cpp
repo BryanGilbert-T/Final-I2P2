@@ -7,6 +7,32 @@
 
 float AudioHelper::BGMVolume = 0.5;
 float AudioHelper::SFXVolume = 0.75;
+std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> AudioHelper::currentBgm = nullptr;
+
+std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> AudioHelper::PlayBgmOnce(
+    const std::string &audio, bool loop, float volume
+) {
+    if (!currentBgm) {
+        currentBgm = PlaySample(audio, loop, volume);
+    }
+    return currentBgm;
+}
+
+void AudioHelper::SwitchBgm(const std::string &audio, bool loop, float volume) {
+    if (currentBgm) {
+        StopSample(currentBgm);
+        currentBgm.reset();
+    }
+    currentBgm = PlaySample(audio, loop, volume);
+}
+
+void AudioHelper::StopBgm() {
+    if (currentBgm) {
+        StopSample(currentBgm);
+        currentBgm.reset();
+    }
+}
+
 ALLEGRO_SAMPLE_ID AudioHelper::PlayAudio(const std::string &audio) {
     ALLEGRO_SAMPLE *sample = Engine::Resources::GetInstance().GetSample(audio).get();
     ALLEGRO_SAMPLE_ID id;

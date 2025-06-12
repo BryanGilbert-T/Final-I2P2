@@ -11,6 +11,11 @@ private:
 public:
     static float BGMVolume;
     static float SFXVolume;
+    static std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> currentBgm;
+    static std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> PlayBgmOnce(
+        const std::string &audio, bool loop, float volume);
+    static void SwitchBgm(const std::string &audio, bool loop, float volume);
+    static void StopBgm();
     static ALLEGRO_SAMPLE_ID PlayAudio(const std::string &audio);
     static ALLEGRO_SAMPLE_ID PlayBGM(const std::string &audio);
     static void StopBGM(ALLEGRO_SAMPLE_ID sample);

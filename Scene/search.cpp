@@ -38,10 +38,8 @@ void SearchScene::Initialize() {
 
     DrawLoading(2);
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
     DrawLoading(3);
     const int iconW = 64;
     const int iconH = 64;
@@ -151,8 +149,6 @@ void SearchScene::Logout(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("login");
 }
 void SearchScene::Terminate() {
-    AudioHelper::StopSample(bgmInstance);
-    bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
     if (Logo) al_destroy_bitmap(Logo);
     if (PlayFont) al_destroy_font(PlayFont);
