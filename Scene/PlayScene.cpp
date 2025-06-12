@@ -114,6 +114,7 @@ void PlayScene::Initialize() {
     AddNewControlObject(btn);
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
+    vignette = al_load_bitmap("Resource/images/play-scene/vignete.png");
 
     std::vector<std::string> cloudLayers = {
         "Resource/images/play-scene/mountains/sky.png",
@@ -512,6 +513,7 @@ void PlayScene::Draw() const {
     }
     Group::Draw();
     location.Draw(MapId);
+    al_draw_tinted_scaled_bitmap(vignette, al_map_rgba(255, 255, 255, 50), 0, 0, al_get_bitmap_width(vignette), al_get_bitmap_height(vignette), 0, 0, w, h, 0);
     //HEALTH UI
     al_draw_scaled_bitmap(HealthUIValue, 0, 0, al_get_bitmap_width(HealthUIValue), al_get_bitmap_height(HealthUIValue),
                         halfW - 224, h * 0.9 + 10 + 15, al_get_bitmap_width(HealthUIValue) * hpDraw, al_get_bitmap_height(HealthUIValue),0);
