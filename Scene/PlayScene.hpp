@@ -17,6 +17,7 @@
 #include "Engine/ParallaxBackground.hpp"
 #include "Engine/utility.hpp"
 #include "Player/Player.hpp"
+#include "Engine/ParallaxCloud.hpp"
 
 class Turret;
 namespace Engine {
@@ -59,6 +60,7 @@ public:
     void DrawLocation(float elapsedTime);
     ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
+    static Engine::ParallaxCloud CloudBg;
     static Player player;
     std::set<int> keyHeld;
     static Camera cam;

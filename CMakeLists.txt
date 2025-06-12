@@ -47,6 +47,8 @@ add_executable(${PROJECT_NAME}
         Engine/utility.hpp
         Engine/Location.cpp
         Engine/Location.hpp
+        Engine/ParallaxCloud.cpp
+        Engine/ParallaxCloud.hpp
 
         Scene/LoseScene.cpp
         Scene/PlayScene.cpp
@@ -84,6 +86,8 @@ add_executable(${PROJECT_NAME}
         Engine/ParallaxBackground.cpp
         Engine/Location.hpp
         Engine/Location.cpp
+        Engine/ParallaxCloud.hpp
+        Engine/ParallaxCloud.cpp
 )
 
 # Vendored libcurl

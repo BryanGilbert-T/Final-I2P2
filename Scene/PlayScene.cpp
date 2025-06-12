@@ -44,6 +44,7 @@ int PlayScene::MapWidth = 64;
 int PlayScene::MapHeight = 64;
 Camera PlayScene::cam;
 Engine::ParallaxBackground PlayScene::MountainSceneBg;
+Engine::ParallaxCloud PlayScene::CloudBg;
 const std::vector<int> PlayScene::code = {
     ALLEGRO_KEY_UP, ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_DOWN,
     ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT,
@@ -114,17 +115,26 @@ void PlayScene::Initialize() {
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
 
-    std::vector<std::string> layers = {
+    std::vector<std::string> cloudLayers = {
         "Resource/images/play-scene/mountains/sky.png",
+        "Resource/images/play-scene/mountains/clouds-01.png",
+        "Resource/images/play-scene/mountains/clouds-02.png",
+    };
+    std::vector<float> cloudFactor = {0.0, 0.05f, 0.1f};
+    CloudBg.Initialize(cloudLayers, cloudFactor);
+    CloudBg.SetLayerOffset(0, 0, -700);
+    CloudBg.SetLayerOffset(1, 0, -200);
+    CloudBg.SetLayerOffset(2, 0, -100);
+
+    std::vector<std::string> layers = {
         "Resource/images/play-scene/mountains/mountains.png",
         "Resource/images/play-scene/mountains/tree.png"
     };
-    std::vector<float> factors = {0.0f, 0.1f, 0.25f};
+    std::vector<float> factors = {0.1f, 0.25f};
 
     MountainSceneBg.Initialize(layers, factors);
-    MountainSceneBg.SetLayerOffset(0, 0, -700);
-    MountainSceneBg.SetLayerOffset(1, 0, 0);   // mountains shifted right/down
-    MountainSceneBg.SetLayerOffset(2, 0, 0 );   // trees shifted left/up
+    MountainSceneBg.SetLayerOffset(0, 0, 0);   // mountains shifted right/down
+    MountainSceneBg.SetLayerOffset(1, 0, 0 );   // trees shifted left/up
 
     teleportLeft.clear();
     teleportRight.clear();
@@ -343,6 +353,7 @@ void PlayScene::findTeleport() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
     ambientTimer += deltaTime;
+    CloudBg.Update(deltaTime);
     if (ambientTimer >= AmbientCycle)
         ambientTimer -= AmbientCycle;
 
@@ -477,6 +488,7 @@ void PlayScene::Draw() const {
     al_set_shader_float_vector("ambient", 3, amb, 1);
     al_set_shader_int("numLights", 1); // No dynamic lights for static geometry
 
+    CloudBg.Draw(cam);
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
 
