@@ -45,6 +45,8 @@ add_executable(${PROJECT_NAME}
         Engine/map.hpp
         Engine/map.cpp
         Engine/utility.hpp
+        Engine/Location.cpp
+        Engine/Location.hpp
 
         Scene/LoseScene.cpp
         Scene/PlayScene.cpp
@@ -67,6 +69,8 @@ add_executable(${PROJECT_NAME}
         Player/Player.cpp
         Player/Player.hpp
 
+        Shop/Shop.cpp
+
         UI/Animation/DirtyEffect.cpp
         UI/Animation/ExplosionEffect.cpp
 
@@ -78,6 +82,8 @@ add_executable(${PROJECT_NAME}
         main.cpp
         Engine/ParallaxBackground.hpp
         Engine/ParallaxBackground.cpp
+        Engine/Location.hpp
+        Engine/Location.cpp
 )
 
 # Vendored libcurl
