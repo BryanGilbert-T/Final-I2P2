@@ -18,7 +18,10 @@ using namespace Engine;
 void Location::Initialize() {
     elapsedTime = 0.0;
     Locations = {
-        al_load_bitmap("Resource/images/play-scene/ui/loc-mount-huaguo.png")
+        al_load_bitmap("Resource/images/play-scene/ui/loc-mount-huaguo.png"),
+        al_load_bitmap("Resource/images/play-scene/ui/loc-eastern.png"),
+        al_load_bitmap("Resource/images/play-scene/ui/loc-moon.png")
+        //, al_load_bitmap("Resource/images/play-scene/ui/loc-thunder.png")
     };
 }
 
