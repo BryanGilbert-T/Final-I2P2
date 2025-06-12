@@ -346,6 +346,13 @@ void PlayScene::findTeleport() {
 
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+    if (player.hp == 0) {
+        player.isHit = false;
+        player.hitTimer = 0;
+        player.knockbackRemaining = 0;
+        player.knockbackDir = 0;
+        return;
+    }
     if (pause) {
         return;
     }
@@ -411,6 +418,41 @@ void PlayScene::Draw() const {
     al_draw_scaled_bitmap(HealthUIBg, 0, 0, al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg),
                     halfW - al_get_bitmap_width(HealthUIBg)/2, h * 0.9 + 10,
                     al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg), 0);
+
+    if (player.hp == 0) {
+        const int recw = 600;
+        const int rech = 400;
+        int left = w/2 - recw/2;
+        int top  = h/2 - rech/2;
+
+        const int ButtonW = 200;
+        const int ButtonH = 50;
+
+        // Compute center‐aligned button positions
+        int bx = w/2 - ButtonW/2;
+        int byContinue = top + 100;
+        int byExit     = byContinue + ButtonH + 20;
+
+        // draw button backgrounds
+        ALLEGRO_COLOR bg = al_map_rgb(60,60,60);
+        ALLEGRO_COLOR fg = al_map_rgb(255,255,255);
+        al_draw_filled_rectangle(bx,              byContinue,
+                                 bx + ButtonW,   byContinue + ButtonH,
+                                 bg);
+        al_draw_filled_rectangle(bx,              byExit,
+                                 bx + ButtonW,   byExit     + ButtonH,
+                                 bg);
+
+        // draw labels
+        al_draw_text(PauseFont, fg,
+                     bx + ButtonW/2, byContinue + ButtonH/2 - 8,
+                     ALLEGRO_ALIGN_CENTER, "Try Again");
+        al_draw_text(PauseFont, fg,
+                     bx + ButtonW/2, byExit + ButtonH/2 - 8,
+                     ALLEGRO_ALIGN_CENTER, "Exit");
+        return;
+    }
+
     if (DebugMode) {
         // Draw reverse BFS distance on all reachable blocks.
         for (int i = 0; i < MapHeight; i++) {
@@ -486,6 +528,56 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
         if (mx >= bx && mx <= bx + ButtonW &&
             my >= byE && my <= byE + ButtonH)
         {
+            Engine::GameEngine::GetInstance().ChangeScene("boarding");
+        }
+        return;
+    }
+
+    if ((player.hp == 0) && (button & 1)) {
+        const int w = Engine::GameEngine::GetInstance().getVirtW();
+        const int h = Engine::GameEngine::GetInstance().getVirtH();
+
+        const int recw = 600;
+        const int rech = 400;
+        int left = w/2 - recw/2;
+        int top  = h/2 - rech/2;
+
+        const int ButtonW = 200;
+        const int ButtonH = 50;
+
+        int bx   = w/2 - ButtonW/2;
+        int byC  = top + 100;
+        int byE  = byC + ButtonH + 20;
+
+        // Continue?
+        if (mx >= bx && mx <= bx + ButtonW &&
+            my >= byC && my <= byC + ButtonH)
+        {
+            std::ofstream file("Resource/account.txt"); // truncate mode by default
+            if (!file) {
+                std::cerr << "Failed to open file for writing.\n";
+            }
+
+            // Write new values into the file
+            file << player.username << " " << 1 << " " << 820 << " " << 1372
+            << " " << 0 << " " << 100;
+
+            file.close();
+
+            changeScene = true;
+
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            return;   // don’t fall through to normal click logic
+        }
+        // Exit?
+        if (mx >= bx && mx <= bx + ButtonW &&
+            my >= byE && my <= byE + ButtonH)
+        {
+            MapId = 1;
+            player.hp = 100;
+            player.x = 820;
+            player.y = 1372;
+
             Engine::GameEngine::GetInstance().ChangeScene("boarding");
         }
         return;
