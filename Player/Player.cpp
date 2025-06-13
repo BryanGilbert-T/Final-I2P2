@@ -112,6 +112,10 @@ void Player::Create(int hp, int x, int y, std::string name){
 
     animations[JUMP] = animations[IDLE];
 
+    //STAMINA
+    staminaBg = al_load_bitmap("Resource/images/play-scene/ui/stamina-bg.png");
+    staminaValue = al_load_bitmap("Resource/images/play-scene/ui/stamina-value.png");
+
     this->hp = hp;
     this->x = x;
     this->y = y;
@@ -297,6 +301,50 @@ void Player::Update(float deltaTime) {
     if (y < 0)                           y = 0;
     if (y + PLAYER_HEIGHT > mapPixelH)     y = mapPixelH - PLAYER_HEIGHT;
 }
+
+void Player::DrawStamina() {
+    if (stamina >= maxStamina) return;
+
+    bool inCooldown = sprintCooldownTimer > 0.0f;
+    if (!isRunning && !inCooldown) return;
+
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfH = h / 2;
+
+    int barW = al_get_bitmap_width(staminaBg);
+    int barH = al_get_bitmap_height(staminaBg);
+    int barX = w * 0.95f;
+    int barY = halfH - barH / 2;
+    
+    int fillH = static_cast<int>(barH * (stamina / maxStamina));
+    fillH = std::clamp(fillH, 0, barH);
+
+    if (fillH > 0) {
+        int srcY = barH - fillH;
+        int dstY = barY + (barH - fillH);
+
+        al_draw_scaled_bitmap(
+            staminaValue,
+            0, srcY,           // only the bottom `fillH` pixels of the source
+            barW, fillH,
+            barX + 7,         // +15 to inset it a bit inside the BG
+            dstY,
+            barW, fillH,
+            0
+        );
+    }
+    al_draw_scaled_bitmap(
+        staminaBg,
+        0, 0,
+        barW, barH,
+        barX, barY,
+        barW, barH,
+        0
+    );
+
+}
+
 
 Player::Player(){
     hp = 100;

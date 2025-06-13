@@ -63,7 +63,6 @@ public:
     std::vector<Raindrop> drops;
 
     void DrawLoading(int step);
-    void DrawLocation(float elapsedTime);
     ALLEGRO_FONT* PauseFont;
     static Engine::ParallaxBackground MountainSceneBg; //BACKGROUND
     static Engine::ParallaxCloud CloudBg;

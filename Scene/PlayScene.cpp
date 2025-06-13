@@ -115,6 +115,7 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
+    //HEALTH
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
     vignette = al_load_bitmap("Resource/images/play-scene/vignete.png");
@@ -615,6 +616,7 @@ void PlayScene::Draw() const {
     }
     Group::Draw();
     location.Draw(MapId);
+    player.DrawStamina();
     al_draw_tinted_scaled_bitmap(vignette, al_map_rgba(255, 255, 255, 50), 0, 0, al_get_bitmap_width(vignette), al_get_bitmap_height(vignette), 0, 0, w, h, 0);
     //HEALTH UI
     al_draw_scaled_bitmap(HealthUIValue, 0, 0, al_get_bitmap_width(HealthUIValue), al_get_bitmap_height(HealthUIValue),

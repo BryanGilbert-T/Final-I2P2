@@ -67,6 +67,9 @@ public:
   void Jump();
   void Hit(int damage, int flag);
   bool enemyInRange(int x, int y);
+  void DrawStamina();
+  ALLEGRO_BITMAP* staminaBg;
+  ALLEGRO_BITMAP* staminaValue;
   int flag;
   bool isMoving;
   bool isRunning;
@@ -80,14 +83,14 @@ public:
   float stamina        = 5.0f;
   const float maxStamina   = 5.0f;
   const float sprintDrain  = 1.0f;    // stamina per second when holding
-  const float regenRate    = maxStamina / 2.5f;
+  const float regenRate    = maxStamina / 5.0f;
 
   // tap-to-dash:
   const float dashDuration = 0.5f;     // half‐second dash
   float dashTimer         = 0.0f;
 
   float   sprintCooldownTimer = 0.0f;
-  const float sprintCooldownDuration = 2.5f;
+  const float sprintCooldownDuration = 5.0f;
 
   // input timing:
   double lastRightDown    = 0.0;       // timestamp of last right-mouse down
