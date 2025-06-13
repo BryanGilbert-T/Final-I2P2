@@ -3,6 +3,7 @@
 #include <allegro5/base.h>
 #include <list>
 #include <string>
+#include <vector>
 #include <map>
 
 #include "Engine/Sprite.hpp"
@@ -70,6 +71,8 @@ public:
   void DrawStamina();
   ALLEGRO_BITMAP* staminaBg;
   ALLEGRO_BITMAP* staminaValue;
+  float staminaBarAlpha = 0.0f;
+  static constexpr float STAMINA_BAR_FADE_SPEED = 0.8f;
   int flag;
   bool isMoving;
   bool isRunning;

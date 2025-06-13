@@ -157,6 +157,15 @@ void Player::Update(float deltaTime) {
 
     bool wantSprint = rightHeld && stamina>0 && sprintCooldownTimer==0.0f;
 
+    bool wantsVisible = (stamina < maxStamina);
+
+    // fade alpha up or down toward 0/1
+    if (wantsVisible) {
+        staminaBarAlpha = std::min(1.0f, staminaBarAlpha + STAMINA_BAR_FADE_SPEED * deltaTime);
+    } else {
+        staminaBarAlpha = std::max(0.0f, staminaBarAlpha - STAMINA_BAR_FADE_SPEED * deltaTime);
+    }
+
     if (wantSprint && state != RUN) {
         isRunning = true;
     }
@@ -303,10 +312,10 @@ void Player::Update(float deltaTime) {
 }
 
 void Player::DrawStamina() {
-    if (stamina >= maxStamina) return;
+    if (staminaBarAlpha <= 0.01f) return;
 
     bool inCooldown = sprintCooldownTimer > 0.0f;
-    if (!isRunning && !inCooldown) return;
+    //if (!isRunning && !inCooldown) return;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -319,23 +328,24 @@ void Player::DrawStamina() {
 
     int fillH = static_cast<int>(barH * (stamina / maxStamina));
     fillH = std::clamp(fillH, 0, barH);
+    ALLEGRO_COLOR tint = al_map_rgba_f(1, 1, 1, staminaBarAlpha);
 
     if (fillH > 0) {
         int srcY = barH - fillH;
         int dstY = barY + (barH - fillH);
 
-        al_draw_scaled_bitmap(
-            staminaValue,
+        al_draw_tinted_scaled_bitmap(
+            staminaValue, tint,
             0, srcY,           // only the bottom `fillH` pixels of the source
             barW, fillH,
             barX + 7,         // +15 to inset it a bit inside the BG
-            dstY,
+            dstY + 3,
             barW, fillH,
             0
         );
     }
-    al_draw_scaled_bitmap(
-        staminaBg,
+    al_draw_tinted_scaled_bitmap(
+        staminaBg, tint,
         0, 0,
         barW, barH,
         barX, barY,
