@@ -71,6 +71,7 @@ add_executable(${PROJECT_NAME}
 
         Player/Player.cpp
         Player/Player.hpp
+        Player/coin.cpp
 
         Shop/Shop.cpp
         Shop/item.cpp

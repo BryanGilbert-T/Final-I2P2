@@ -11,6 +11,7 @@
 
 #include "Engine/IScene.hpp"
 #include "Shop/Shop.hpp"
+#include "Player/coin.hpp"
 #include "Shop/item.hpp"
 #include "Engine/Chat.hpp"
 #include "Engine/Point.hpp"
@@ -48,6 +49,7 @@ protected:
 
 public:
     int MapBefore;
+    std::vector<Coin*> coins;
     std::vector<Item*> items;
     std::vector<Engine::Point> goBackPoints;
     bool inShop = false;
