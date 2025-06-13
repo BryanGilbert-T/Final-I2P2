@@ -475,8 +475,12 @@ void PlayScene::CheckChatTrigger() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
 
-    std::cout << money << std::endl;
-    
+    if (pause) {
+        return;
+    }
+
+    std::cout << player.x << " " << player.y << std::endl;
+
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
@@ -572,15 +576,19 @@ void PlayScene::Update(float deltaTime) {
     }
 
     if (player.hp == 0) {
-        player.isHit = false;
-        player.hitTimer = 0;
-        player.knockbackRemaining = 0;
-        player.knockbackDir = 0;
+        if (!player.isDying && !player.died) {
+            // Start death animation if not already started
+            player.isDying = true;
+        }
+        else if (player.died) {
+            // Animation is complete, show death screen
+            return; // Skip other updates
+        }
+        // Let the death animation continue updating
+        player.Update(deltaTime);
         return;
     }
-    if (pause) {
-        return;
-    }
+
     OnKeyHold();
     player.Update(deltaTime);
     findTeleport();
@@ -712,7 +720,13 @@ void PlayScene::Draw() const {
                     halfW - al_get_bitmap_width(HealthUIBg)/2, h * 0.9 + 10,
                     al_get_bitmap_width(HealthUIBg), al_get_bitmap_height(HealthUIBg), 0);
 
-    if (player.hp == 0) {
+    if (player.isDying) {
+        player.Draw(cam);   // this will draw the current DYING frame
+        return;
+    }
+
+    if (player.hp == 0 && player.died) {
+
         const int recw = 600;
         const int rech = 400;
         int left = w/2 - recw/2;
@@ -796,10 +810,6 @@ void PlayScene::Draw() const {
 }
 
 void PlayScene::OnMouseDown(int button, int mx, int my) {
-    if ((button & 1) && chatBox.isActive()) {
-        chatBox.OnMouseClick();
-        return;
-    }
     if (pause && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();
         const int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -829,6 +839,11 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
         {
             Engine::GameEngine::GetInstance().ChangeScene("boarding");
         }
+        return;
+    }
+
+    if ((button & 1) && chatBox.isActive()) {
+        chatBox.OnMouseClick();
         return;
     }
 
@@ -870,6 +885,9 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
             file.close();
 
             changeScene = true;
+            player.isDying = false;
+            player.died = false;
+            player.hp = 100;
 
             Engine::GameEngine::GetInstance().ChangeScene("play");
             return;   // don’t fall through to normal click logic
