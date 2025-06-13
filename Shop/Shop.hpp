@@ -10,12 +10,14 @@ class Shop {
 private:
     int x;
     int y;
-    ALLEGRO_BITMAP* bmp;
+    ALLEGRO_BITMAP* idle_sheet;
     ALLEGRO_FONT* font;
+    Animation animation;
 
 public:
     bool playerIsNear;
     Shop(int x, int y);
+    ~Shop();
     void Draw(Camera cam);
     void Update(float dt, const Player& player);
 };
