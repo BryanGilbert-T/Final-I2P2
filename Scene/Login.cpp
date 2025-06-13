@@ -59,7 +59,6 @@ void LoginScene::Initialize() {
     btn->SetOnClickCallback(std::bind(&LoginScene::Login, this, 1));
     AddNewControlObject(btn);
 
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 
     //IMAGES
 
@@ -68,12 +67,9 @@ void LoginScene::Initialize() {
     signupTextHov = al_load_bitmap("Resource/images/login-scene/signup-txt-hov.png");
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
-    bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 }
 void LoginScene::Terminate() {
     if (font) al_destroy_font(font);
-    AudioHelper::StopSample(bgmInstance);
-    bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
     IScene::Terminate();
 }
 void LoginScene::Login(int stage) {
