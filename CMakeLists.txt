@@ -49,6 +49,7 @@ add_executable(${PROJECT_NAME}
         Engine/Location.hpp
         Engine/ParallaxCloud.cpp
         Engine/ParallaxCloud.hpp
+        Engine/Chat.cpp
 
         Scene/LoseScene.cpp
         Scene/PlayScene.cpp

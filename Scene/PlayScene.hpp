@@ -11,6 +11,7 @@
 
 #include "Engine/IScene.hpp"
 #include "Shop/Shop.hpp"
+#include "Engine/Chat.hpp"
 #include "Engine/Point.hpp"
 #include "Engine/map.hpp"
 #include "Engine/Location.hpp"
@@ -34,6 +35,8 @@ class PlayScene final : public Engine::IScene {
 private:
     ALLEGRO_SAMPLE_ID bgmId;
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
+    ChatBox chatBox;
+    bool chatting = false;
 
 protected:
     int lives;
@@ -43,6 +46,9 @@ protected:
     ALLEGRO_BITMAP* loadingBg;
 
 public:
+    std::vector<bool> chatDone;
+    void CheckChatTrigger();
+    bool PlayerIsInside(int x, int y);
     Shop* shop;
     float ambientTimer    = 0.0f;                         // seconds elapsed
     static constexpr float AmbientCycle = 4.0f * 60.0f;  // 720 seconds

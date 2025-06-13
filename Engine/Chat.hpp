@@ -2,29 +2,49 @@
 #define CHAT_H
 
 #include <list>
+#include <vector>
 #include <string>
 #include "allegro5/allegro_font.h"
+#include "Engine/utility.hpp"
 
-class Content {
-public:
+struct DialogueEntry {
     std::string text;
-    int x;
-    int y;
+    float speakerX, speakerY;       // world coords of who’s speaking
+    int speakerW, speakerH;
 };
 
-class Chat {
-private:
-    std::list<Content> content;
-    const int offset = 12;
-    ALLEGRO_FONT* playfont;
 
+class ChatBox {
 public:
-    void Init(int x);
-    void Draw();
-    void Update(int deltatime);
-    void Next();
-    Chat();
-    ~Chat();
+    ChatBox();
+
+    // Start a new conversation:
+    void start(const std::vector<DialogueEntry>& entries);
+
+    // Call every frame:
+    void update(float dt);
+    void draw(Camera cam) const;
+
+    bool isActive() const { return active; }
+    // World‐space camera target: current speaker's position
+    std::pair<float,float> getCameraTarget() const;
+
+    void OnKeyDown(int key);
+    void OnMouseClick();
+
+private:
+    std::vector<DialogueEntry> queue;
+    int currentIndex = 0;
+    bool active = false;
+
+    // UI layout:
+    int x, y, w, h;
+    ALLEGRO_FONT* font;
+
+    // Input cooldown so you don’t skip multiple lines at once:
+    float inputCooldown = 0.0f;
+
+    void advance();
 };
 
 

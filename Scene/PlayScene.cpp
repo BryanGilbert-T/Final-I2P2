@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <filesystem>
+#include <iterator>
 
 #include "Enemy/Enemy.hpp"
 #include "Enemy/Knight.hpp"
@@ -54,6 +55,8 @@ Engine::Point PlayScene::GetClientSize() {
     return Engine::Point(MapWidth * BlockSize, MapHeight * BlockSize);
 }
 void PlayScene::Initialize() {
+    chatting = false;
+    chatBox = ChatBox();
     background = al_load_bitmap("Resource/images/friendlist-scene/friendlist-bg.png");
     loadingBg = al_load_bitmap("Resource/images/friendlist-scene/loading-bg.png");
     Engine::Point SpawnGridPoint = Engine::Point(-1, 0);
@@ -182,6 +185,8 @@ void PlayScene::Initialize() {
         DrawLoading(i);
         al_rest(0.1);
     }
+
+    chatDone = std::vector(2, false);
 }
 void PlayScene::Pause(int stage) {
     pause = !pause;
@@ -351,8 +356,63 @@ void PlayScene::findTeleport() {
     }
 }
 
+bool PlayScene::PlayerIsInside(int x, int y) {
+    return (player.x >= x && player.x <= x + BlockSize &&
+        player.y >= y);
+}
+
+void PlayScene::CheckChatTrigger() {
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
+    int halfH = h / 2;
+
+    if (MapId == 1) {
+        if (PlayerIsInside(1396, player.y - 1)) {
+            if (chatDone[0] == false) {
+                auto it = std::next(enemyGroup.begin(), 4);
+                Enemy* e = *it;
+                std::vector<DialogueEntry> convo = {
+                    DialogueEntry{ "Hey, who goes there?",
+                        float(player.x - halfW - BlockSize / 2),
+                        float(player.y - halfH - BlockSize / 2),
+                    157, 100},
+                    DialogueEntry{ "It’s me, the Dark Knight!",
+                        float(e->x - halfW - BlockSize / 2),
+                        float(e->y - halfH - BlockSize / 2),
+                    e->ENEMY_WIDTH, e->ENEMY_HEIGHT},
+                    // … more lines …
+                };
+                chatBox.start(convo);
+
+                chatDone[0] = true;
+            }
+        } else if (PlayerIsInside(5882, 1408)) {
+            if (chatDone[1] == false) {
+                chatDone[1] = true;
+            }
+        }
+    } else if (MapId == 2) {
+
+    } else if (MapId == 3) {
+
+    }
+}
+
+
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+
+    int w = Engine::GameEngine::GetInstance().getVirtW();
+    int h = Engine::GameEngine::GetInstance().getVirtH();
+    int halfW = w / 2;
+    int halfH = h / 2;
+
+    std::cout << player.x << " " << player.y << std::endl;
+    if (!chatBox.isActive()) {
+        CheckChatTrigger();
+    }
+
     ambientTimer += deltaTime;
     CloudBg.Update(deltaTime);
     if (ambientTimer >= AmbientCycle)
@@ -394,6 +454,24 @@ void PlayScene::Update(float deltaTime) {
             drops.end());
     }
     location.Update(deltaTime);
+    if (chatBox.isActive()) {
+        chatBox.update(deltaTime);
+
+        // smooth‐lerp camera toward current speaker
+        auto [tx, ty] = chatBox.getCameraTarget();
+        float lerp = 5.0f * deltaTime;
+        cam.x += (tx - cam.x) * lerp;
+        cam.y += (ty - cam.y) * lerp;
+
+        if (cam.x < 0) cam.x = 0;
+        if (cam.y < 0) cam.y = 0;
+
+        if (cam.x > MapWidth * BlockSize - w) cam.x = MapWidth * BlockSize - w;
+        if (cam.y > MapHeight * BlockSize - h) cam.y = MapHeight * BlockSize - h;
+
+        return;   // skip all the rest of your normal update!
+    }
+
     if (player.hp == 0) {
         player.isHit = false;
         player.hitTimer = 0;
@@ -408,15 +486,14 @@ void PlayScene::Update(float deltaTime) {
     player.Update(deltaTime);
     findTeleport();
 
-    int w = Engine::GameEngine::GetInstance().getVirtW();
-    int h = Engine::GameEngine::GetInstance().getVirtH();
-    int halfW = w / 2;
-    int halfH = h / 2;
 
     hpDraw = std::clamp( float(player.hp) / 100.0f, 0.0f, 1.0f );
 
-    cam.x = player.x - halfW - BlockSize / 2;
-    cam.y = player.y - halfH - BlockSize / 2;
+    // cam.x = player.x - halfW - BlockSize / 2;
+    // cam.y = player.y - halfH - BlockSize / 2;
+    float lerp = 2.0f * deltaTime;
+    cam.x += ((player.x - halfW - BlockSize / 2) - cam.x) * lerp;
+    cam.y += ((player.y - halfH - BlockSize / 2) - cam.y) * lerp;
 
     if (cam.x < 0) cam.x = 0;
     if (cam.y < 0) cam.y = 0;
@@ -601,9 +678,14 @@ void PlayScene::Draw() const {
                      ALLEGRO_ALIGN_CENTER, "Exit");
 
     }
+    chatBox.draw(cam);
 }
 
 void PlayScene::OnMouseDown(int button, int mx, int my) {
+    if ((button & 1) && chatBox.isActive()) {
+        chatBox.OnMouseClick();
+        return;
+    }
     if (pause && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();
         const int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -700,8 +782,11 @@ void PlayScene::OnMouseUp(int button, int mx, int my) {
 }
 void PlayScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);
+    if (chatBox.isActive()) {
+        chatBox.OnKeyDown(keyCode);
+        return;
+    }
     keyHeld.insert(keyCode);
-
     if (keyCode == ALLEGRO_KEY_W || keyCode == ALLEGRO_KEY_SPACE) {
         player.Jump();
     }
