@@ -46,6 +46,7 @@ protected:
     ALLEGRO_BITMAP* loadingBg;
 
 public:
+    bool inShop = false;
     std::vector<bool> chatDone;
     void CheckChatTrigger();
     bool PlayerIsInside(int x, int y);

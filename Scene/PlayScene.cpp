@@ -543,6 +543,7 @@ void PlayScene::Update(float deltaTime) {
             ++it;
         }
     }
+
 }
 void PlayScene::Draw() const {
     //al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -622,9 +623,8 @@ void PlayScene::Draw() const {
         }
     }
     Group::Draw();
-    location.Draw(MapId);
+    if (MapId != 9) location.Draw(MapId);
     player.DrawStamina();
-
 
     al_draw_tinted_scaled_bitmap(vignette, al_map_rgba(255, 255, 255, 50), 0, 0, al_get_bitmap_width(vignette), al_get_bitmap_height(vignette), 0, 0, w, h, 0);
     //HEALTH UI
@@ -715,6 +715,7 @@ void PlayScene::Draw() const {
 
     }
     chatBox.draw(cam);
+
 }
 
 void PlayScene::OnMouseDown(int button, int mx, int my) {
@@ -841,7 +842,23 @@ void PlayScene::OnKeyDown(int keyCode) {
     }
     if (shop) {
         if (shop->playerIsNear && keyCode == ALLEGRO_KEY_F) {
-            std::cout << "Masuk shop" << std::endl;
+            changeScene = true;
+            int nextx = 5 * BlockSize - (100 - BlockSize);
+            int nexty = 23 * BlockSize - (100 - BlockSize);
+
+            std::ofstream file("Resource/account.txt"); // truncate mode by default
+            if (!file) {
+                std::cerr << "Failed to open file for writing.\n";
+            }
+
+            // Write new values into the file
+            file << player.username << " " << 9 << " " << nextx << " " << nexty
+            << " " << 0 << " " << player.hp;
+
+            file.close();
+
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            return;
         }
     }
     keyHeld.insert(keyCode);
@@ -863,7 +880,6 @@ void PlayScene::OnKeyHold() {
             case ALLEGRO_KEY_A:
             case ALLEGRO_KEY_S:
             case ALLEGRO_KEY_D:
-                std::cout << key << std::endl;
                 player.move(key);
                 break;
             default:
