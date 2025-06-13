@@ -896,6 +896,15 @@ void PlayScene::OnKeyDown(int keyCode) {
         chatBox.OnKeyDown(keyCode);
         return;
     }
+    for (Item* i : items) {
+        if (keyCode == ALLEGRO_KEY_F && i->playerIsNear) {
+            if (i->type == ITEM_APPLE) {
+                
+            } else if (i->type == ITEM_PEACH) {
+
+            }
+        }
+    }
     if (shop) {
         if (shop->playerIsNear && keyCode == ALLEGRO_KEY_F) {
             changeScene = true;
@@ -1023,7 +1032,8 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = SHOP_SKY;
                 items.emplace_back(new Item(j * BlockSize, i * BlockSize, 32, 32,
                     64, 64,
-                    10, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f));
+                    10, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f,
+                    ITEM_APPLE));
             } else if (num == 11) {
                 mapState[i][j] = SHOP_SKY;
                 // items.emplace_back();

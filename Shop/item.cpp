@@ -16,13 +16,15 @@ const int rech = 150;
 const int ANIM_FRAME_COUNT = 6;
 const float ANIM_FRAME_RATE = 0.25f;
 
-Item::Item(int x, int y, int w, int h, int dw, int dh, int price, std::string name, int anim_frame, float anim_rate) {
+Item::Item(int x, int y, int w, int h, int dw, int dh, int price,
+    std::string name, int anim_frame, float anim_rate, ItemType type) {
     this->x = x;
     this->y = y;
     this->w = w;
     this->h = h;
     this->dw = dw;
     this->dh = dh;
+    this->type = type;
 
     idle_sheet = al_load_bitmap(name.c_str());
     if (!idle_sheet) {
