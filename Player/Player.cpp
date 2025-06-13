@@ -316,7 +316,7 @@ void Player::DrawStamina() {
     int barH = al_get_bitmap_height(staminaBg);
     int barX = w * 0.95f;
     int barY = halfH - barH / 2;
-    
+
     int fillH = static_cast<int>(barH * (stamina / maxStamina));
     fillH = std::clamp(fillH, 0, barH);
 

@@ -71,6 +71,7 @@ void PlayScene::Initialize() {
     SpeedMult = 1;
     cam.Update(0, 0);
     location.Initialize();
+    shop = nullptr;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -115,7 +116,6 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
-    //HEALTH
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
     vignette = al_load_bitmap("Resource/images/play-scene/vignete.png");
@@ -426,14 +426,17 @@ void PlayScene::CheckChatTrigger() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
 
-    std::cout << player.x << " " << player.y << std::endl;
+    // std::cout << player.x << " " << player.y << std::endl;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
 
-    std::cout << player.x << " " << player.y << std::endl;
+    if (shop) {
+        shop->Update(deltaTime, player);
+    }
+
     if (!chatBox.isActive()) {
         CheckChatTrigger();
     }
@@ -597,6 +600,10 @@ void PlayScene::Draw() const {
     map.DrawMap(cam);
 
     al_use_shader(nullptr);
+    if (shop) {
+        shop->Draw(cam);
+    }
+
     player.Draw(cam);
     for (Enemy* e : enemyGroup) {
         e->Draw(cam);
@@ -617,6 +624,8 @@ void PlayScene::Draw() const {
     Group::Draw();
     location.Draw(MapId);
     player.DrawStamina();
+
+
     al_draw_tinted_scaled_bitmap(vignette, al_map_rgba(255, 255, 255, 50), 0, 0, al_get_bitmap_width(vignette), al_get_bitmap_height(vignette), 0, 0, w, h, 0);
     //HEALTH UI
     al_draw_scaled_bitmap(HealthUIValue, 0, 0, al_get_bitmap_width(HealthUIValue), al_get_bitmap_height(HealthUIValue),
@@ -830,6 +839,9 @@ void PlayScene::OnKeyDown(int keyCode) {
         chatBox.OnKeyDown(keyCode);
         return;
     }
+    if (shop->playerIsNear && keyCode == ALLEGRO_KEY_F) {
+        std::cout << "Masuk shop" << std::endl;
+    }
     keyHeld.insert(keyCode);
     if (keyCode == ALLEGRO_KEY_W || keyCode == ALLEGRO_KEY_SPACE) {
         player.Jump();
@@ -905,6 +917,7 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = TILE_DIRT;
             } else if (num == 2) {
                 mapState[i][j] = TILE_SKY;
+                shop = new Shop(j * BlockSize - (260 - BlockSize), i * BlockSize - (200 - BlockSize));
             } else if (num == 3) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
