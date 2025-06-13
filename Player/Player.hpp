@@ -68,14 +68,16 @@ public:
   void Hit(int damage, int flag);
   bool enemyInRange(int x, int y);
   int flag;
-
+  bool isMoving;
   void Attack();
 
   bool attacked = false;
 
   float attackCooldown;
 
+
 private:
   void setState(State s);
+
 };
 #endif   // PLAYER_HPP

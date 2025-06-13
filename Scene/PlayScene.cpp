@@ -794,6 +794,9 @@ void PlayScene::OnKeyDown(int keyCode) {
 void PlayScene::OnKeyUp(int keyCode) {
     IScene::OnKeyUp(keyCode);
     keyHeld.erase(keyCode);
+    if (keyCode == ALLEGRO_KEY_A || keyCode == ALLEGRO_KEY_D) {
+        player.isMoving = false;
+    }
 }
 void PlayScene::OnKeyHold() {
     for (int key : keyHeld) {
