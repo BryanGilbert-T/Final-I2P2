@@ -373,11 +373,19 @@ void PlayScene::CheckChatTrigger() {
                 auto it = std::next(enemyGroup.begin(), 4);
                 Enemy* e = *it;
                 std::vector<DialogueEntry> convo = {
-                    DialogueEntry{ "Hey, who goes there?",
-                        float(player.x - halfW - BlockSize / 2),
-                        float(player.y - halfH - BlockSize / 2),
-                    157, 100},
-                    DialogueEntry{ "It’s me, the Dark Knight!",
+                    DialogueEntry{ "Hey, who's there?",
+                        float(e->x - halfW - BlockSize / 2),
+                        float(e->y - halfH - BlockSize / 2),
+                    e->ENEMY_WIDTH, e->ENEMY_HEIGHT},
+                    DialogueEntry{ "Me! The almighty Wu Kuo!",
+                    float(player.x - halfW - BlockSize / 2),
+                    float(player.y - halfH - BlockSize / 2),
+                            157, 100},
+                    DialogueEntry{ "Move! Or you will regret it!",
+                    float(player.x - halfW - BlockSize / 2),
+                    float(player.y - halfH - BlockSize / 2),
+                            157, 100},
+                    DialogueEntry{ "Try me kid",
                         float(e->x - halfW - BlockSize / 2),
                         float(e->y - halfH - BlockSize / 2),
                     e->ENEMY_WIDTH, e->ENEMY_HEIGHT},
@@ -387,8 +395,22 @@ void PlayScene::CheckChatTrigger() {
 
                 chatDone[0] = true;
             }
-        } else if (PlayerIsInside(5882, 1408)) {
+        } else if (PlayerIsInside(5882, 1400)) {
             if (chatDone[1] == false) {
+
+                std::vector<DialogueEntry> convo = {
+                    DialogueEntry{ "The scroll is up ahead!",
+                    float(player.x - halfW - BlockSize / 2),
+                    float(player.y - halfH - BlockSize / 2),
+                            157, 100},
+                    DialogueEntry{ "Let's get moving!",
+                    float(player.x - halfW - BlockSize / 2),
+                    float(player.y - halfH - BlockSize / 2),
+                            157, 100},
+                    // … more lines …
+                };
+                chatBox.start(convo);
+
                 chatDone[1] = true;
             }
         }
@@ -402,6 +424,8 @@ void PlayScene::CheckChatTrigger() {
 
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
+
+    std::cout << player.x << " " << player.y << std::endl;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -455,11 +479,12 @@ void PlayScene::Update(float deltaTime) {
     }
     location.Update(deltaTime);
     if (chatBox.isActive()) {
+        player.Update(deltaTime);
         chatBox.update(deltaTime);
 
         // smooth‐lerp camera toward current speaker
         auto [tx, ty] = chatBox.getCameraTarget();
-        float lerp = 5.0f * deltaTime;
+        float lerp = 3.0f * deltaTime;
         cam.x += (tx - cam.x) * lerp;
         cam.y += (ty - cam.y) * lerp;
 
