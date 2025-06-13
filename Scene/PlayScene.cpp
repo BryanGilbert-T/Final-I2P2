@@ -111,6 +111,8 @@ void PlayScene::Initialize() {
                   << al_get_shader_log(lightShader) << "\n";
     }
 
+    items.clear();
+
     //UI
     elapsedTime = 0.0f;
     Engine::ImageButton *btn;
@@ -964,6 +966,8 @@ void PlayScene::ReadMap() {
             case '8': mapData.push_back(7); break;
             case '9': mapData.push_back(8); break;
             case 'T': mapData.push_back(9); break;
+            case 'K': mapData.push_back(10); break;
+            case 'J': mapData.push_back(11); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -1007,6 +1011,12 @@ void PlayScene::ReadMap() {
             } else if (num == 9) {
                 mapState[i][j] = SHOP_SKY;
                 goBackPoints.emplace_back(Engine::Point{float(j), float(i)});
+            } else if (num == 10) {
+                mapState[i][j] = SHOP_SKY;
+                // items.emplace_back(Item());
+            } else if (num == 11) {
+                mapState[i][j] = SHOP_SKY;
+                // items.emplace_back();
             }
         }
     }

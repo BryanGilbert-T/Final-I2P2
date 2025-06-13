@@ -1,23 +1,24 @@
-#ifndef SHOP_H
-#define SHOP_H
+#ifndef ITEM_H
+#define ITEM_H
 
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_font.h>
 #include "Engine/utility.hpp"
 #include "Player/Player.hpp"
 
-class Shop {
+class Item {
 private:
-    int x;
-    int y;
+    int x, y;
+    int w, h;
     ALLEGRO_BITMAP* idle_sheet;
     ALLEGRO_FONT* font;
     Animation animation;
+    int price;
 
 public:
     bool playerIsNear;
-    Shop(int x, int y);
-    ~Shop();
+    Item(int x, int y, int w, int h, std::string name, int price);
+    ~Item();
     void Draw(Camera cam);
     void Update(float dt, const Player& player);
 };
