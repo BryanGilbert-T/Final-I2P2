@@ -6,18 +6,26 @@
 #include "Engine/utility.hpp"
 #include "Player/Player.hpp"
 
+typedef enum ItemType {
+    ITEM_APPLE,
+    ITEM_PEACH,
+};
+
 class Item {
 private:
     int x, y;
     int w, h;
+    int dw, dh;
     ALLEGRO_BITMAP* idle_sheet;
     ALLEGRO_FONT* font;
     Animation animation;
-    int price;
 
 public:
     bool playerIsNear;
-    Item(int x, int y, int w, int h, std::string name, int price);
+    ItemType type;
+    int price;
+
+    Item(int x, int y, int w, int h, int dw, int dh, int price, std::string name, int anim_frame, float anim_rate, ItemType type);
     ~Item();
     void Draw(Camera cam);
     void Update(float dt, const Player& player);
