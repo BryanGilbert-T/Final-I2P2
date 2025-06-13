@@ -34,13 +34,16 @@ const int ATTACK_FRAME_COUNT = 4;
 const double ATTACK_FRAME_RATE = 0.15;
 
 const int JUMP_FRAME_COUNT = 6;
-const double JUMP_FRAME_RATE = 0.09;
+const double JUMP_FRAME_RATE = 0.089;  // ~11 FPS
 
 const int WALK_FRAME_COUNT = 6;
 const double WALK_FRAME_RATE = 0.175;
 
 const int RUN_FRAME_COUNT = 6;
 const double RUN_FRAME_RATE = 0.1;
+
+const int DEAD_FRAME_COUNT = 6;
+const double DEAD_FRAME_RATE = 0.1;
 
 const float ATTACK_COOLDOWN_MAX = 1.0f;
 
@@ -50,6 +53,8 @@ void Player::Create(int hp, int x, int y, std::string name){
     flag = 0;
     isMoving = false;
     isRunning = false;
+    isDying = false;
+    died = false;
     idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
     if (!idle_sheet) {
         std::cerr << "Failed to load player_bitmap(idle-sheet.png)" << std::endl;
@@ -114,15 +119,34 @@ void Player::Create(int hp, int x, int y, std::string name){
     if (!idle_sheet) {
         std::cerr << "Failed to load player_bitmap(jump)" << std::endl;
     }
-    frameW = al_get_bitmap_width(idle_sheet)/JUMP_FRAME_COUNT;
+    frameW = al_get_bitmap_width(idle_sheet)/4;
     frameH = al_get_bitmap_height(idle_sheet);
+    std::vector<ALLEGRO_BITMAP*> base;
+    for (int i = 0; i < 4; i++) {
+        base.push_back(al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+        ));
+    }
     Animation jumpAnim(JUMP_FRAME_RATE);
-    for (int i = 0; i < JUMP_FRAME_COUNT; ++i) {
-        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
-            idle_sheet, i * frameW, 0, frameW, frameH);
-        jumpAnim.frames.push_back(f);
+    int sequence[6] = { 0, 1, 1, 2, 2, 3 };
+    for (int k = 0; k < 6; k++) {
+        jumpAnim.frames.push_back(base[ sequence[k] ]);
     }
     animations[JUMP] = std::move(jumpAnim);
+
+    idle_sheet = al_load_bitmap("Resource/images/character/dying-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap(dying)" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet)/DEAD_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation dyingAnim(DEAD_FRAME_RATE);
+    for (int i = 0; i < DEAD_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH);
+        dyingAnim.frames.push_back(f);
+    }
+    animations[DEAD] = std::move(dyingAnim);
 
     //STAMINA
     staminaBg = al_load_bitmap("Resource/images/play-scene/ui/stamina-bg.png");
@@ -140,7 +164,15 @@ void Player::Create(int hp, int x, int y, std::string name){
 
 void Player::Hit(int damage, int flag) {
     hp -= damage;
-    if (hp <= 0) hp = 0;
+    if (hp <= 0) {
+        hp = 0;
+        setState(DEAD);
+        isDying    = true;
+        died   = false;      // we’ll flip this when the animation completes
+        animations[DEAD].current = 0;
+        animations[DEAD].timer   = 0;
+        return;
+    }
     // start the red flash + knockback
     isHit = true;
     hitTimer = 0.2f;  // flash for 0.2 seconds
@@ -163,6 +195,26 @@ void Player::setState(State s) {
 void Player::Update(float deltaTime) {
    PlayScene *scene = dynamic_cast<PlayScene*>(Engine::GameEngine::GetInstance().GetScene("play"));
     if (!scene) return;
+
+    if (isDying && state == DEAD) {
+        auto &A = animations[DEAD];
+        A.timer += deltaTime;
+        if (A.timer >= A.frame_time) {
+            A.timer -= A.frame_time;
+            A.current++;
+            // once we hit the last frame, mark done:
+            if (A.current >= A.frames.size()) {
+                A.current = A.frames.size() - 1;  // stay on final pose
+                died = true;
+                isDying = false;
+            }
+        }
+        return;  // don’t do any other movement/physics
+    }
+
+    if (hp == 0 && died) {
+        return;
+    }
 
     attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
     sprintCooldownTimer = std::max(0.0f, sprintCooldownTimer - deltaTime);

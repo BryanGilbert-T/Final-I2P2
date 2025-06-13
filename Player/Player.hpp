@@ -76,6 +76,8 @@ public:
   int flag;
   bool isMoving;
   bool isRunning;
+  bool isDying;
+  bool died;
   void Attack();
 
 
@@ -99,6 +101,7 @@ public:
   double lastRightDown    = 0.0;       // timestamp of last right-mouse down
   const double clickThreshold = 0.2;   // max seconds between down/up to count as a “click”
   bool rightHeld          = false;
+
 
 private:
   void setState(State s);
