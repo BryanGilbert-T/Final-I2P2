@@ -36,12 +36,16 @@ const double ATTACK_FRAME_RATE = 0.15;
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
+const int WALK_FRAME_COUNT = 6;
+const double WALK_FRAME_RATE = 0.15;
+
 const float ATTACK_COOLDOWN_MAX = 1.0f;
 
 
 void Player::Create(int hp, int x, int y, std::string name){
     username = name;
     flag = 0;
+    isMoving = false;
     idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
     if (!idle_sheet) {
         std::cerr << "Failed to load player_bitmap(idle-sheet.png)" << std::endl;
@@ -71,6 +75,21 @@ void Player::Create(int hp, int x, int y, std::string name){
         attackAnim.frames.push_back(f);
     }
     animations[ATTACK] = std::move(attackAnim);
+
+    idle_sheet = al_load_bitmap("Resource/images/character/walk-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap(walk)" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet)/WALK_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation walkAnim(WALK_FRAME_RATE);
+    for (int i = 0; i < WALK_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+            );
+        walkAnim.frames.push_back(f);
+    }
+    animations[WALK] = std::move(walkAnim);
 
     animations[JUMP] = animations[IDLE];
 
@@ -202,7 +221,8 @@ void Player::Update(float deltaTime) {
     if (state != ATTACK) {
         if (jump > 0 && vy < 0)        setState(JUMP);
         else if (jump > 0 && vy > 0)   setState(JUMP);  // falling could be separate
-        else if (state != IDLE)        setState(IDLE);
+        else if (isMoving) setState(WALK);
+        else  setState(IDLE);
     }
 
     auto &A = animations[state];
@@ -264,12 +284,15 @@ void Player::move(int keyCode) {
     if (keyCode == ALLEGRO_KEY_A) {
         dx -= this->speed;
         dir = LEFT;
+        isMoving = true;
         flag = 1;
     } else if (keyCode == ALLEGRO_KEY_S) {
         dy += this->speed;
+        isMoving = false;
     } else if (keyCode == ALLEGRO_KEY_D) {
         dx += this->speed;
         dir = RIGHT;
+        isMoving = true;
         flag = 0;
     }
     if (dx >= 0 && dy >= 0 &&
