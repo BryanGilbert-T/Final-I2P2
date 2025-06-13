@@ -1,4 +1,4 @@
-#include "Item.hpp"
+#include "item.hpp"
 #include "Engine/GameEngine.hpp"
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
@@ -16,20 +16,22 @@ const int rech = 150;
 const int ANIM_FRAME_COUNT = 6;
 const float ANIM_FRAME_RATE = 0.25f;
 
-Item::Item(int x, int y, int w, int h, std::string name, int price) {
+Item::Item(int x, int y, int w, int h, int dw, int dh, int price, std::string name, int anim_frame, float anim_rate) {
     this->x = x;
     this->y = y;
     this->w = w;
     this->h = h;
+    this->dw = dw;
+    this->dh = dh;
 
-    idle_sheet = al_load_bitmap(filename.c_str());
+    idle_sheet = al_load_bitmap(name.c_str());
     if (!idle_sheet) {
         std::cerr << "Failed to load player_bitmap(walk)" << std::endl;
     }
-    int frameW = al_get_bitmap_width(idle_sheet)/ANIM_FRAME_COUNT;
+    int frameW = al_get_bitmap_width(idle_sheet)/anim_frame;
     int frameH = al_get_bitmap_height(idle_sheet);
-    Animation Anim(ANIM_FRAME_RATE);
-    for (int i = 0; i < ANIM_FRAME_COUNT; ++i) {
+    Animation Anim(anim_rate);
+    for (int i = 0; i < anim_frame; ++i) {
         ALLEGRO_BITMAP* f = al_create_sub_bitmap(
             idle_sheet, i * frameW, 0, frameW, frameH
             );
@@ -62,7 +64,7 @@ void Item::Draw(Camera cam) {
         int screenW = Engine::GameEngine::GetInstance().getVirtW();
         int screenH = Engine::GameEngine::GetInstance().getVirtH();
 
-        int dx = x - cam.x - (recw - w) / 2;
+        int dx = x - cam.x - (recw - dw) / 2;
         int dy = y - cam.y - rech;
 
         al_draw_filled_rectangle(dx, dy, dx + recw, dy + rech, al_map_rgba_f(0, 0, 0, 0.7f));
@@ -79,14 +81,15 @@ void Item::Draw(Camera cam) {
 
     al_draw_scaled_bitmap(bmp,
         0, 0, w, h,
-        dx, dy, w, h,
+        dx, dy, dw, dh,
         0);
 }
 
 void Item::Update(float dt, const Player& player) {
+    const int offset = 20;
     int px = player.x + 157 / 2;
     int py = player.y + 100 / 2;
-    if (px >= x && px <= x + w) {
+    if (px >= x - offset && px <= x + dw + offset) {
         playerIsNear = true;
     } else {
         playerIsNear = false;

@@ -485,6 +485,10 @@ void PlayScene::Update(float deltaTime) {
         shop->Update(deltaTime, player);
     }
 
+    for (Item* i : items) {
+        i->Update(deltaTime, player);
+    }
+
     if (!chatBox.isActive()) {
         CheckChatTrigger();
     }
@@ -652,6 +656,10 @@ void PlayScene::Draw() const {
     al_use_shader(nullptr);
     if (shop) {
         shop->Draw(cam);
+    }
+
+    for (Item* i : items) {
+        i->Draw(cam);
     }
 
     player.Draw(cam);
@@ -966,8 +974,8 @@ void PlayScene::ReadMap() {
             case '8': mapData.push_back(7); break;
             case '9': mapData.push_back(8); break;
             case 'T': mapData.push_back(9); break;
-            case 'K': mapData.push_back(10); break;
-            case 'J': mapData.push_back(11); break;
+            case 'J': mapData.push_back(10); break;
+            case 'K': mapData.push_back(11); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -1013,7 +1021,9 @@ void PlayScene::ReadMap() {
                 goBackPoints.emplace_back(Engine::Point{float(j), float(i)});
             } else if (num == 10) {
                 mapState[i][j] = SHOP_SKY;
-                // items.emplace_back(Item());
+                items.emplace_back(new Item(j * BlockSize, i * BlockSize, 32, 32,
+                    64, 64,
+                    10, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f));
             } else if (num == 11) {
                 mapState[i][j] = SHOP_SKY;
                 // items.emplace_back();
