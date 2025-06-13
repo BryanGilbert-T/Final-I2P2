@@ -839,8 +839,10 @@ void PlayScene::OnKeyDown(int keyCode) {
         chatBox.OnKeyDown(keyCode);
         return;
     }
-    if (shop->playerIsNear && keyCode == ALLEGRO_KEY_F) {
-        std::cout << "Masuk shop" << std::endl;
+    if (shop) {
+        if (shop->playerIsNear && keyCode == ALLEGRO_KEY_F) {
+            std::cout << "Masuk shop" << std::endl;
+        }
     }
     keyHeld.insert(keyCode);
     if (keyCode == ALLEGRO_KEY_W || keyCode == ALLEGRO_KEY_SPACE) {
@@ -861,6 +863,7 @@ void PlayScene::OnKeyHold() {
             case ALLEGRO_KEY_A:
             case ALLEGRO_KEY_S:
             case ALLEGRO_KEY_D:
+                std::cout << key << std::endl;
                 player.move(key);
                 break;
             default:
