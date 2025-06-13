@@ -37,7 +37,10 @@ const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
 const int WALK_FRAME_COUNT = 6;
-const double WALK_FRAME_RATE = 0.15;
+const double WALK_FRAME_RATE = 0.175;
+
+const int RUN_FRAME_COUNT = 6;
+const double RUN_FRAME_RATE = 0.1;
 
 const float ATTACK_COOLDOWN_MAX = 1.0f;
 
@@ -46,6 +49,7 @@ void Player::Create(int hp, int x, int y, std::string name){
     username = name;
     flag = 0;
     isMoving = false;
+    isRunning = false;
     idle_sheet = al_load_bitmap("Resource/images/character/idle-sheet.png");
     if (!idle_sheet) {
         std::cerr << "Failed to load player_bitmap(idle-sheet.png)" << std::endl;
@@ -91,6 +95,21 @@ void Player::Create(int hp, int x, int y, std::string name){
     }
     animations[WALK] = std::move(walkAnim);
 
+    idle_sheet = al_load_bitmap("Resource/images/character/walk-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap(walk)" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet)/WALK_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation runAnim(RUN_FRAME_RATE);
+    for (int i = 0; i < RUN_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH
+            );
+        runAnim.frames.push_back(f);
+    }
+    animations[RUN] = std::move(runAnim);
+
     animations[JUMP] = animations[IDLE];
 
     this->hp = hp;
@@ -130,6 +149,34 @@ void Player::Update(float deltaTime) {
     if (!scene) return;
 
     attackCooldown = std::max(0.0f, attackCooldown - deltaTime);
+    sprintCooldownTimer = std::max(0.0f, sprintCooldownTimer - deltaTime);
+
+    bool wantSprint = rightHeld && stamina>0 && sprintCooldownTimer==0.0f;
+
+    if (wantSprint && state != RUN) {
+        isRunning = true;
+    }
+
+    if (dashTimer > 0.0f) {
+        dashTimer -= deltaTime;
+    }
+    else if (wantSprint) {
+        isRunning = true;
+        stamina = std::max(0.0f, stamina - sprintDrain * deltaTime);
+        if (stamina == 0.0f) sprintCooldownTimer = sprintCooldownDuration;
+    }
+    else {
+        if (isRunning) {
+            isRunning = false;
+            // pick new state once, too:
+            if (isMoving) setState(WALK);
+            else          setState(IDLE);
+        }
+        stamina = std::min(maxStamina, stamina + regenRate * deltaTime);
+    }
+
+    if (state == RUN)       speed = SPEED * 1.5;
+    else if (state == WALK) speed = SPEED;
 
     if (state == ATTACK) {
         Animation &anim = animations[ATTACK];
@@ -221,6 +268,7 @@ void Player::Update(float deltaTime) {
     if (state != ATTACK) {
         if (jump > 0 && vy < 0)        setState(JUMP);
         else if (jump > 0 && vy > 0)   setState(JUMP);  // falling could be separate
+        else if (isRunning && isMoving) {setState(RUN);}
         else if (isMoving) setState(WALK);
         else  setState(IDLE);
     }

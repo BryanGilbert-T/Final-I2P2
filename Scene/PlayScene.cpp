@@ -753,6 +753,12 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
         return;
     }
 
+    if (button & 2) {
+        player.lastRightDown = al_get_time();
+        player.rightHeld    = true;
+        return;
+    }
+
     if ((player.hp == 0) && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();
         const int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -814,6 +820,17 @@ void PlayScene::OnMouseMove(int mx, int my) {
 }
 void PlayScene::OnMouseUp(int button, int mx, int my) {
     IScene::OnMouseUp(button, mx, my);
+
+    if (button & 2) {
+        double held = al_get_time() - player.lastRightDown;
+        player.rightHeld = false;
+        if (held < player.clickThreshold) {
+            // tap → start dash
+            player.dashTimer = player.dashDuration;
+            player.isRunning = true;
+        }
+        return;
+    }
 }
 void PlayScene::OnKeyDown(int keyCode) {
     IScene::OnKeyDown(keyCode);

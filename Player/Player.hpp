@@ -69,15 +69,32 @@ public:
   bool enemyInRange(int x, int y);
   int flag;
   bool isMoving;
+  bool isRunning;
   void Attack();
+
 
   bool attacked = false;
 
   float attackCooldown;
 
+  float stamina        = 5.0f;
+  const float maxStamina   = 5.0f;
+  const float sprintDrain  = 1.0f;    // stamina per second when holding
+  const float regenRate    = maxStamina / 2.5f;
+
+  // tap-to-dash:
+  const float dashDuration = 0.5f;     // half‐second dash
+  float dashTimer         = 0.0f;
+
+  float   sprintCooldownTimer = 0.0f;
+  const float sprintCooldownDuration = 2.5f;
+
+  // input timing:
+  double lastRightDown    = 0.0;       // timestamp of last right-mouse down
+  const double clickThreshold = 0.2;   // max seconds between down/up to count as a “click”
+  bool rightHeld          = false;
 
 private:
   void setState(State s);
-
 };
 #endif   // PLAYER_HPP
