@@ -185,24 +185,14 @@ void PlayScene::Initialize() {
     if (!PauseFont) {
         std::cerr << "Failed to load pause menu font\n";
     }
-    for (int i = 3; i <= 10; i++) {
+    for (int i = 3; i <= 9; i++) {
         DrawLoading(i);
         al_rest(0.1);
     }
 
-    chatDone = std::vector(2, false);
-}
-void PlayScene::Pause(int stage) {
-    pause = !pause;
-}
-void PlayScene::Terminate() {
-    MountainSceneBg.Terminate();
-    IScene::Terminate();
-
     if (MapId == 9) {
-        DrawLoading(1);
-        std::ofstream file("Resource/account.txt"); // truncate mode by default
-        if (!file) {
+        std::ofstream filez("Resource/account.txt"); // truncate mode by default
+        if (!filez) {
             std::cerr << "Failed to open file for writing.\n";
         }
 
@@ -214,18 +204,21 @@ void PlayScene::Terminate() {
         }
 
         // Write new values into the file
-        file << player.username << " " << MapBefore << " " << dx << " " << dy
+        filez << player.username << " " << MapBefore << " " << dx << " " << dy
         << " " << 0 << " " << player.hp;
-        DrawLoading(2);
 
-        file.close();
+        filez.close();
 
-        updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
-        for (int i = 3; i <= 10; i++) {
-            DrawLoading(i);
-            al_rest(0.1);
-        }
+        updateUser(player.username, dx, dy, 0, player.hp, MapBefore);
     }
+    DrawLoading(10);
+}
+void PlayScene::Pause(int stage) {
+    pause = !pause;
+}
+void PlayScene::Terminate() {
+    MountainSceneBg.Terminate();
+    IScene::Terminate();
 
     if (changeScene == false && MapId != 9) {
         DrawLoading(1);
@@ -389,23 +382,7 @@ void PlayScene::findTeleport() {
     for (Engine::Point p : goBackPoints) {
         if (player.x / BlockSize == p.x &&
             player.y / BlockSize == p.y) {
-            if (MapBefore == 1) {
-                int nextx = 12 * BlockSize - (100 - BlockSize);
-                int nexty = 22 * BlockSize - (100 - BlockSize);
-
-                std::ofstream file("Resource/account.txt"); // truncate mode by default
-                if (!file) {
-                    std::cerr << "Failed to open file for writing.\n";
-                }
-
-                // Write new values into the file
-                file << player.username << " " << 1 << " " << nextx << " " << nexty
-                << " " << 0 << " " << player.hp;
-
-                file.close();
-                Engine::GameEngine::GetInstance().ChangeScene("play");
-                return;
-            }
+            Engine::GameEngine::GetInstance().ChangeScene("play");
         }
     }
 }
@@ -439,7 +416,7 @@ void PlayScene::CheckChatTrigger() {
                     float(player.x - halfW - BlockSize / 2),
                     float(player.y - halfH - BlockSize / 2),
                             157, 100},
-                    DialogueEntry{ "Try me kid",
+                    DialogueEntry{ "Try me monke",
                         float(e->x - halfW - BlockSize / 2),
                         float(e->y - halfH - BlockSize / 2),
                     e->ENEMY_WIDTH, e->ENEMY_HEIGHT},
@@ -471,7 +448,23 @@ void PlayScene::CheckChatTrigger() {
     } else if (MapId == 2) {
 
     } else if (MapId == 3) {
+        if (PlayerIsInside(330, player.y - 1)) {
+            if (chatDone[2] == false) {
+                std::vector<DialogueEntry> convo = {
+                    DialogueEntry{ "Be Careful!",
+                    float(player.x - halfW - BlockSize / 2),
+                    float(player.y - halfH - BlockSize / 2),
+                            157, 100},
+                    DialogueEntry{ "I sense something evil near!",
+                    float(player.x - halfW - BlockSize / 2),
+                    float(player.y - halfH - BlockSize / 2),
+                            157, 100},
+                };
+                chatBox.start(convo);
 
+                chatDone[2] = true;
+            }
+        }
     }
 }
 
@@ -479,7 +472,7 @@ void PlayScene::CheckChatTrigger() {
 void PlayScene::Update(float deltaTime) {
     IScene::Update(deltaTime);
 
-    // std::cout << player.x << " " << player.y << std::endl;
+    std::cout << player.x << " " << player.y << std::endl;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();

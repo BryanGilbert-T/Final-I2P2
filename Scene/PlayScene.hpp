@@ -49,7 +49,7 @@ public:
     int MapBefore;
     std::vector<Engine::Point> goBackPoints;
     bool inShop = false;
-    std::vector<bool> chatDone;
+    std::vector<bool> chatDone = std::vector(3, false);
     void CheckChatTrigger();
     bool PlayerIsInside(int x, int y);
     Shop* shop;
