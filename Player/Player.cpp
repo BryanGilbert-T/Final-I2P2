@@ -158,7 +158,6 @@ void Player::Update(float deltaTime) {
     bool wantSprint = rightHeld && stamina>0 && sprintCooldownTimer==0.0f;
 
     bool wantsVisible = (stamina < maxStamina);
-
     // fade alpha up or down toward 0/1
     if (wantsVisible) {
         staminaBarAlpha = std::min(1.0f, staminaBarAlpha + STAMINA_BAR_FADE_SPEED * deltaTime);
@@ -169,7 +168,6 @@ void Player::Update(float deltaTime) {
     if (wantSprint && state != RUN) {
         isRunning = true;
     }
-
     if (dashTimer > 0.0f) {
         dashTimer -= deltaTime;
     }
@@ -187,7 +185,6 @@ void Player::Update(float deltaTime) {
         }
         stamina = std::min(maxStamina, stamina + regenRate * deltaTime);
     }
-
     if (state == RUN)       speed = SPEED * 1.5;
     else if (state == WALK) speed = SPEED;
 
@@ -210,7 +207,6 @@ void Player::Update(float deltaTime) {
             setState(IDLE);
         }
     }
-
     if (knockbackRemaining > 0) {
         int step = std::min(knockbackRemaining, speed);
         int dx = x + knockbackDir * step;
@@ -225,7 +221,6 @@ void Player::Update(float deltaTime) {
             y = dy;
         }
     }
-
     // 1) Apply gravity (vy will grow by GRAVITY each frame):
     vy += JUMP_ACCELERATION;
 
@@ -285,7 +280,6 @@ void Player::Update(float deltaTime) {
         else if (isMoving) setState(WALK);
         else  setState(IDLE);
     }
-
     auto &A = animations[state];
     A.timer += deltaTime;
     if (A.timer >= A.frame_time) {

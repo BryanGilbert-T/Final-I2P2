@@ -46,6 +46,8 @@ protected:
     ALLEGRO_BITMAP* loadingBg;
 
 public:
+    int MapBefore;
+    std::vector<Engine::Point> goBackPoints;
     bool inShop = false;
     std::vector<bool> chatDone;
     void CheckChatTrigger();
@@ -56,7 +58,7 @@ public:
     bool    isRaining     = false;
     int     currentPhase  = -1;       // last‐seen index 0…5
     std::mt19937 rng;                 // random engine
-    std::uniform_int_distribution<int> rainRoll{0,1}; // 0…4
+    std::uniform_int_distribution<int> rainRoll{0,2}; // 0…4
 
     struct Raindrop {
         float x, y, speed;

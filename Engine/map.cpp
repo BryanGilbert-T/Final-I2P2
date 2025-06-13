@@ -102,6 +102,45 @@ void Map::DrawMap(Camera cam) {
                     //     0, 0, sw, sh,
                     //     dx, dy, TILE_SIZE, TILE_SIZE, 0);
                     break;
+                case SHOP_DIRT: {
+                    ALLEGRO_BITMAP* center = floor_bitmap[1][1];
+                    if (shader) al_set_shader_sampler("texture", center, 0);
+                    al_draw_scaled_bitmap(center,
+                        0,0,
+                        al_get_bitmap_width(center),
+                        al_get_bitmap_height(center),
+                        dx,dy,
+                        TILE_SIZE,TILE_SIZE,
+                        0
+                    );
+
+                    // 2) if we’re on an edge or corner, draw that on top
+                    int idx = offset_asset[i][j];
+                    if (idx != 4) {
+                        int row = idx/3;
+                        int col = idx%3;
+                        ALLEGRO_BITMAP* variant = floor_bitmap[row][col];
+                        if (shader) al_set_shader_sampler("texture", variant, 0);
+                        al_draw_scaled_bitmap(variant,
+                            0,0,
+                            al_get_bitmap_width(variant),
+                            al_get_bitmap_height(variant),
+                            dx,dy,
+                            TILE_SIZE,TILE_SIZE,
+                            0
+                        );
+                    }
+                    break;
+                }
+                case SHOP_SKY: {
+                    sw = al_get_bitmap_width(sky_bitmap);
+                    sh = al_get_bitmap_height(sky_bitmap);
+
+                    al_draw_scaled_bitmap(sky_bitmap,
+                        0, 0, sw, sh,
+                        dx, dy, TILE_SIZE, TILE_SIZE, 0);
+                    break;
+                }
                 default:
                     break;
             }
@@ -113,7 +152,7 @@ bool Map::IsCollision(int x, int y) {
     int dx = x / TILE_SIZE;
     int dy = y / TILE_SIZE;
 
-    if (MapState[dy][dx] == TILE_DIRT) {
+    if (MapState[dy][dx] == TILE_DIRT || MapState[dy][dx] == SHOP_DIRT) {
         return true;
     }
 
@@ -128,7 +167,7 @@ void Map::get_map_offset() {
     for(int i = 0; i < MapHeight; ++i) {
         for(int j = 0; j < MapWidth; ++j) {
 
-            if (MapState[i][j] != TILE_DIRT) {
+            if (MapState[i][j] != TILE_DIRT && MapState[i][j] != SHOP_DIRT) {
                 offset_asset[i][j] = -1;
                 continue;
             }

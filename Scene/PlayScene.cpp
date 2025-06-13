@@ -46,6 +46,7 @@ int PlayScene::MapHeight = 64;
 Camera PlayScene::cam;
 Engine::ParallaxBackground PlayScene::MountainSceneBg;
 Engine::ParallaxCloud PlayScene::CloudBg;
+
 const std::vector<int> PlayScene::code = {
     ALLEGRO_KEY_UP, ALLEGRO_KEY_UP, ALLEGRO_KEY_DOWN, ALLEGRO_KEY_DOWN,
     ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT, ALLEGRO_KEY_LEFT, ALLEGRO_KEY_RIGHT,
@@ -131,6 +132,8 @@ void PlayScene::Initialize() {
     CloudBg.SetLayerOffset(1, 0, -200);
     CloudBg.SetLayerOffset(2, 0, -100);
 
+    goBackPoints.clear();
+
     std::vector<std::string> layers = {
         "Resource/images/play-scene/mountains/mountains.png",
         "Resource/images/play-scene/mountains/tree.png"
@@ -196,7 +199,35 @@ void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
     IScene::Terminate();
 
-    if (changeScene == false) {
+    if (MapId == 9) {
+        DrawLoading(1);
+        std::ofstream file("Resource/account.txt"); // truncate mode by default
+        if (!file) {
+            std::cerr << "Failed to open file for writing.\n";
+        }
+
+        int dx = 0;
+        int dy = 0;
+        if (MapBefore == 1) {
+            dx = 12 * BlockSize - (100 - BlockSize);
+            dy = 22 * BlockSize - (100 - BlockSize);
+        }
+
+        // Write new values into the file
+        file << player.username << " " << MapBefore << " " << dx << " " << dy
+        << " " << 0 << " " << player.hp;
+        DrawLoading(2);
+
+        file.close();
+
+        updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
+        for (int i = 3; i <= 10; i++) {
+            DrawLoading(i);
+            al_rest(0.1);
+        }
+    }
+
+    if (changeScene == false && MapId != 9) {
         DrawLoading(1);
         std::ofstream file("Resource/account.txt"); // truncate mode by default
         if (!file) {
@@ -355,6 +386,28 @@ void PlayScene::findTeleport() {
             return;
         }
     }
+    for (Engine::Point p : goBackPoints) {
+        if (player.x / BlockSize == p.x &&
+            player.y / BlockSize == p.y) {
+            if (MapBefore == 1) {
+                int nextx = 12 * BlockSize - (100 - BlockSize);
+                int nexty = 22 * BlockSize - (100 - BlockSize);
+
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 1 << " " << nextx << " " << nexty
+                << " " << 0 << " " << player.hp;
+
+                file.close();
+                Engine::GameEngine::GetInstance().ChangeScene("play");
+                return;
+            }
+        }
+    }
 }
 
 bool PlayScene::PlayerIsInside(int x, int y) {
@@ -481,7 +534,8 @@ void PlayScene::Update(float deltaTime) {
             [&](auto &d){ return d.y > Engine::GameEngine::GetInstance().getVirtH(); }),
             drops.end());
     }
-    location.Update(deltaTime);
+    if (MapId != 9) location.Update(deltaTime);
+
     if (chatBox.isActive()) {
         player.Update(deltaTime);
         chatBox.update(deltaTime);
@@ -543,7 +597,6 @@ void PlayScene::Update(float deltaTime) {
             ++it;
         }
     }
-
 }
 void PlayScene::Draw() const {
     //al_clear_to_color(al_map_rgb(0, 0, 0));
@@ -592,10 +645,11 @@ void PlayScene::Draw() const {
     }
 
     // draw parallax behind everything
-    al_use_shader(lightShader);
-    al_set_shader_float_vector("ambient", 3, amb, 1);
-    al_set_shader_int("numLights", 1); // No dynamic lights for static geometry
-
+    if (MapId != 9) {
+        al_use_shader(lightShader);
+        al_set_shader_float_vector("ambient", 3, amb, 1);
+        al_set_shader_int("numLights", 1); // No dynamic lights for static geometry
+    }
     CloudBg.Draw(cam);
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
@@ -715,7 +769,6 @@ void PlayScene::Draw() const {
 
     }
     chatBox.draw(cam);
-
 }
 
 void PlayScene::OnMouseDown(int button, int mx, int my) {
@@ -857,6 +910,8 @@ void PlayScene::OnKeyDown(int keyCode) {
 
             file.close();
 
+            MapBefore = MapId;
+
             Engine::GameEngine::GetInstance().ChangeScene("play");
             return;
         }
@@ -913,6 +968,9 @@ void PlayScene::ReadMap() {
             case 'W': mapData.push_back(4); break;
             case 'L': mapData.push_back(5); break;
             case 'B': mapData.push_back(6); break;
+            case '8': mapData.push_back(7); break;
+            case '9': mapData.push_back(8); break;
+            case 'T': mapData.push_back(9); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -949,7 +1007,13 @@ void PlayScene::ReadMap() {
             } else if (num == 6) {
                 mapState[i][j] = TILE_SKY;
                 enemyGroup.push_back(new BossEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
-
+            } else if (num == 7) {
+                mapState[i][j] = SHOP_SKY;
+            } else if (num == 8) {
+                mapState[i][j] = TILE_DIRT;
+            } else if (num == 9) {
+                mapState[i][j] = SHOP_SKY;
+                goBackPoints.emplace_back(Engine::Point{float(j), float(i)});
             }
         }
     }

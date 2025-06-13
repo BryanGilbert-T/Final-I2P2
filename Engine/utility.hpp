@@ -1,6 +1,8 @@
 #ifndef UTILITY_HPP
 #define UTILITY_HPP
 
+static int MapBefore = 1;
+
 class Camera {
 public:
     float x;
@@ -28,6 +30,8 @@ enum TileType {
     TILE_FLOOR,
     TILE_OCCUPIED,
     TILE_SKY,
+    SHOP_DIRT,
+    SHOP_SKY,
 };
 
 #endif
