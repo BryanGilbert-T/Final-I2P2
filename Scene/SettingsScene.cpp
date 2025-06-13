@@ -24,26 +24,30 @@ void SettingsScene::Initialize() {
     PlayFont = al_load_font("Resource/fonts/imfell.ttf", 45, ALLEGRO_ALIGN_CENTER);
     decor = al_load_bitmap("Resource/images/friendlist-scene/decor-line.png");
 
+    barBg = al_load_bitmap("Resource/images/stage-select/bar-bg.png");
+    bgmIcon = al_load_bitmap("Resource/images/stage-select/bgm.png");
+    sfxIcon = al_load_bitmap("Resource/images/stage-select/sfx.png");
+
     Engine::ImageButton *btn;
     btn = new Engine::ImageButton("friendlist-scene/back-btn.png", "friendlist-scene/back-btn-hov.png", halfW - 496/2, h * 0.9 - 30, 496, 112);
     btn->SetOnClickCallback(std::bind(&SettingsScene::BackOnClick, this, 1));
     AddNewControlObject(btn);
 
     Slider *sliderBGM, *sliderSFX;
-    sliderBGM = new Slider(40 + halfW - 95, halfH - 50 - 2, 190, 4);
+    sliderBGM = new Slider(752 , 447, 530, 15);
     sliderBGM->SetOnValueChangedCallback(std::bind(&SettingsScene::BGMSlideOnValueChanged, this, std::placeholders::_1));
     AddNewControlObject(sliderBGM);
-    AddNewObject(new Engine::Label("BGM: ", "imfell.ttf", 28, 40 + halfW - 60 - 95, halfH - 50, 255, 255, 255, 255, 0.5, 0.5));
-    sliderSFX = new Slider(40 + halfW - 95, halfH + 50 - 2, 190, 4);
+    sliderSFX = new Slider(752, 564, 530, 15);
     sliderSFX->SetOnValueChangedCallback(std::bind(&SettingsScene::SFXSlideOnValueChanged, this, std::placeholders::_1));
     AddNewControlObject(sliderSFX);
-    AddNewObject(new Engine::Label("SFX: ", "imfell.ttf", 28, 40 + halfW - 60 - 95, halfH + 50, 255, 255, 255, 255, 0.5, 0.5));
-    // Not safe if release resource while playing, however we only free while change scene, so it's fine.
+
     sliderBGM->SetValue(AudioHelper::BGMVolume);
     sliderSFX->SetValue(AudioHelper::SFXVolume);
 }
 void SettingsScene::Terminate() {
-    IScene::Terminate();
+
+    bgmInstance = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+
 }
 
 void SettingsScene::Draw() const {
@@ -67,13 +71,25 @@ void SettingsScene::Draw() const {
                         117, 900, al_get_bitmap_width(decor), al_get_bitmap_height(decor), 0);
 
     al_draw_text(PlayFont, al_map_rgb(0, 0, 0), halfW, 70, ALLEGRO_ALIGN_CENTER, "Settings");
+
+    al_draw_scaled_bitmap(barBg, 0, 0, al_get_bitmap_width(barBg), al_get_bitmap_height(barBg), 745, 441,
+        al_get_bitmap_width(barBg), al_get_bitmap_height(barBg), 0);
+    al_draw_scaled_bitmap(barBg, 0, 0, al_get_bitmap_width(barBg), al_get_bitmap_height(barBg), 745, 558,
+        al_get_bitmap_width(barBg), al_get_bitmap_height(barBg), 0);
+
+    al_draw_scaled_bitmap(bgmIcon, 0, 0, al_get_bitmap_width(bgmIcon), al_get_bitmap_height(bgmIcon), 636, 427,
+        al_get_bitmap_width(bgmIcon), al_get_bitmap_height(bgmIcon), 0);
+    al_draw_scaled_bitmap(sfxIcon, 0, 0, al_get_bitmap_width(sfxIcon), al_get_bitmap_height(sfxIcon), 636, 544,
+        al_get_bitmap_width(sfxIcon), al_get_bitmap_height(sfxIcon), 0);
+
+    Group::Draw();
 }
 
 void SettingsScene::BackOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("boarding");
 }
 void SettingsScene::BGMSlideOnValueChanged(float value) {
-    AudioHelper::ChangeSampleVolume(bgmInstance, value);
+    AudioHelper::ChangeSampleVolume(AudioHelper::currentBgm, value);
     AudioHelper::BGMVolume = value;
 }
 void SettingsScene::SFXSlideOnValueChanged(float value) {

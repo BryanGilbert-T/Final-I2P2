@@ -22,6 +22,10 @@ public:
     ALLEGRO_BITMAP* background;
     ALLEGRO_BITMAP* loadingBg;
     ALLEGRO_BITMAP* decor;
+
+    ALLEGRO_BITMAP* bgmIcon;
+    ALLEGRO_BITMAP* sfxIcon;
+    ALLEGRO_BITMAP* barBg;
 };
 
 #endif   // SettingsScene_HPP
