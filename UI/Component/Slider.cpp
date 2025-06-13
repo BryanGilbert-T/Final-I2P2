@@ -8,10 +8,10 @@
 Slider::Slider(float x, float y, float w, float h)
     : ImageButton("stage-select/slider.png", "stage-select/slider-blue.png", x, y),
       Bar("stage-select/bar.png", x, y, w, h),
-      End1("stage-select/end.png", x, y + h / 2, 0, 0, 0.5, 0.5),
-      End2("stage-select/end.png", x + w, y + h / 2, 0, 0, 0.5, 0.5),
+      End1("stage-select/end.png", -100, -100, 0, 0, 0.5, 0.5),
+      End2("stage-select/end.png",-100,-100, 0, 0, 0.5, 0.5),
       Arrow("stage-select/slider.png", "stage-select/slider-blue.png",
-          x, y + 10, 30, 30, 0.5, 0.5) {
+          x, y, 30, 79, 0.5, 0.0) {
     Position.x += w;
     Position.y += h / 2;
     Anchor = Engine::Point(0.5, 0.5);
