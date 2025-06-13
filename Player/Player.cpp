@@ -33,8 +33,8 @@ const double IDLE_FRAME_RATE = 0.3;
 const int ATTACK_FRAME_COUNT = 4;
 const double ATTACK_FRAME_RATE = 0.15;
 
-const int JUMP_FRAME_COUNT = 2;
-const double JUMP_FRAME_RATE = 0.3;
+const int JUMP_FRAME_COUNT = 6;
+const double JUMP_FRAME_RATE = 0.09;
 
 const int WALK_FRAME_COUNT = 6;
 const double WALK_FRAME_RATE = 0.175;
@@ -110,7 +110,19 @@ void Player::Create(int hp, int x, int y, std::string name){
     }
     animations[RUN] = std::move(runAnim);
 
-    animations[JUMP] = animations[IDLE];
+    idle_sheet = al_load_bitmap("Resource/images/character/jump-sheet.png");
+    if (!idle_sheet) {
+        std::cerr << "Failed to load player_bitmap(jump)" << std::endl;
+    }
+    frameW = al_get_bitmap_width(idle_sheet)/JUMP_FRAME_COUNT;
+    frameH = al_get_bitmap_height(idle_sheet);
+    Animation jumpAnim(JUMP_FRAME_RATE);
+    for (int i = 0; i < JUMP_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            idle_sheet, i * frameW, 0, frameW, frameH);
+        jumpAnim.frames.push_back(f);
+    }
+    animations[JUMP] = std::move(jumpAnim);
 
     //STAMINA
     staminaBg = al_load_bitmap("Resource/images/play-scene/ui/stamina-bg.png");
