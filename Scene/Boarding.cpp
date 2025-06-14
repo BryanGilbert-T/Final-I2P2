@@ -27,10 +27,12 @@ void BoardingScene::Initialize() {
 
     PlayFont = al_load_font("Resource/fonts/imfell.ttf", 48, ALLEGRO_ALIGN_CENTER);
     Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
+    smallFont = al_load_font("Resource/fonts/imfell.ttf", 24, ALLEGRO_ALIGN_CENTER);
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     // bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
-
+    std::ifstream in("Resource/account.txt");
+    in >> curUser;
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     // bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 }
@@ -73,6 +75,9 @@ void BoardingScene::Draw() const {
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
         0, 0, sw, sh,
         w * 0.2, h * 0.2, sw, sh, 0);
+
+    al_draw_text(smallFont, al_map_rgb(0, 0, 0),
+        w * 0.98, h * 0.95, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {

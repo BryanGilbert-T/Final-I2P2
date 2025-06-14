@@ -8,6 +8,8 @@
 class BoardingScene final : public Engine::IScene {
 private:
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> bgmInstance;
+    std::string curUser;
+    ALLEGRO_FONT* smallFont;
 
 public:
     explicit BoardingScene() = default;
