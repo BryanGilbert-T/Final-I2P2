@@ -125,7 +125,7 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
-    btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
+    btn = new Engine::ImageButton("play-scene/ui/map-btn.png", "play-scene/ui/map-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::MapTeleport, this, 1));
     AddNewControlObject(btn);
 
@@ -195,10 +195,6 @@ void PlayScene::Initialize() {
     mapDistance = CalculateBFSDistance();
     // Preload Lose Scene
     // Start BGM.
-
-    btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
-    btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
-    MapGroup->AddNewControlObject(btn);
 
     PauseFont = al_load_ttf_font("Resource/fonts/imfell.ttf", 16, 0);
     if (!PauseFont) {
