@@ -46,8 +46,11 @@ protected:
     int SpeedMult;
     ALLEGRO_BITMAP* background;
     ALLEGRO_BITMAP* loadingBg;
+    ALLEGRO_BITMAP* coinIcon;
+    ALLEGRO_FONT* coinFont;
 
 public:
+    int MoneyBefore;
     int MapBefore;
     std::vector<Coin*> coins;
     std::vector<Item*> items;

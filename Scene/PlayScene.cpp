@@ -110,6 +110,12 @@ void PlayScene::Initialize() {
                   << al_get_shader_log(lightShader) << "\n";
     }
 
+    coinIcon = al_load_bitmap("Resource/images/play-scene/shop/AppleIcon.png");
+    if (!coinIcon) {
+        std::cerr << "<UNK> Cannot load coinIcon.png\n";
+    }
+    coinFont = al_load_ttf_font("Resource/fonts/imfell.ttf", 64, 0);
+
     items.clear();
     coins.clear();
 
@@ -165,6 +171,7 @@ void PlayScene::Initialize() {
     this->MapId = level;
     this->player.Create(hp, x, y, username);
     this->money = score;
+    this->MoneyBefore = money;
     DrawLoading(2);
 
     rng.seed(std::random_device{}());
@@ -222,6 +229,10 @@ void PlayScene::Pause(int stage) {
 void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
     IScene::Terminate();
+
+    if (coinIcon) {
+        al_destroy_bitmap(coinIcon);
+    }
 
     if (changeScene == false && MapId != 9) {
         DrawLoading(1);
@@ -687,6 +698,19 @@ void PlayScene::Draw() const {
         c->Draw(cam);
     }
 
+    const int iconx = w * 0.05;
+    const int icony = h * 0.1;
+    al_draw_scaled_bitmap(coinIcon,
+        0, 0, 32, 32,
+        iconx, icony, 64, 64,
+        0);
+
+    const int distance = BlockSize * 1.5;
+    const int fontHeight = al_get_font_line_height(coinFont);
+    al_draw_text(coinFont, al_map_rgb(255, 255, 255),
+        iconx + distance, icony - (fontHeight/2), ALLEGRO_ALIGN_LEFT,
+        std::to_string(money).c_str());
+
     for (Item* i : items) {
         i->Draw(cam);
     }
@@ -880,7 +904,7 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
 
             // Write new values into the file
             file << player.username << " " << 1 << " " << 820 << " " << 1372
-            << " " << 0 << " " << 100;
+            << " " << MoneyBefore << " " << 100;
 
             file.close();
 
@@ -900,6 +924,7 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
             player.hp = 100;
             player.x = 820;
             player.y = 1372;
+            money = MoneyBefore;
 
             Engine::GameEngine::GetInstance().ChangeScene("boarding");
         }
@@ -957,7 +982,7 @@ void PlayScene::OnKeyDown(int keyCode) {
 
             // Write new values into the file
             file << player.username << " " << 9 << " " << nextx << " " << nexty
-            << " " << 0 << " " << player.hp;
+            << " " << money << " " << player.hp;
 
             file.close();
 
