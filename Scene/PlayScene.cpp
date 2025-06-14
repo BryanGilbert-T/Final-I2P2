@@ -700,9 +700,11 @@ void PlayScene::Draw() const {
 
     const int iconx = w * 0.05;
     const int icony = h * 0.1;
+    const int iconw = 64;
+    const int iconh = 64;
     al_draw_scaled_bitmap(coinIcon,
         0, 0, 32, 32,
-        iconx, icony, 64, 64,
+        iconx, icony, iconw, iconh,
         0);
 
     const int distance = BlockSize * 1.5;
@@ -960,13 +962,39 @@ void PlayScene::OnKeyDown(int keyCode) {
         chatBox.OnKeyDown(keyCode);
         return;
     }
-    for (Item* i : items) {
-        if (keyCode == ALLEGRO_KEY_F && i->playerIsNear) {
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        Item* i = *it;
+        if (keyCode == ALLEGRO_KEY_F && i->playerIsNear)
+        {
             if (i->type == ITEM_APPLE) {
+                std::cout << "lai";
+                if (money >= i->price) {
+                    player.hp = std::min(player.hp + 10, 100);
+                    money -= i->price;
+                    it = items.erase(it);
 
+                    std::ofstream filez("Resource/account.txt"); // truncate mode by default
+                    if (!filez) {
+                        std::cerr << "Failed to open file for writing.\n";
+                    }
+                    int dx = 0;
+                    int dy = 0;
+                    if (MapBefore == 1) {
+                        dx = 12 * BlockSize - (100 - BlockSize);
+                        dy = 22 * BlockSize - (100 - BlockSize);
+                    }
+                    // Write new values into the file
+                    filez << player.username << " " << MapBefore << " " << dx << " " << dy
+                    << " " << money << " " << player.hp;
+                    filez.close();
+
+                    break;
+                }
             } else if (i->type == ITEM_PEACH) {
 
             }
+
+            // updateUser(player.username, dx, dy, money, player.hp, MapBefore);
         }
     }
     if (shop) {
@@ -1097,7 +1125,7 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = SHOP_SKY;
                 items.emplace_back(new Item(j * BlockSize, i * BlockSize, 32, 32,
                     64, 64,
-                    10, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f,
+                    2, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f,
                     ITEM_APPLE));
             } else if (num == 11) {
                 mapState[i][j] = SHOP_SKY;
