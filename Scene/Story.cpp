@@ -3,6 +3,7 @@
 //
 #include "Story.hpp"
 #include "Engine/GameEngine.hpp"
+#include "Engine/AudioHelper.hpp"
 #include <iostream>
 #include <vector>
 #include <sstream>
@@ -26,6 +27,7 @@ void Story::Terminate() {
     for (auto* bmp : intro)
         if (bmp) al_destroy_bitmap(bmp);
     intro.clear();
+    song.clear();
 }
 
 void Story::Initialize() {
@@ -50,13 +52,16 @@ void Story::Initialize() {
             std::cerr << "Failed loading " << oss.str() << "\n";
         }
         intro.push_back(bmp);
+        song.emplace_back("story/map-" + std::to_string(level_) + "-" + std::to_string(i) + ".mp3");
     }
+
 
     // reset fade state
     timer_        = 0;
     alpha_        = 0;
     currentFrame_ = 0;
     phase_        = FadeIn;
+    PlaySong = true;
 }
 
 void Story::Update(float deltaTime) {
@@ -64,6 +69,11 @@ void Story::Update(float deltaTime) {
 
     switch (phase_) {
         case FadeIn:
+            if (PlaySong) {
+                AudioHelper::PlaySample(song[currentFrame_],
+                    false, AudioHelper::SFXVolume, 0);
+                PlaySong = false;
+            }
             alpha_ = std::min(timer_ / fadeTime_, 1.0f);
             if (timer_ >= fadeTime_) {
                 phase_ = Display;
@@ -90,6 +100,7 @@ void Story::Update(float deltaTime) {
                 // next frame
                 phase_ = FadeIn;
                 timer_ = 0;
+                PlaySong = true;
             }
             break;
     }

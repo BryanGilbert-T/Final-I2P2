@@ -646,8 +646,6 @@ void PlayScene::Update(float deltaTime) {
 void PlayScene::Draw() const {
     //al_clear_to_color(al_map_rgb(0, 0, 0));
 
-    if (!introPlayed) return;
-
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;

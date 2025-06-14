@@ -22,7 +22,10 @@ public:
 private:
     enum Phase { FadeIn, Display, FadeOut };
 
+    bool PlaySong = true;
+
     std::vector<ALLEGRO_BITMAP*> intro;
+    std::vector<std::string> song;
     int   level_;
     float fadeTime_;
     float displayTime_;
