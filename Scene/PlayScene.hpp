@@ -37,6 +37,8 @@ class PlayScene final : public Engine::IScene {
 private:
     ALLEGRO_SAMPLE_ID bgmId;
     std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> deathBGMInstance;
+    std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> rainBGM;
+    std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE> birdBGM;
     ChatBox chatBox;
     bool chatting = false;
 

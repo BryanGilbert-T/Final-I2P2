@@ -493,7 +493,7 @@ void PlayScene::Update(float deltaTime) {
         return;
     }
 
-    if (MapId == 1 && !introPlayed) {
+    if (MapId == 1 && !introPlayed && player.x == 820 && player.y == 1372) {
         changeScene = true;
         Engine::GameEngine::GetInstance().ChangeScene("story-1");
         introPlayed = true;
@@ -549,6 +549,27 @@ void PlayScene::Update(float deltaTime) {
         isRaining = (rainRoll(rng) == 0);
         // clear any leftover drops
         drops.clear();
+        if (isRaining) {
+            AudioHelper::PlaySample("play/thunder.mp3", false,
+                AudioHelper::SFXVolume, 0);
+            if (!rainBGM) {
+                rainBGM = AudioHelper::PlaySample("play/rain.mp3", true,
+                    AudioHelper::SFXVolume, 0);
+            }
+            if (birdBGM) {
+                AudioHelper::StopSample(birdBGM);
+                birdBGM = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+            }
+        } else {
+            if (!birdBGM) {
+                birdBGM = AudioHelper::PlaySample("play/birds.mp3", true,
+                    AudioHelper::SFXVolume, 0);
+            }
+            if (rainBGM) {
+                AudioHelper::StopSample(rainBGM);
+                rainBGM = std::shared_ptr<ALLEGRO_SAMPLE_INSTANCE>();
+            }
+        }
     }
 
     // if raining, spawn & update raindrops
