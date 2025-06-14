@@ -26,6 +26,8 @@ const double IDLE_FRAME_RATE = 0.3;
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
+const int xkurang = 35;
+const int ykurang = 15;
 
 void Enemy::setState(State s) {
     if (state != s) {
@@ -244,5 +246,5 @@ void Enemy::Draw(Camera cam){
             flag
         );
     }
-    al_draw_rectangle(dx, dy, dx + ENEMY_WIDTH, dy + ENEMY_HEIGHT, al_map_rgb(0, 0, 0), 10);
+
 }
