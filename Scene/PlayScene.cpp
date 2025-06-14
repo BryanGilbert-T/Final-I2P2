@@ -211,6 +211,9 @@ void PlayScene::Initialize() {
         if (MapBefore == 1) {
             dx = 12 * BlockSize - (100 - BlockSize);
             dy = 22 * BlockSize - (100 - BlockSize);
+        } else if (MapBefore == 2) {
+            dx = 88 * BlockSize - (100 - BlockSize);
+            dy = 6 * BlockSize - (100 - BlockSize);
         }
 
         // Write new values into the file
@@ -982,6 +985,9 @@ void PlayScene::OnKeyDown(int keyCode) {
                     if (MapBefore == 1) {
                         dx = 12 * BlockSize - (100 - BlockSize);
                         dy = 22 * BlockSize - (100 - BlockSize);
+                    } else if (MapBefore == 2) {
+                        dx = 88 * BlockSize - (100 - BlockSize);
+                        dy = 6 * BlockSize - (100 - BlockSize);
                     }
                     // Write new values into the file
                     filez << player.username << " " << MapBefore << " " << dx << " " << dy
