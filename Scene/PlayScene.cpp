@@ -128,6 +128,7 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::MapTeleport, this, 1));
     AddNewControlObject(btn);
+
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
     vignette = al_load_bitmap("Resource/images/play-scene/vignete.png");
@@ -234,7 +235,8 @@ void PlayScene::Pause(int stage) {
     pause = !pause;
 }
 void PlayScene::MapTeleport(int stage) {
-    maptp = !maptp;
+    maptp = true;
+    std::cout << maptp << std::endl;
 }
 void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
@@ -510,6 +512,11 @@ void PlayScene::Update(float deltaTime) {
         return;
     }
 
+    if (maptp) {
+
+        return;
+    }
+
     if (MapId == 1 && !introPlayed && player.x == 820 && player.y == 1372) {
         changeScene = true;
         Engine::GameEngine::GetInstance().ChangeScene("story-1");
@@ -736,6 +743,11 @@ void PlayScene::Draw() const {
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
+
+    if (maptp) {
+
+        return;
+    }
 
     // draw parallax behind everything
     float phase = ambientTimer / AmbientCycle;
