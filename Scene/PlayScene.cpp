@@ -516,7 +516,7 @@ void PlayScene::Update(float deltaTime) {
     }
 
     if (maptp) {
-
+        MapGroup->Update(deltaTime);
         return;
     }
 
@@ -749,7 +749,8 @@ void PlayScene::Draw() const {
 
     if (maptp) {
         al_draw_scaled_bitmap(mapBitmap, 0, 0, w, h, 0, 0, w, h, 0);
-        
+
+        MapGroup->Draw();
         return;
     }
 
