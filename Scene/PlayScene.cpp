@@ -125,7 +125,7 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
-    btn = new Engine::ImageButton("play-scene/ui/map-btn.png", "play-scene/ui/map-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
+    btn = new Engine::ImageButton("map/map-btn.png", "map/map-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::MapTeleport, this, 1));
     AddNewControlObject(btn);
 
@@ -1080,6 +1080,8 @@ void PlayScene::OnKeyDown(int keyCode) {
             if (i->type == ITEM_APPLE) {
                 std::cout << "lai";
                 if (money >= i->price) {
+                    AudioHelper::PlaySample("sfx/chaching.mp3", false,
+                        AudioHelper::SFXVolume, 0);
                     player.hp = std::min(player.hp + 10, 100);
                     money -= i->price;
                     it = items.erase(it);
@@ -1106,6 +1108,8 @@ void PlayScene::OnKeyDown(int keyCode) {
                 }
             } else if (i->type == ITEM_BANANA) {
                 if (money >= i->price) {
+                    AudioHelper::PlaySample("sfx/chaching.mp3", false,
+                        AudioHelper::SFXVolume, 0);
                     player.hp = std::min(player.hp + 30, 100);
                     money -= i->price;
                     it = items.erase(it);
