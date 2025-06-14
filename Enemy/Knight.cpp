@@ -340,7 +340,7 @@ void KnightEnemy::performAttack(float dt, float dist) {
                             Engine::GameEngine::GetInstance().GetScene("play")
                         );
             if (scene) {
-                int dx = this->x;
+                int dx = this->x + 20;
                 int dy = this->y + ENEMY_HEIGHT / 4 * 3;
                 if (scene->player.CollideWith(dx, dy)) {
                     scene->player.Hit(damage, (flag == 1) ? -1 : 1);

@@ -1,6 +1,7 @@
 // ChatBox.cpp
 #include "Chat.hpp"
 #include "Engine/GameEngine.hpp"
+#include "Engine/AudioHelper.hpp"
 #include "Engine/utility.hpp"
 #include <allegro5/allegro_primitives.h>
 #include <allegro5/allegro_font.h>
@@ -23,6 +24,8 @@ ChatBox::ChatBox()
 
 // Begin conversation:
 void ChatBox::start(const std::vector<DialogueEntry>& entries) {
+    AudioHelper::PlaySample("sfx/chatmove.mp3", false,
+        AudioHelper::SFXVolume, 0);
     queue = entries;
     currentIndex = 0;
     active = true;
@@ -54,6 +57,8 @@ void ChatBox::advance() {
     if (currentIndex >= (int)queue.size()) {
         active = false;
     }
+    AudioHelper::PlaySample("sfx/chatmove.mp3", false,
+        AudioHelper::SFXVolume, 0);
 }
 
 void ChatBox::draw(Camera cam) const {

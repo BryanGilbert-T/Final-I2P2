@@ -69,6 +69,8 @@ public:
     int     currentPhase  = -1;       // last‐seen index 0…5
     std::mt19937 rng;                 // random engine
     std::uniform_int_distribution<int> rainRoll{0,2}; // 0…4
+    std::uniform_int_distribution<int> appleSound{0,2}; // 0…4
+    void MapTeleport(int stage);
 
     struct Raindrop {
         float x, y, speed;
@@ -148,6 +150,7 @@ public:
     bool changeScene = false;
     void Pause(int stage);
     bool pause = false;
+    bool maptp = false;
 
     void findTeleport();
 };
