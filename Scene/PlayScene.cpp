@@ -73,14 +73,14 @@ void PlayScene::Initialize() {
     location.Initialize();
     shop = nullptr;
 
+    MapGroup = new Group();
+
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
 
-    //MAP
     mapBitmap = al_load_bitmap("Resource/images/map/map.png");
-
     //SHADER
     lightShader = al_create_shader(ALLEGRO_SHADER_AUTO);
     std::cerr << "CWD: " << std::filesystem::current_path() << "\n";
@@ -135,6 +135,17 @@ void PlayScene::Initialize() {
     HealthUIBg = al_load_bitmap("Resource/images/play-scene/ui/life-ui-bg.png");
     HealthUIValue = al_load_bitmap("Resource/images/play-scene/ui/life-ui-value.png");
     vignette = al_load_bitmap("Resource/images/play-scene/vignete.png");
+
+    //MAP
+    teleportButton = al_load_bitmap("Resource/images/map/huaguo-btn.png");
+    teleportButtonHovered = al_load_bitmap("Resource/images/map/huaguo-btn-hov.png");;
+    teleport1 = false;
+    teleport2 = false;
+    teleport3 = false;
+
+    backButton = al_load_bitmap("Resource/images/map/back-btn.png");;
+    backButtonHovered = al_load_bitmap("Resource/images/map/back-btn-hov.png");;
+    backHover = false;
 
     std::vector<std::string> cloudLayers = {
         "Resource/images/play-scene/mountains/sky.png",
@@ -191,6 +202,7 @@ void PlayScene::Initialize() {
     AddNewObject(TowerGroup = new Group());
     AddNewObject(BulletGroup = new Group());
     AddNewObject(EffectGroup = new Group());
+    AddNewControlObject(MapGroup);
     // Should support buttons.
     AddNewControlObject(UIGroup = new Group());
     ReadMap();
@@ -239,8 +251,11 @@ void PlayScene::Pause(int stage) {
 }
 void PlayScene::MapTeleport(int stage) {
     maptp = true;
-    std::cout << maptp << std::endl;
 }
+void PlayScene::MapTeleportTo(int stage) {
+
+}
+
 void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
     IScene::Terminate();
@@ -416,6 +431,13 @@ void PlayScene::findTeleport() {
     }
 }
 
+bool playmouse(int mx, int my, int x, int y, int w, int h) {
+    if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
+        return true;
+    }
+    return false;
+}
+
 bool PlayScene::PlayerIsInside(int x, int y) {
     return (player.x >= x && player.x <= x + BlockSize &&
         player.y >= y);
@@ -516,7 +538,38 @@ void PlayScene::Update(float deltaTime) {
     }
 
     if (maptp) {
-        MapGroup->Update(deltaTime);
+        Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
+
+        if (playmouse(mouse.x, mouse.y, 440, 635, 191, 48)) {
+            teleport1 = true;
+            teleport2 = false;
+            teleport3 = false;
+            backHover = false;
+        }
+        else if (playmouse(mouse.x, mouse.y, 862, 217, 191, 48)) {
+            teleport1 = false;
+            teleport2 = true;
+            teleport3 = false;
+            backHover = false;
+        }
+        else if (playmouse(mouse.x, mouse.y, 836, 826, 191, 48)) {
+            teleport1 = false;
+            teleport2 = false;
+            teleport3 = true;
+            backHover = false;
+        }
+        else if (playmouse(mouse.x, mouse.y, 1920 * 0.9, 30, 58, 59)) {
+            teleport1 = false;
+            teleport2 = false;
+            teleport3 = false;
+            backHover = true;
+        } else {
+            teleport1 = false;
+            teleport2 = false;
+            teleport3 = false;
+            backHover = false;
+        }
+
         return;
     }
 
@@ -750,7 +803,30 @@ void PlayScene::Draw() const {
     if (maptp) {
         al_draw_scaled_bitmap(mapBitmap, 0, 0, w, h, 0, 0, w, h, 0);
 
-        MapGroup->Draw();
+        if (teleport1) {
+            al_draw_scaled_bitmap(teleportButtonHovered, 0, 0, 191, 48, 440, 635, 191, 48, 0);
+        } else {
+            al_draw_scaled_bitmap(teleportButton, 0, 0, 191, 48, 440, 635, 191, 48, 0);
+        }
+
+        if (teleport2) {
+            al_draw_scaled_bitmap(teleportButtonHovered, 0, 0, 191, 48, 862, 217, 191, 48, 0);
+        } else {
+            al_draw_scaled_bitmap(teleportButton, 0, 0, 191, 48, 862, 217, 191, 48, 0);
+        }
+
+        if (teleport3) {
+            al_draw_scaled_bitmap(teleportButtonHovered, 0, 0, 191, 48, 836, 826, 191, 48, 0);
+        } else {
+            al_draw_scaled_bitmap(teleportButton, 0, 0, 191, 48, 836, 826, 191, 48, 0);
+        }
+
+        if (backHover) {
+            al_draw_scaled_bitmap(backButtonHovered, 0, 0, 58, 59, w * 0.9, 30, 58, 59, 0);
+        } else {
+            al_draw_scaled_bitmap(backButton, 0, 0, 58, 59, w * 0.9, 30, 58, 59, 0);
+        }
+
         return;
     }
 
@@ -951,6 +1027,71 @@ void PlayScene::Draw() const {
 
 void PlayScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
+
+    if (maptp) {
+        if (button & 1) {
+            if (teleport1) {
+                MapId = 1;
+                changeScene = true;
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 1 << " " << 850 << " " << 1372
+                << " " << money << " " << player.hp;
+
+                file.close();
+
+                updateUser(player.username, 850, 1372, money, player.hp, 1);
+                Engine::GameEngine::GetInstance().ChangeScene("play");
+                return;
+            } else if (teleport2) {
+                MapId = 2;
+                int nextx = 3 * BlockSize - (100 - BlockSize);
+                int nexty = 21 * BlockSize - (100 - BlockSize);
+
+                changeScene = true;
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 2 << " " << nextx << " " << nexty
+                << " " << money << " " << player.hp;
+
+                file.close();
+
+                updateUser(player.username, nextx, nexty, money, player.hp, 2);
+                Engine::GameEngine::GetInstance().ChangeScene("play");
+                return;
+            } else if (teleport3) {
+                MapId = 3;
+                int nextx = 0;
+                int nexty = 0;
+
+                changeScene = true;
+                std::ofstream file("Resource/account.txt"); // truncate mode by default
+                if (!file) {
+                    std::cerr << "Failed to open file for writing.\n";
+                }
+
+                // Write new values into the file
+                file << player.username << " " << 3 << " " << nextx << " " << nexty
+                << " " << money << " " << player.hp;
+
+                file.close();
+
+                updateUser(player.username, nextx, nexty, money, player.hp, 3);
+                Engine::GameEngine::GetInstance().ChangeScene("play");
+                return;
+            } else if (backHover) {
+                maptp = false;
+            }
+        }
+    }
 
     if (pause && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();

@@ -52,6 +52,16 @@ protected:
     ALLEGRO_FONT* coinFont;
 
 public:
+    ALLEGRO_BITMAP* teleportButton;
+    ALLEGRO_BITMAP* teleportButtonHovered;
+    bool teleport1 = false;
+    bool teleport2 = false;
+    bool teleport3 = false;
+
+    ALLEGRO_BITMAP* backButton;
+    ALLEGRO_BITMAP* backButtonHovered;
+    bool backHover = false;
+
     int MoneyBefore;
     int MapBefore;
     bool introPlayed = false;
@@ -143,6 +153,7 @@ public:
     void ConstructUI();
     void UIBtnClicked(int id);
     bool CheckSpaceValid(int x, int y);
+    void MapTeleportTo(int stage);
     std::vector<std::vector<int>> CalculateBFSDistance();
     // void ModifyReadMapTiles();
     std::vector<Engine::Point> teleportLeft;
