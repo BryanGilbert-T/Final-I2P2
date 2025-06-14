@@ -47,6 +47,9 @@ const double DEAD_FRAME_RATE = 0.1;
 
 const float ATTACK_COOLDOWN_MAX = 1.0f;
 
+const int xkurang = 35;
+const int ykurang = 15;
+
 
 void Player::Create(int hp, int x, int y, std::string name){
     username = name;
@@ -271,16 +274,21 @@ void Player::Update(float deltaTime) {
             setState(IDLE);
         }
     }
+    const int w2 = PLAYER_WIDTH - xkurang - xkurang;
+    const int h2 = PLAYER_HEIGHT - ykurang;
     if (knockbackRemaining > 0) {
         int step = std::min(knockbackRemaining, speed);
         int dx = x + knockbackDir * step;
         int dy = y;
         knockbackRemaining -= step;
         // (optional) you can check collisions here if you don’t want them shoved into walls
-        if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy + PLAYER_HEIGHT - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_HEIGHT - 1) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy)) {
+        const int x2 = dx + xkurang;
+        const int y2 = dy + ykurang;
+
+        if (x2 >= 0 && y2 >= 0 &&
+            x2 + w2 - 1 < scene->MapWidth * scene->BlockSize && y2 + h2 - 1 < scene->MapHeight * scene->BlockSize &&
+            !scene->map.IsCollision(x2, y2) && !scene->map.IsCollision(x2 + w2 - 1, y2 + h2 - 1) &&
+            !scene->map.IsCollision(x2, y2 + h2 - 1) && !scene->map.IsCollision(x2 + w2 - 1, y2)) {
             x = dx;
             y = dy;
         }
@@ -299,8 +307,8 @@ void Player::Update(float deltaTime) {
     while (remaining > 0) {
         // test a one-pixel step
         int testY = y + signDY;
-        int leftX = x;
-        int rightX = x + PLAYER_WIDTH - 1;
+        int leftX = x + xkurang;
+        int rightX = leftX + w2 - 1;
         bool collided = false;
 
         if (signDY > 0) {
@@ -363,8 +371,10 @@ void Player::Update(float deltaTime) {
     // 5) Clamp inside world bounds (so you can’t fall off the map):
     int mapPixelW = scene->MapWidth * scene->BlockSize;
     int mapPixelH = scene->MapHeight * scene->BlockSize;
-    if (x < 0)                           x = 0;
-    if (x + PLAYER_WIDTH > mapPixelW)     x = mapPixelW - PLAYER_WIDTH;
+    const int x2 = x + xkurang;
+    const int y2 = y + ykurang;
+    if (x2 < 0)                           x = 0;
+    if (x2 + w2 > mapPixelW)     x = mapPixelW - w2;
     if (y < 0)                           y = 0;
     if (y + PLAYER_HEIGHT > mapPixelH)     y = mapPixelH - PLAYER_HEIGHT;
 }
@@ -459,10 +469,14 @@ void Player::move(int keyCode) {
         isMoving = true;
         flag = 0;
     }
-    if (dx >= 0 && dy >= 0 &&
-        dx + PLAYER_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + PLAYER_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy + PLAYER_HEIGHT - 1) &&
-        !scene->map.IsCollision(dx, dy + PLAYER_HEIGHT - 1) && !scene->map.IsCollision(dx + PLAYER_WIDTH - 1, dy)) {
+    const int x2 = dx + xkurang;
+    const int y2 = dy + ykurang;
+    const int w2 = PLAYER_WIDTH - xkurang - xkurang;
+    const int h2 = PLAYER_HEIGHT - ykurang;
+    if (x2 >= 0 && y2 >= 0 &&
+        x2 + w2 - 1 < scene->MapWidth * scene->BlockSize && y2 + h2 - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(x2, y2) && !scene->map.IsCollision(x2 + w2 - 1, y2 + h2 - 1) &&
+        !scene->map.IsCollision(x2, y2 + h2 - 1) && !scene->map.IsCollision(x2 + w2 - 1, y2)) {
         x = dx;
         y = dy;
     }
@@ -502,7 +516,13 @@ void Player::Draw(Camera cam){
           flag
         );
     }
+    al_draw_rectangle(dx, dy, dx + PLAYER_WIDTH, dy + PLAYER_HEIGHT, al_map_rgb(0, 0, 0), 10);
 
+    const int x2 = dx + xkurang;
+    const int y2 = dy + ykurang;
+    const int w2 = PLAYER_WIDTH - xkurang - xkurang;
+    const int h2 = PLAYER_HEIGHT - ykurang;
+    al_draw_rectangle(x2, y2, x2 + w2, y2 + h2, al_map_rgb(255, 0, 0), 5);
 }
 
 bool Player::enemyInRange(int x, int y) {

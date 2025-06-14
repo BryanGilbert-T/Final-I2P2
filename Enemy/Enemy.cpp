@@ -26,6 +26,8 @@ const double IDLE_FRAME_RATE = 0.3;
 const int JUMP_FRAME_COUNT = 2;
 const double JUMP_FRAME_RATE = 0.3;
 
+const int xkurang = 35;
+const int ykurang = 15;
 
 void Enemy::setState(State s) {
     if (state != s) {

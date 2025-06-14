@@ -40,6 +40,9 @@ const int HEIGHT = 80*2.5;
 
 const float attackCooldownMax = 2.0f;
 
+const int xkurang = 90;
+const int ykurang = 80;
+
 const std::string filename = "Resource/images/character/idle-sheet.png";
 const std::string idlefile = "Resource/images/character/knight/_Idle.png";
 const std::string walkfile = "Resource/images/character/knight/_Run.png";
@@ -133,6 +136,17 @@ std::pair<float,float> KnightEnemy::getPlayerPos() const {
 
 void KnightEnemy::Draw(Camera cam) {
     Enemy::Draw(cam);
+
+    int dx = x - cam.x;
+    int dy = y - cam.y;
+
+    al_draw_rectangle(dx, dy, dx + ENEMY_WIDTH, dy + ENEMY_HEIGHT, al_map_rgb(0, 0, 0), 10);
+
+    const int x2 = dx + xkurang;
+    const int y2 = dy + ykurang;
+    const int w2 = ENEMY_WIDTH - xkurang - xkurang;
+    const int h2 = ENEMY_HEIGHT - ykurang;
+    al_draw_rectangle(x2, y2, x2 + w2, y2 + h2, al_map_rgb(255, 0, 0), 5);
 }
 
 void KnightEnemy::performPatrol(float dt) {
@@ -155,10 +169,15 @@ void KnightEnemy::performPatrol(float dt) {
         patrolDir = -patrolDir;
     }
 
-    if (dx >= 0 && dy >= 0 &&
-        dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
-        !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
-        !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+    const int x2 = dx + xkurang;
+    const int y2 = dy + ykurang;
+    const int w2 = ENEMY_WIDTH - xkurang - xkurang;
+    const int h2 = ENEMY_HEIGHT - ykurang;
+
+    if (x2 >= 0 && y2 >= 0 &&
+        x2 + w2 - 1 < scene->MapWidth * scene->BlockSize && y2 + h2 - 1 < scene->MapHeight * scene->BlockSize &&
+        !scene->map.IsCollision(x2, y2) && !scene->map.IsCollision(x2 + w2 - 1, y2 + h2 - 1) &&
+        !scene->map.IsCollision(x2, y2 + h2 - 1) && !scene->map.IsCollision(x2 + w2 - 1, y2)) {
             x = dx;
         }
     else {
@@ -185,10 +204,15 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
             int dx = x + (nx * speed * 2);
             int dy = y;
 
-            if (dx >= 0 && dy >= 0 &&
-            dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
-            !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
-            !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+            const int x2 = dx + xkurang;
+            const int y2 = dy + ykurang;
+            const int w2 = ENEMY_WIDTH - xkurang - xkurang;
+            const int h2 = ENEMY_HEIGHT - ykurang;
+
+            if (x2 >= 0 && y2 >= 0 &&
+                x2 + w2 - 1 < scene->MapWidth * scene->BlockSize && y2 + h2 - 1 < scene->MapHeight * scene->BlockSize &&
+                !scene->map.IsCollision(x2, y2) && !scene->map.IsCollision(x2 + w2 - 1, y2 + h2 - 1) &&
+                !scene->map.IsCollision(x2, y2 + h2 - 1) && !scene->map.IsCollision(x2 + w2 - 1, y2)) {
                 x = dx;
             }
         }
@@ -203,10 +227,15 @@ void KnightEnemy::performChase(float dt, float dx, float dy, float dist) {
             int dx = x + (nx * speed * 2);
             int dy = y;
 
-            if (dx >= 0 && dy >= 0 &&
-            dx + ENEMY_WIDTH - 1 < scene->MapWidth * scene->BlockSize && dy + ENEMY_HEIGHT - 1 < scene->MapHeight * scene->BlockSize &&
-            !scene->map.IsCollision(dx, dy) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy + ENEMY_HEIGHT - 1) &&
-            !scene->map.IsCollision(dx, dy + ENEMY_HEIGHT - 1) && !scene->map.IsCollision(dx + ENEMY_WIDTH - 1, dy)) {
+            const int x2 = dx + xkurang;
+            const int y2 = dy + ykurang;
+            const int w2 = ENEMY_WIDTH - xkurang - xkurang;
+            const int h2 = ENEMY_HEIGHT - ykurang;
+
+            if (x2 >= 0 && y2 >= 0 &&
+                x2 + w2 - 1 < scene->MapWidth * scene->BlockSize && y2 + h2 - 1 < scene->MapHeight * scene->BlockSize &&
+                !scene->map.IsCollision(x2, y2) && !scene->map.IsCollision(x2 + w2 - 1, y2 + h2 - 1) &&
+                !scene->map.IsCollision(x2, y2 + h2 - 1) && !scene->map.IsCollision(x2 + w2 - 1, y2)) {
                 x = dx;
             }
         }

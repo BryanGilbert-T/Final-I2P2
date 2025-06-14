@@ -219,7 +219,7 @@ void LeaderboardScene::Draw() const {
                                 al_get_bitmap_width(profile), al_get_bitmap_height(profile),0);
         // text
         al_draw_text(
-            PlayFont, al_map_rgb(0,0,0),
+            PlayFont, (ldb[idx].name == curUser) ? al_map_rgb(130, 0, 0) : al_map_rgb(0,0,0),
             startw, starth + i * deltah - fontHeight/2,
             ALLEGRO_ALIGN_LEFT, ldb[idx].name.c_str()
         );

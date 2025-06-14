@@ -68,7 +68,6 @@ void PlayScene::Initialize() {
     ticks = 0;
     deathCountDown = -1;
     lives = 10;
-    money = 150;
     SpeedMult = 1;
     cam.Update(0, 0);
     location.Initialize();
@@ -111,7 +110,14 @@ void PlayScene::Initialize() {
                   << al_get_shader_log(lightShader) << "\n";
     }
 
+    coinIcon = al_load_bitmap("Resource/images/play-scene/shop/AppleIcon.png");
+    if (!coinIcon) {
+        std::cerr << "<UNK> Cannot load coinIcon.png\n";
+    }
+    coinFont = al_load_ttf_font("Resource/fonts/imfell.ttf", 64, 0);
+
     items.clear();
+    coins.clear();
 
     //UI
     elapsedTime = 0.0f;
@@ -164,6 +170,8 @@ void PlayScene::Initialize() {
     file.close();
     this->MapId = level;
     this->player.Create(hp, x, y, username);
+    this->money = score;
+    this->MoneyBefore = money;
     DrawLoading(2);
 
     rng.seed(std::random_device{}());
@@ -203,15 +211,18 @@ void PlayScene::Initialize() {
         if (MapBefore == 1) {
             dx = 12 * BlockSize - (100 - BlockSize);
             dy = 22 * BlockSize - (100 - BlockSize);
+        } else if (MapBefore == 2) {
+            dx = 88 * BlockSize - (100 - BlockSize);
+            dy = 6 * BlockSize - (100 - BlockSize);
         }
 
         // Write new values into the file
         filez << player.username << " " << MapBefore << " " << dx << " " << dy
-        << " " << 0 << " " << player.hp;
+        << " " << money << " " << player.hp;
 
         filez.close();
 
-        updateUser(player.username, dx, dy, 0, player.hp, MapBefore);
+        updateUser(player.username, dx, dy, money, player.hp, MapBefore);
     }
     DrawLoading(10);
 }
@@ -222,6 +233,10 @@ void PlayScene::Terminate() {
     MountainSceneBg.Terminate();
     IScene::Terminate();
 
+    if (coinIcon) {
+        al_destroy_bitmap(coinIcon);
+    }
+
     if (changeScene == false && MapId != 9) {
         DrawLoading(1);
         std::ofstream file("Resource/account.txt"); // truncate mode by default
@@ -231,12 +246,12 @@ void PlayScene::Terminate() {
 
         // Write new values into the file
         file << player.username << " " << MapId << " " << player.x << " " << player.y
-        << " " << 0 << " " << player.hp;
+        << " " << money << " " << player.hp;
         DrawLoading(2);
 
         file.close();
 
-        updateUser(player.username, player.x, player.y, 0, player.hp, MapId);
+        updateUser(player.username, player.x, player.y, money, player.hp, MapId);
         for (int i = 3; i <= 10; i++) {
             DrawLoading(i);
             al_rest(0.1);
@@ -335,7 +350,7 @@ void PlayScene::findTeleport() {
 
                 // Write new values into the file
                 file << player.username << " " << 1 << " " << nextx << " " << nexty
-                << " " << 0 << " " << player.hp;
+                << " " << money << " " << player.hp;
 
                 file.close();
             }
@@ -358,7 +373,7 @@ void PlayScene::findTeleport() {
 
                 // Write new values into the file
                 file << player.username << " " << 2 << " " << nextx << " " << nexty
-                << " " << 0 << " " << player.hp;
+                << " " << money << " " << player.hp;
 
                 file.close();
             }
@@ -373,7 +388,7 @@ void PlayScene::findTeleport() {
 
                 // Write new values into the file
                 file << player.username << " " << 3 << " " << nextx << " " << nexty
-                << " " << 0 << " " << player.hp;
+                << " " << money << " " << player.hp;
 
                 file.close();
             }
@@ -494,6 +509,22 @@ void PlayScene::Update(float deltaTime) {
 
     if (shop) {
         shop->Update(deltaTime, player);
+    }
+
+    for (auto it = coins.begin(); it != coins.end(); /*no ++it here*/) {
+        Coin* c = *it;
+        c->Update(deltaTime, player);
+
+        if (c->playerIsNear) {
+            // 1) Award the player
+            money += 1;                // or call EarnMoney(1) if you have such a method
+
+            // 3) Erase from the vector and advance the iterator
+            it = coins.erase(it);
+        }
+        else {
+            ++it;
+        }
     }
 
     for (Item* i : items) {
@@ -624,7 +655,6 @@ void PlayScene::Draw() const {
     // draw parallax behind everything
     float phase = ambientTimer / AmbientCycle;
 
-
     // Option A: smooth cosine-based brightness in [0,1]:
     //    at phase=0 → brightness=1 (full day)
     //    at phase=0.5 → brightness=0 (midnight)
@@ -671,12 +701,29 @@ void PlayScene::Draw() const {
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
 
-
-
     al_use_shader(nullptr);
     if (shop) {
         shop->Draw(cam);
     }
+
+    for (Coin* c : coins) {
+        c->Draw(cam);
+    }
+
+    const int iconx = w * 0.05;
+    const int icony = h * 0.1;
+    const int iconw = 64;
+    const int iconh = 64;
+    al_draw_scaled_bitmap(coinIcon,
+        0, 0, 32, 32,
+        iconx, icony, iconw, iconh,
+        0);
+
+    const int distance = BlockSize * 1.5;
+    const int fontHeight = al_get_font_line_height(coinFont);
+    al_draw_text(coinFont, al_map_rgb(255, 255, 255),
+        iconx + distance, icony - (fontHeight/2), ALLEGRO_ALIGN_LEFT,
+        std::to_string(money).c_str());
 
     for (Item* i : items) {
         i->Draw(cam);
@@ -803,7 +850,6 @@ void PlayScene::Draw() const {
 void PlayScene::OnMouseDown(int button, int mx, int my) {
     IScene::OnMouseDown(button, mx, my);
 
-
     if (pause && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();
         const int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -874,7 +920,7 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
 
             // Write new values into the file
             file << player.username << " " << 1 << " " << 820 << " " << 1372
-            << " " << 0 << " " << 100;
+            << " " << MoneyBefore << " " << 100;
 
             file.close();
 
@@ -894,6 +940,7 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
             player.hp = 100;
             player.x = 820;
             player.y = 1372;
+            money = MoneyBefore;
 
             Engine::GameEngine::GetInstance().ChangeScene("boarding");
         }
@@ -929,10 +976,37 @@ void PlayScene::OnKeyDown(int keyCode) {
         chatBox.OnKeyDown(keyCode);
         return;
     }
-    for (Item* i : items) {
-        if (keyCode == ALLEGRO_KEY_F && i->playerIsNear) {
+    for (auto it = items.begin(); it != items.end(); ++it) {
+        Item* i = *it;
+        if (keyCode == ALLEGRO_KEY_F && i->playerIsNear)
+        {
             if (i->type == ITEM_APPLE) {
-                
+                std::cout << "lai";
+                if (money >= i->price) {
+                    player.hp = std::min(player.hp + 10, 100);
+                    money -= i->price;
+                    it = items.erase(it);
+
+                    std::ofstream filez("Resource/account.txt"); // truncate mode by default
+                    if (!filez) {
+                        std::cerr << "Failed to open file for writing.\n";
+                    }
+                    int dx = 0;
+                    int dy = 0;
+                    if (MapBefore == 1) {
+                        dx = 12 * BlockSize - (100 - BlockSize);
+                        dy = 22 * BlockSize - (100 - BlockSize);
+                    } else if (MapBefore == 2) {
+                        dx = 88 * BlockSize - (100 - BlockSize);
+                        dy = 6 * BlockSize - (100 - BlockSize);
+                    }
+                    // Write new values into the file
+                    filez << player.username << " " << MapBefore << " " << dx << " " << dy
+                    << " " << money << " " << player.hp;
+                    filez.close();
+
+                    break;
+                }
             } else if (i->type == ITEM_PEACH) {
 
             }
@@ -951,7 +1025,7 @@ void PlayScene::OnKeyDown(int keyCode) {
 
             // Write new values into the file
             file << player.username << " " << 9 << " " << nextx << " " << nexty
-            << " " << 0 << " " << player.hp;
+            << " " << money << " " << player.hp;
 
             file.close();
 
@@ -1018,6 +1092,7 @@ void PlayScene::ReadMap() {
             case 'T': mapData.push_back(9); break;
             case 'J': mapData.push_back(10); break;
             case 'K': mapData.push_back(11); break;
+            case 'C': mapData.push_back(12); break;
             case '\n':
             case '\r':
                 if (static_cast<int>(mapData.size()) / MapWidth != 0)
@@ -1065,11 +1140,14 @@ void PlayScene::ReadMap() {
                 mapState[i][j] = SHOP_SKY;
                 items.emplace_back(new Item(j * BlockSize, i * BlockSize, 32, 32,
                     64, 64,
-                    10, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f,
+                    2, "Resource/images/play-scene/shop/Apple.png", 8, 0.25f,
                     ITEM_APPLE));
             } else if (num == 11) {
                 mapState[i][j] = SHOP_SKY;
                 // items.emplace_back();
+            } else if (num == 12) {
+                mapState[i][j] = TILE_SKY;
+                coins.emplace_back(new Coin(j * BlockSize - (64 - BlockSize), i * BlockSize - (64 - BlockSize)));
             }
         }
     }
