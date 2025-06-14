@@ -196,6 +196,10 @@ void PlayScene::Initialize() {
     // Preload Lose Scene
     // Start BGM.
 
+    btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
+    btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
+    MapGroup->AddNewControlObject(btn);
+
     PauseFont = al_load_ttf_font("Resource/fonts/imfell.ttf", 16, 0);
     if (!PauseFont) {
         std::cerr << "Failed to load pause menu font\n";
@@ -513,7 +517,7 @@ void PlayScene::Update(float deltaTime) {
     }
 
     if (maptp) {
-
+        MapGroup->Update(deltaTime);
         return;
     }
 
@@ -745,7 +749,7 @@ void PlayScene::Draw() const {
     int halfW = w / 2;
 
     if (maptp) {
-
+        MapGroup->Draw();
         return;
     }
 

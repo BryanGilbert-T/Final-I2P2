@@ -105,6 +105,7 @@ public:
     Group *TowerGroup;
     Group *EffectGroup;
     Group *UIGroup;
+    Group *MapGroup;
     std::list<Enemy*> enemyGroup;
     Engine::Label *UIMoney;
     Engine::Label *UILives;
