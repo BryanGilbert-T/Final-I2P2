@@ -37,7 +37,7 @@ void Story::Initialize() {
         case 1: frameCount = 3; break;
         case 2: frameCount = 0; break;
         case 3: frameCount = 0; break;
-        case 4: frameCount = 3; break;
+        case 4: frameCount = 4; break;
         default: frameCount = 1; break;
     }
 
@@ -93,9 +93,15 @@ void Story::Update(float deltaTime) {
             if (timer_ >= fadeTime_) {
                 currentFrame_++;
                 if (currentFrame_ >= intro.size()) {
-                    // Done → back to play
-                    Engine::GameEngine::GetInstance().ChangeScene("play");
-                    return;
+                    if (level_ == 1) {
+                        // Done → back to play
+                        Engine::GameEngine::GetInstance().ChangeScene("play");
+                        return;
+                    }
+                    if (level_ == 4) {
+                        Engine::GameEngine::GetInstance().ChangeScene("intro");
+                        return;
+                    }
                 }
                 // next frame
                 phase_ = FadeIn;

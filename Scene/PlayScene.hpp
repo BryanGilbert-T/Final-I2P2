@@ -59,7 +59,7 @@ public:
     std::vector<Item*> items;
     std::vector<Engine::Point> goBackPoints;
     bool inShop = false;
-    std::vector<bool> chatDone = std::vector(3, false);
+    std::vector<bool> chatDone = std::vector(4, false);
     void CheckChatTrigger();
     bool PlayerIsInside(int x, int y);
     Shop* shop;

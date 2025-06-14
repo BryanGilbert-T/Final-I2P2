@@ -420,6 +420,7 @@ void PlayScene::CheckChatTrigger() {
             if (chatDone[0] == false) {
                 auto it = std::next(enemyGroup.begin(), 4);
                 Enemy* e = *it;
+                if (!e) return;
                 std::vector<DialogueEntry> convo = {
                     DialogueEntry{ "Hey, who's there?",
                         float(e->x - halfW - BlockSize / 2),
@@ -466,6 +467,11 @@ void PlayScene::CheckChatTrigger() {
 
     } else if (MapId == 3) {
         if (PlayerIsInside(330, player.y - 1)) {
+            auto it = std::next(enemyGroup.begin(), 0);
+            Enemy* e = *it;
+            if (!e) {
+                return;
+            }
             if (chatDone[2] == false) {
                 std::vector<DialogueEntry> convo = {
                     DialogueEntry{ "Be Careful!",
@@ -476,6 +482,10 @@ void PlayScene::CheckChatTrigger() {
                     float(player.x - halfW - BlockSize / 2),
                     float(player.y - halfH - BlockSize / 2),
                             157, 100},
+                    DialogueEntry{ "...",
+                        float(e->x - halfW - BlockSize / 2),
+                        float(e->y - halfH - BlockSize / 2),
+                    e->ENEMY_WIDTH, e->ENEMY_HEIGHT},
                 };
                 chatBox.start(convo);
 
@@ -497,6 +507,51 @@ void PlayScene::Update(float deltaTime) {
         changeScene = true;
         Engine::GameEngine::GetInstance().ChangeScene("story-1");
         introPlayed = true;
+        return;
+    }
+
+    if (MapId == 3 && enemyGroup.empty()) {
+        if (chatDone[3] == false) {
+            int w = Engine::GameEngine::GetInstance().getVirtW();
+            int h = Engine::GameEngine::GetInstance().getVirtH();
+            int halfW = w / 2;
+            int halfH = h / 2;
+            std::vector<DialogueEntry> convo = {
+                DialogueEntry{ "There we go!",
+                float(player.x - halfW - BlockSize / 2),
+                float(player.y - halfH - BlockSize / 2),
+                        157, 100},
+                DialogueEntry{ "Finally!",
+                float(player.x - halfW - BlockSize / 2),
+                float(player.y - halfH - BlockSize / 2),
+                        157, 100},
+            };
+            chatBox.start(convo);
+            chatDone[3] = true;
+        }
+    }
+
+    if (chatDone[3] == true && !chatBox.isActive()) {
+        changeScene = true;
+        DrawLoading(1);
+        std::ofstream file("Resource/account.txt"); // truncate mode by default
+        if (!file) {
+            std::cerr << "Failed to open file for writing.\n";
+        }
+
+        // Write new values into the file
+        file << player.username << " " << 1 << " " << 820 << " " << 1372
+        << " " << money << " " << 100;
+        DrawLoading(2);
+
+        file.close();
+
+        updateUser(player.username, 820, 1372, money, 100, 1);
+        for (int i = 3; i <= 10; i++) {
+            DrawLoading(i);
+            al_rest(0.1);
+        }
+        Engine::GameEngine::GetInstance().ChangeScene("story-2");
         return;
     }
 

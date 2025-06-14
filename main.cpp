@@ -52,6 +52,6 @@ int main(int argc, char **argv) {
 	}
 
     // TODO HACKATHON-1 (1/1): Change the start scene
-	game.Start("start", 60, 1920, 1080);
+	game.Start("intro", 60, 1920, 1080);
 	return 0;
 }
