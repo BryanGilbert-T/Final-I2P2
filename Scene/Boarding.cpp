@@ -147,7 +147,7 @@ void BoardingScene::Draw() const {
             w * 0.145, h * 0.2, sw, sh, 0);
 
         al_draw_text(smallFont, al_map_rgb(255, 255, 255),
-            w * 0.9, h * 0.93, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
+            w * 0.9, h * 0.91, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
     }
 
 
