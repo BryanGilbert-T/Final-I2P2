@@ -78,6 +78,9 @@ void PlayScene::Initialize() {
     int halfW = w / 2;
     int halfH = h / 2;
 
+    //MAP
+    mapBitmap = al_load_bitmap("Resource/images/map/map.png");
+
     //SHADER
     lightShader = al_create_shader(ALLEGRO_SHADER_AUTO);
     std::cerr << "CWD: " << std::filesystem::current_path() << "\n";
@@ -125,7 +128,7 @@ void PlayScene::Initialize() {
     btn = new Engine::ImageButton("play-scene/ui/pause-btn.png", "play-scene/ui/pause-btn-hov.png", w * 0.9, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::Pause, this, 1));
     AddNewControlObject(btn);
-    btn = new Engine::ImageButton("play-scene/ui/map-btn.png", "play-scene/ui/map-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
+    btn = new Engine::ImageButton("map/map-btn.png", "map/map-btn-hov.png", w * 0.85, h * 0.1, 64, 64);
     btn->SetOnClickCallback(std::bind(&PlayScene::MapTeleport, this, 1));
     AddNewControlObject(btn);
 
@@ -513,7 +516,7 @@ void PlayScene::Update(float deltaTime) {
     }
 
     if (maptp) {
-        
+
         return;
     }
 
@@ -745,7 +748,8 @@ void PlayScene::Draw() const {
     int halfW = w / 2;
 
     if (maptp) {
-
+        al_draw_scaled_bitmap(mapBitmap, 0, 0, w, h, 0, 0, w, h, 0);
+        
         return;
     }
 
