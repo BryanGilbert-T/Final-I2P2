@@ -61,5 +61,6 @@ public:
     void Hit(int dmg);
     int flag;
     void setState(State s);
+    virtual bool CollideWith(int x, int y) = 0;
 };
 #endif   // PLAYER_HPP

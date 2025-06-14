@@ -52,11 +52,8 @@ protected:
 public:
     int MoneyBefore;
     int MapBefore;
-<<<<<<< HEAD
     bool introPlayed = false;
-=======
     std::vector<Coin*> coins;
->>>>>>> 4e75c0aadc1393dd1f77c6c2da278686000b2bda
     std::vector<Item*> items;
     std::vector<Engine::Point> goBackPoints;
     bool inShop = false;

@@ -56,6 +56,7 @@ public:
   static constexpr int KNOCKBACK_DISTANCE = 100; // total pixels to push back
   int attackRadius;
 
+  bool CollideWith(int x, int y);
   int x, y;
   int hp;
   std::string username;

@@ -136,17 +136,6 @@ std::pair<float,float> KnightEnemy::getPlayerPos() const {
 
 void KnightEnemy::Draw(Camera cam) {
     Enemy::Draw(cam);
-
-    int dx = x - cam.x;
-    int dy = y - cam.y;
-
-    al_draw_rectangle(dx, dy, dx + ENEMY_WIDTH, dy + ENEMY_HEIGHT, al_map_rgb(0, 0, 0), 10);
-
-    const int x2 = dx + xkurang;
-    const int y2 = dy + ykurang;
-    const int w2 = ENEMY_WIDTH - xkurang - xkurang;
-    const int h2 = ENEMY_HEIGHT - ykurang;
-    al_draw_rectangle(x2, y2, x2 + w2, y2 + h2, al_map_rgb(255, 0, 0), 5);
 }
 
 void KnightEnemy::performPatrol(float dt) {
@@ -331,15 +320,30 @@ void KnightEnemy::performAttack(float dt, float dist) {
     // after the attack animation finishes, switch back to chase-walk
     Animation &anim = animations[ATTACK];
     if (anim.current == 1 || anim.current == 2) {
-        if (dist < attackRadius && hitPlayer == false ||
-            (flag == 0 && dist < attackRadius + 170 && hitPlayer == false)) {
+        if (flag == 0 && hitPlayer == false) {
             auto scene = dynamic_cast<PlayScene*>(
                 Engine::GameEngine::GetInstance().GetScene("play")
             );
             if (scene) {
-                scene->player.Hit(damage, (flag == 1) ? -1 : 1);
+                int dx = this->x + ENEMY_WIDTH;
+                int dy = this->y + ENEMY_HEIGHT / 4 * 3;
+                if (scene->player.CollideWith(dx, dy)) {
+                    scene->player.Hit(damage, (flag == 1) ? -1 : 1);
+                    hitPlayer = true;
+                }
             }
-            hitPlayer = true;
+        } else if (flag == 1 && hitPlayer == false) {
+            auto scene = dynamic_cast<PlayScene*>(
+                            Engine::GameEngine::GetInstance().GetScene("play")
+                        );
+            if (scene) {
+                int dx = this->x;
+                int dy = this->y + ENEMY_HEIGHT / 4 * 3;
+                if (scene->player.CollideWith(dx, dy)) {
+                    scene->player.Hit(damage, (flag == 1) ? -1 : 1);
+                    hitPlayer = true;
+                }
+            }
         }
     }
     if (anim.current >= anim.frames.size() - 1) {
@@ -348,3 +352,15 @@ void KnightEnemy::performAttack(float dt, float dist) {
         hitPlayer = false;
     }
 }
+
+bool KnightEnemy::CollideWith(int x, int y) {
+    const int x2 = this->x + xkurang;
+    const int y2 = this->y + ykurang;
+    const int w2 = ENEMY_WIDTH - xkurang - xkurang;
+    const int h2 = ENEMY_HEIGHT - ykurang;
+    if (x >= x2 && x <= x2 + w2 && y >= y2 && y <= y2 + h2) {
+        return true;
+    }
+    return false;
+}
+

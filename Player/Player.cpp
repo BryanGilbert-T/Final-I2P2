@@ -260,11 +260,24 @@ void Player::Update(float deltaTime) {
         if (anim.current == 1 || anim.current == 2) {
             for (Enemy* e : scene->enemyGroup) {
                 if (attacked == false) {
-                    if (enemyInRange(e->x + e->ENEMY_WIDTH / 2, e->y + e->ENEMY_HEIGHT /2)) {
-                        e->Hit(10, (flag == 1) ? -1 : 1);
-                        attacked = true;
-                        return;
+                    if (dir == RIGHT) {
+                        int dx = this->x + PLAYER_WIDTH;
+                        int dy = this->y + PLAYER_HEIGHT / 2;
+                        if (e->CollideWith(dx, dy)) {
+                            e->Hit(10, (flag == 1) ? -1 : 1);
+                            attacked = true;
+                            return;
+                        }
+                    } else if (dir == LEFT) {
+                        int dx = this->x;
+                        int dy = this->y + PLAYER_HEIGHT / 2;
+                        if (e->CollideWith(dx, dy)) {
+                            e->Hit(10, (flag == 1) ? -1 : 1);
+                            attacked = true;
+                            return;
+                        }
                     }
+
                 }
             }
         }
@@ -516,14 +529,19 @@ void Player::Draw(Camera cam){
           flag
         );
     }
-    al_draw_rectangle(dx, dy, dx + PLAYER_WIDTH, dy + PLAYER_HEIGHT, al_map_rgb(0, 0, 0), 10);
+}
 
-    const int x2 = dx + xkurang;
-    const int y2 = dy + ykurang;
+bool Player::CollideWith(int x, int y) {
+    const int x2 = this->x + xkurang;
+    const int y2 = this->y + ykurang;
     const int w2 = PLAYER_WIDTH - xkurang - xkurang;
     const int h2 = PLAYER_HEIGHT - ykurang;
-    al_draw_rectangle(x2, y2, x2 + w2, y2 + h2, al_map_rgb(255, 0, 0), 5);
+    if (x >= x2 && x <= x2 + w2 && y >= y2 && y <= y2 + h2) {
+        return true;
+    }
+    return false;
 }
+
 
 bool Player::enemyInRange(int x, int y) {
     if (dir == RIGHT) {

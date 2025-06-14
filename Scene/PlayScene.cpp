@@ -500,7 +500,7 @@ void PlayScene::Update(float deltaTime) {
         return;
     }
 
-    std::cout << player.x << " " << player.y << std::endl;
+    // std::cout << player.x << " " << player.y << std::endl;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -1128,7 +1128,7 @@ void PlayScene::ReadMap() {
                 teleportLeft.emplace_back(Engine::Point(j * BlockSize, i * BlockSize));
             } else if (num == 6) {
                 mapState[i][j] = TILE_SKY;
-                enemyGroup.push_back(new BossEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
+                enemyGroup.push_back(new KnightEnemy(j * BlockSize - (120*2.5 - BlockSize), i * BlockSize - (80*2.5 - BlockSize)));
             } else if (num == 7) {
                 mapState[i][j] = SHOP_SKY;
             } else if (num == 8) {

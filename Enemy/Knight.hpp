@@ -38,5 +38,6 @@ public:
     std::pair<float,float> getPlayerPos() const;
     void performPatrol(float dt);
     void performChase(float dt, float dx, float dy, float dist);
+    bool CollideWith(int x, int y) override ;
 };
 #endif   // PLAYER_HPP
