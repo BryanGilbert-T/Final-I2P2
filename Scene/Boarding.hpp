@@ -17,13 +17,13 @@ public:
     void Terminate() override;
     void PlayOnClick(int stage);
     void SettingsOnClick(int stage);
-    void ScoreboardOnClick();
+    void ScoreboardOnClick(int stage);
+    void FriendlistOnClick(int stage);
     void BackOnClick(int stage);
     void Logout(int stage);
 
     void Draw() const override;
     void Update(float deltaTime) override;
-    void OnMouseDown(int button, int mx, int my) override;
 
     void BGMSlideOnValueChanged(float value);
     void SFXSlideOnValueChanged(float value);

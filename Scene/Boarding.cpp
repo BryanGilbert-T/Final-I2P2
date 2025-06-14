@@ -61,6 +61,18 @@ void BoardingScene::Initialize() {
     btn->SetOnClickCallback(std::bind(&BoardingScene::PlayOnClick, this, 1));
     AddNewControlObject(btn);
 
+    btn = new Engine::ImageButton("stage-select/friendlist-btn.png", "stage-select/friendlist-btn-hov.png", w * 0.93, 63, 102, 102);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::FriendlistOnClick, this, 1));
+    AddNewControlObject(btn);
+
+    btn = new Engine::ImageButton("stage-select/ldb-btn.png", "stage-select/ldb-btn-hov.png", w * 0.93, 185, 102, 102);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::ScoreboardOnClick, this, 1));
+    AddNewControlObject(btn);
+
+    btn = new Engine::ImageButton("stage-select/logout-btn.png", "stage-select/logout-btn-hov.png", w * 0.93, 955, 102, 102);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::Logout, this, 1));
+    AddNewControlObject(btn);
+
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     // bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
@@ -74,9 +86,17 @@ void BoardingScene::SettingsOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("settings");
 }
 
+void BoardingScene::FriendlistOnClick(int stage) {
+    Engine::GameEngine::GetInstance().ChangeScene("friendlist");
+}
 
 void BoardingScene::Logout(int stage) {
-
+    std::string curUser;
+    std::ifstream in("Resource/account.txt");
+    if (in.peek() != EOF) {
+        in >> curUser;
+        set_online(curUser, false);
+    }
     std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
     Engine::GameEngine::GetInstance().ChangeScene("login");
 }
@@ -107,17 +127,9 @@ void BoardingScene::Draw() const {
     int sh = al_get_bitmap_height(Logo);
 
 
-    ALLEGRO_COLOR logoutcolor = (logoutHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR friendlistcolor = (friendlistHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR leaderboardcolor = (leaderboardHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-
-    al_draw_text(PlayFont, logoutcolor, w * 0.8, h * 0.8, ALLEGRO_ALIGN_CENTER, "LOGOUT");
-    al_draw_text(PlayFont, friendlistcolor, w * 0.8, h * 0.175, ALLEGRO_ALIGN_CENTER, "FRIENDLIST");
-    al_draw_text(PlayFont, leaderboardcolor, w * 0.8, h * 0.275, ALLEGRO_ALIGN_CENTER, "LEADERBOARD");
-
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
         0, 0, sw, sh,
-        w * 0.15, h * 0.2, sw, sh, 0);
+        w * 0.145, h * 0.2, sw, sh, 0);
 
     al_draw_text(smallFont, al_map_rgb(0, 0, 0),
         w * 0.98, h * 0.95, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
@@ -134,6 +146,8 @@ void BoardingScene::Update(float deltatime) {
 
     Engine::Point mouse = Engine::GameEngine::GetInstance().GetMousePosition();
 
+    Group::Update(deltatime);
+
     const int offset = 10;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
@@ -143,43 +157,6 @@ void BoardingScene::Update(float deltatime) {
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_font_line_height(PlayFont) * 2 + offset;
 
-    int dxlogout = w * 0.8 - sw / 2;
-    int dylogout = h * 0.8 - offset;
-
-
-   if (mouseIn(mouse.x, mouse.y, dxlogout, dylogout, sw, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = true;
-        friendlistHover = false;
-        leaderboardHover = false;
-    }
-    else if (mouseIn(mouse.x, mouse.y, dxlogout - 20, h * 0.175 - offset, sw + 20, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = true;
-        leaderboardHover = false;
-    }
-    else if (mouseIn(mouse.x, mouse.y, dxlogout - 20, h * 0.275 - offset, sw + 20, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-        leaderboardHover = true;
-    }
-    else {
-        playHover = false;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-        leaderboardHover = false;
-    }
-
     auto &A = animation;
     A.timer += deltatime;
     if (A.timer >= A.frame_time) {
@@ -187,59 +164,17 @@ void BoardingScene::Update(float deltatime) {
         A.current = (A.current + 1) % A.frames.size();
     }
 }
-void BoardingScene::OnMouseDown(int button, int mx, int my) {
-    if (button & 1) {
-        const int offset = 10;
 
-        int w = Engine::GameEngine::GetInstance().getVirtW();
-        int h = Engine::GameEngine::GetInstance().getVirtH();
-        int startx = w * 0.2;
-
-        int sw = al_get_bitmap_width(Logo);
-        int sh = al_get_font_line_height(PlayFont) * 2 + offset;
-
-        int logoutdx = w * 0.8 - sw / 2;
-        int logoutdy = h * 0.8 - offset;
-
-        if(mouseIn(mx, my, startx, h * 0.575 - offset, sw, sh)) {
-            AudioHelper::PlayAudio("sfx/dungtak.mp3");
-            PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
-            Engine::GameEngine::GetInstance().ChangeScene("play");
-        }
-        else if(mouseIn(mx, my, startx, h * 0.675 - offset, sw, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("settings");
-        }
-        else if(mouseIn(mx, my, startx, h * 0.775 - offset, sw, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("start");
-        }
-        else if (mouseIn(mx, my, logoutdx, logoutdy, sw, sh)) {
-            std::string curUser;
-            std::ifstream in("Resource/account.txt");
-            if (in.peek() != EOF) {
-                in >> curUser;
-                set_online(curUser, false);
-            }
-            std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
-            Engine::GameEngine::GetInstance().ChangeScene("login");
-        }
-        else if (mouseIn(mx, my, logoutdx - 20, h * 0.175 - offset, sw + 20, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("friendlist");
-        }
-        else if (mouseIn(mx, my, logoutdx - 20, h * 0.275 - offset, sw + 20, sh)) {
-            Engine::GameEngine::GetInstance().ChangeScene("leaderboard");
-        }
-    }
-}
 void BoardingScene::BackOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("start");
 }
 void BoardingScene::PlayOnClick(int stage) {
+    AudioHelper::PlayAudio("sfx/dungtak.mp3");
     PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
-    scene->MapId = stage;
     Engine::GameEngine::GetInstance().ChangeScene("play");
 }
-void BoardingScene::ScoreboardOnClick() {
-    Engine::GameEngine::GetInstance().ChangeScene("scoreboard-scene");
+void BoardingScene::ScoreboardOnClick(int stage) {
+    Engine::GameEngine::GetInstance().ChangeScene("leaderboard");
 }
 void BoardingScene::BGMSlideOnValueChanged(float value) {
     AudioHelper::ChangeSampleVolume(bgmInstance, value);
