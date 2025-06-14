@@ -244,5 +244,5 @@ void Enemy::Draw(Camera cam){
             flag
         );
     }
-
+    al_draw_rectangle(dx, dy, dx + ENEMY_WIDTH, dy + ENEMY_HEIGHT, al_map_rgb(0, 0, 0), 10);
 }
