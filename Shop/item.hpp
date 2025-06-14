@@ -8,7 +8,7 @@
 
 enum ItemType {
     ITEM_APPLE,
-    ITEM_PEACH,
+    ITEM_BANANA,
 };
 
 class Item {
