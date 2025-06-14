@@ -17,6 +17,10 @@
 #include "UI/Component/ImageButton.hpp"
 #include "UI/Component/Label.hpp"
 #include "UI/Component/Slider.hpp"
+const std::string filename = "Resource/images/stage-select/start-sheet.png";
+
+const int ANIM_FRAME_COUNT = 2;
+const float ANIM_FRAME_RATE = 1.0f;
 
 void BoardingScene::Initialize() {
     int w = Engine::GameEngine::GetInstance().getVirtW();
@@ -25,9 +29,38 @@ void BoardingScene::Initialize() {
     int halfH = h / 2;
     Engine::ImageButton *btn;
 
-    PlayFont = al_load_font("Resource/fonts/imfell.ttf", 48, ALLEGRO_ALIGN_CENTER);
-    Logo = al_load_bitmap("Resource/images/stage-select/sunwukuo-logo.png");
+    PlayFont = al_load_font("Resource/fonts/imfell.ttf", 45, ALLEGRO_ALIGN_CENTER);
+
+    Logo = al_load_bitmap("Resource/images/stage-select/logo-white.png");
     smallFont = al_load_font("Resource/fonts/imfell.ttf", 24, ALLEGRO_ALIGN_CENTER);
+
+    start_sheet = al_load_bitmap(filename.c_str());
+    if (!start_sheet) {
+        std::cerr << "Failed to load start bitmap" << std::endl;
+    }
+    int frameW = al_get_bitmap_width(start_sheet)/ANIM_FRAME_COUNT;
+    int frameH = al_get_bitmap_height(start_sheet)/ANIM_FRAME_COUNT;
+    Animation Anim(ANIM_FRAME_RATE);
+    for (int i = 0; i < ANIM_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            start_sheet, i * frameW, 0, frameW, frameH
+            );
+        Anim.frames.push_back(f);
+    }
+    animation = std::move(Anim);
+
+    btn = new Engine::ImageButton("stage-select/back-btn.png", "stage-select/back-btn-hov.png", 274, 777, 286, 105);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::BackOnClick, this, 1));
+    AddNewControlObject(btn);
+
+    btn = new Engine::ImageButton("stage-select/settings-btn.png", "stage-select/settings-btn-hov.png", 210, 669, 412, 105);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::SettingsOnClick, this, 1));
+    AddNewControlObject(btn);
+
+    btn = new Engine::ImageButton("stage-select/start-btn.png", "stage-select/start-btn-hov.png", 267, 570, 286, 105);
+    btn->SetOnClickCallback(std::bind(&BoardingScene::PlayOnClick, this, 1));
+    AddNewControlObject(btn);
+
 
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     // bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
@@ -36,6 +69,12 @@ void BoardingScene::Initialize() {
     // Not safe if release resource while playing, however we only free while change scene, so it's fine.
     // bgmInstance = AudioHelper::PlaySample("select.ogg", true, AudioHelper::BGMVolume);
 }
+
+void BoardingScene::SettingsOnClick(int stage) {
+    Engine::GameEngine::GetInstance().ChangeScene("settings");
+}
+
+
 void BoardingScene::Logout(int stage) {
 
     std::ofstream ofs("Resource/account.txt", std::ofstream::trunc);
@@ -48,36 +87,41 @@ void BoardingScene::Terminate() {
 }
 void BoardingScene::Draw() const {
     al_clear_to_color(al_map_rgb(255, 255, 255));
-    Group::Draw();
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
     int halfH = h / 2;
 
+    ALLEGRO_BITMAP* bmp = animation.frames[animation.current];
+
+    al_draw_scaled_bitmap(bmp,
+        0, 0, w,h,
+        0, 0, w, h,
+        0);
+
+
+    Group::Draw();
+
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_bitmap_height(Logo);
 
-    ALLEGRO_COLOR playcolor = (playHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR settingcolor = (settingHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
-    ALLEGRO_COLOR backcolor = (backHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
+
     ALLEGRO_COLOR logoutcolor = (logoutHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR friendlistcolor = (friendlistHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
     ALLEGRO_COLOR leaderboardcolor = (leaderboardHover) ? al_map_rgb(255, 0, 0) : al_map_rgb(0, 0, 0);
 
-    al_draw_text(PlayFont, playcolor, w * 0.2 + sw / 2, h * 0.575, ALLEGRO_ALIGN_CENTER, "PLAY");
-    al_draw_text(PlayFont, settingcolor, w * 0.2 + sw / 2, h * 0.675, ALLEGRO_ALIGN_CENTER, "SETTINGS");
-    al_draw_text(PlayFont, backcolor, w * 0.2 + sw / 2, h * 0.775, ALLEGRO_ALIGN_CENTER, "BACK");
     al_draw_text(PlayFont, logoutcolor, w * 0.8, h * 0.8, ALLEGRO_ALIGN_CENTER, "LOGOUT");
     al_draw_text(PlayFont, friendlistcolor, w * 0.8, h * 0.175, ALLEGRO_ALIGN_CENTER, "FRIENDLIST");
     al_draw_text(PlayFont, leaderboardcolor, w * 0.8, h * 0.275, ALLEGRO_ALIGN_CENTER, "LEADERBOARD");
 
     al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
         0, 0, sw, sh,
-        w * 0.2, h * 0.2, sw, sh, 0);
+        w * 0.15, h * 0.2, sw, sh, 0);
 
     al_draw_text(smallFont, al_map_rgb(0, 0, 0),
         w * 0.98, h * 0.95, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
+
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
     if (mx >= x && mx <= x + w && my >= y && my <= y + h) {
@@ -103,31 +147,7 @@ void BoardingScene::Update(float deltatime) {
     int dylogout = h * 0.8 - offset;
 
 
-    if(mouseIn(mouse.x, mouse.y, startx, h * 0.575 - offset, sw, sh)) {
-        playHover = true;
-        settingHover = false;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-        leaderboardHover = false;
-    }
-    else if(mouseIn(mouse.x, mouse.y, startx, h * 0.675 - offset, sw, sh)) {
-        playHover = false;
-        settingHover = true;
-        backHover = false;
-        logoutHover = false;
-        friendlistHover = false;
-        leaderboardHover = false;
-    }
-    else if(mouseIn(mouse.x, mouse.y, startx, h * 0.775 - offset, sw, sh)) {
-        playHover = false;
-        settingHover = false;
-        backHover = true;
-        logoutHover = false;
-        friendlistHover = false;
-        leaderboardHover = false;
-    }
-    else if (mouseIn(mouse.x, mouse.y, dxlogout, dylogout, sw, sh)) {
+   if (mouseIn(mouse.x, mouse.y, dxlogout, dylogout, sw, sh)) {
         playHover = false;
         settingHover = false;
         backHover = false;
@@ -158,6 +178,13 @@ void BoardingScene::Update(float deltatime) {
         logoutHover = false;
         friendlistHover = false;
         leaderboardHover = false;
+    }
+
+    auto &A = animation;
+    A.timer += deltatime;
+    if (A.timer >= A.frame_time) {
+        A.timer -= A.frame_time;
+        A.current = (A.current + 1) % A.frames.size();
     }
 }
 void BoardingScene::OnMouseDown(int button, int mx, int my) {

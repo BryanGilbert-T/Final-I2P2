@@ -16,6 +16,7 @@ public:
     void Initialize() override;
     void Terminate() override;
     void PlayOnClick(int stage);
+    void SettingsOnClick(int stage);
     void ScoreboardOnClick();
     void BackOnClick(int stage);
     void Logout(int stage);
@@ -34,9 +35,10 @@ public:
     bool friendlistHover = false;
     bool leaderboardHover = false;
 
-
     ALLEGRO_FONT* PlayFont;
     ALLEGRO_BITMAP* Logo;
+    ALLEGRO_BITMAP* start_sheet;
+    Animation animation;
 };
 
 #endif   // STAGESELECTSCENE_HPP
