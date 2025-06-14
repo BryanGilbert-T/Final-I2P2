@@ -20,6 +20,7 @@
 
 #include "fstream"
 #include "Scene/leaderboard.hpp"
+#include "Scene/Story.hpp"
 
 int main(int argc, char **argv) {
 	Engine::LOG::SetConfig(true);
@@ -40,6 +41,8 @@ int main(int argc, char **argv) {
 	game.AddNewScene("requests", new RequestsScene());
 	game.AddNewScene("search", new SearchScene());
 	game.AddNewScene("leaderboard", new LeaderboardScene());
+	game.AddNewScene("story-1", new Story(1, 0.5f, 5));
+	game.AddNewScene("story-2", new Story(4, 0.5f, 5));
 
 	std::string curUser;
 	std::ifstream in("Resource/account.txt");

@@ -48,6 +48,7 @@ protected:
 
 public:
     int MapBefore;
+    bool introPlayed = false;
     std::vector<Item*> items;
     std::vector<Engine::Point> goBackPoints;
     bool inShop = false;

@@ -478,6 +478,13 @@ void PlayScene::Update(float deltaTime) {
         return;
     }
 
+    if (MapId == 1 && !introPlayed) {
+        changeScene = true;
+        Engine::GameEngine::GetInstance().ChangeScene("story-1");
+        introPlayed = true;
+        return;
+    }
+
     std::cout << player.x << " " << player.y << std::endl;
 
     int w = Engine::GameEngine::GetInstance().getVirtW();
@@ -608,12 +615,15 @@ void PlayScene::Update(float deltaTime) {
 void PlayScene::Draw() const {
     //al_clear_to_color(al_map_rgb(0, 0, 0));
 
+    if (!introPlayed) return;
+
     int w = Engine::GameEngine::GetInstance().getVirtW();
     int h = Engine::GameEngine::GetInstance().getVirtH();
     int halfW = w / 2;
 
     // draw parallax behind everything
     float phase = ambientTimer / AmbientCycle;
+
 
     // Option A: smooth cosine-based brightness in [0,1]:
     //    at phase=0 → brightness=1 (full day)
@@ -660,6 +670,8 @@ void PlayScene::Draw() const {
     CloudBg.Draw(cam);
     MountainSceneBg.Draw(cam);
     map.DrawMap(cam);
+
+
 
     al_use_shader(nullptr);
     if (shop) {
@@ -789,11 +801,9 @@ void PlayScene::Draw() const {
 }
 
 void PlayScene::OnMouseDown(int button, int mx, int my) {
-    if (pause) return;
-    if ((button & 1) && chatBox.isActive()) {
-        chatBox.OnMouseClick();
-        return;
-    }
+    IScene::OnMouseDown(button, mx, my);
+
+
     if (pause && (button & 1)) {
         const int w = Engine::GameEngine::GetInstance().getVirtW();
         const int h = Engine::GameEngine::GetInstance().getVirtH();
@@ -823,6 +833,11 @@ void PlayScene::OnMouseDown(int button, int mx, int my) {
         {
             Engine::GameEngine::GetInstance().ChangeScene("boarding");
         }
+        return;
+    }
+
+    if ((button & 1) && chatBox.isActive()) {
+        chatBox.OnMouseClick();
         return;
     }
 

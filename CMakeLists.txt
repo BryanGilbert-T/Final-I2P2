@@ -90,6 +90,8 @@ add_executable(${PROJECT_NAME}
         Engine/Location.cpp
         Engine/ParallaxCloud.hpp
         Engine/ParallaxCloud.cpp
+        Scene/Story.hpp
+        Scene/Story.cpp
 )
 
 # Vendored libcurl
