@@ -1226,6 +1226,8 @@ void PlayScene::OnKeyDown(int keyCode) {
             if (i->type == ITEM_APPLE) {
                 std::cout << "lai";
                 if (money >= i->price) {
+                    AudioHelper::PlaySample("sfx/chaching.mp3", false,
+                        AudioHelper::SFXVolume, 0);
                     player.hp = std::min(player.hp + 10, 100);
                     money -= i->price;
                     it = items.erase(it);
@@ -1252,6 +1254,8 @@ void PlayScene::OnKeyDown(int keyCode) {
                 }
             } else if (i->type == ITEM_BANANA) {
                 if (money >= i->price) {
+                    AudioHelper::PlaySample("sfx/chaching.mp3", false,
+                        AudioHelper::SFXVolume, 0);
                     player.hp = std::min(player.hp + 30, 100);
                     money -= i->price;
                     it = items.erase(it);
