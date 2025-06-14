@@ -1026,8 +1026,32 @@ void PlayScene::OnKeyDown(int keyCode) {
 
                     break;
                 }
-            } else if (i->type == ITEM_PEACH) {
+            } else if (i->type == ITEM_BANANA) {
+                if (money >= i->price) {
+                    player.hp = std::min(player.hp + 30, 100);
+                    money -= i->price;
+                    it = items.erase(it);
 
+                    std::ofstream filez("Resource/account.txt"); // truncate mode by default
+                    if (!filez) {
+                        std::cerr << "Failed to open file for writing.\n";
+                    }
+                    int dx = 0;
+                    int dy = 0;
+                    if (MapBefore == 1) {
+                        dx = 12 * BlockSize - (100 - BlockSize);
+                        dy = 22 * BlockSize - (100 - BlockSize);
+                    } else if (MapBefore == 2) {
+                        dx = 88 * BlockSize - (100 - BlockSize);
+                        dy = 6 * BlockSize - (100 - BlockSize);
+                    }
+                    // Write new values into the file
+                    filez << player.username << " " << MapBefore << " " << dx << " " << dy
+                    << " " << money << " " << player.hp;
+                    filez.close();
+
+                    break;
+                }
             }
         }
     }
@@ -1163,6 +1187,10 @@ void PlayScene::ReadMap() {
                     ITEM_APPLE));
             } else if (num == 11) {
                 mapState[i][j] = SHOP_SKY;
+                items.emplace_back(new Item(j * BlockSize, i * BlockSize, 32, 32,
+                   64, 64,
+                   5, "Resource/images/play-scene/shop/Banana.png", 8, 0.25f,
+                   ITEM_BANANA));
                 // items.emplace_back();
             } else if (num == 12) {
                 mapState[i][j] = TILE_SKY;
