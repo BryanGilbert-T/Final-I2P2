@@ -5,6 +5,7 @@
 
 #include "Enemy/Enemy.hpp"
 #include "Engine/GameEngine.hpp"
+#include "Engine/AudioHelper.hpp"
 #include "Engine/Group.hpp"
 #include "Engine/IObject.hpp"
 #include "Engine/IScene.hpp"
@@ -58,6 +59,7 @@ KnightEnemy::KnightEnemy(int x, int y):
     chaseRadius(400.0f),    // e.g. start chasing if closer than 300px
     attackRadius(135.0f)   // optional melee range
 {
+    rng.seed(std::random_device{}());
     attackCooldown = 0.0f;
     hitPlayer = false;
     flag = 0;
@@ -122,6 +124,8 @@ KnightEnemy::KnightEnemy(int x, int y):
     animations[DEAD] = std::move(deadAnim);
 
     animations[JUMP] = animations[IDLE];
+
+    PlaySound = true;
 }
 
 std::pair<float,float> KnightEnemy::getPlayerPos() const {
@@ -312,13 +316,12 @@ KnightEnemy::~KnightEnemy() {
 }
 
 void KnightEnemy::performAttack(float dt, float dist) {
-    // tick down until we can hit again
-
-    // once inside attackRadius & animation playing:
-    // deal damage exactly once per cooldown
-    // restart attack animation from frame 0
-    // after the attack animation finishes, switch back to chase-walk
     Animation &anim = animations[ATTACK];
+    if (PlaySound && anim.current == 1) {
+        int id = whichSound(rng);
+        AudioHelper::PlaySample("play/swing-" + std::to_string(id) + ".mp3", false, AudioHelper::SFXVolume, 0);
+        PlaySound = false;
+    }
     if (anim.current == 1 || anim.current == 2) {
         if (flag == 0 && hitPlayer == false) {
             auto scene = dynamic_cast<PlayScene*>(
@@ -350,6 +353,7 @@ void KnightEnemy::performAttack(float dt, float dist) {
         // reset to WALK once animation is done
         setState(WALK);
         hitPlayer = false;
+        PlaySound = true;
     }
 }
 

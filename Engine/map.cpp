@@ -19,7 +19,7 @@ void Map::Init(int width, int height, MapType state) {
     if (!dirt_bitmap) {
         std::cerr << "Failed to load dirt." << std::endl;
     }
-    sky_bitmap = al_load_bitmap("Resource/images/stage-select/floor.png");
+    sky_bitmap = al_load_bitmap("Resource/images/play-scene/shop/carnivalwallpaper.png");
     if (!sky_bitmap) {
         std::cerr << "Failed to load floor." << std::endl;
     }

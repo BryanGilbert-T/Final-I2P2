@@ -416,7 +416,7 @@ void PlayScene::CheckChatTrigger() {
     int halfH = h / 2;
 
     if (MapId == 1) {
-        if (PlayerIsInside(1396, player.y - 1)) {
+        if (PlayerIsInside(1296, player.y - 1)) {
             if (chatDone[0] == false) {
                 auto it = std::next(enemyGroup.begin(), 4);
                 Enemy* e = *it;

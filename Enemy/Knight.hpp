@@ -6,7 +6,7 @@
 #include <map>
 #include "Scene/PlayScene.hpp"
 #include "Enemy/Enemy.hpp"
-
+#include <random>
 #include "Engine/Sprite.hpp"
 
 
@@ -21,6 +21,11 @@ public:
     void Update(float deltaTime) override;
     void move(int keyCode) override;
     void Draw(Camera cam) override;
+
+    std::mt19937 rng;                 // random engine
+    std::uniform_int_distribution<int> whichSound{0,2}; // 0…4
+
+    bool PlaySound = true;
 
     AIState   aiState;
     float     patrolOriginX;
