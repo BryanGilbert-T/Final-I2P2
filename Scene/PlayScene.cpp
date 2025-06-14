@@ -78,6 +78,9 @@ void PlayScene::Initialize() {
     int halfW = w / 2;
     int halfH = h / 2;
 
+    //MAP
+    mapBitmap = al_load_bitmap("Resource/images/map/map.png");
+
     //SHADER
     lightShader = al_create_shader(ALLEGRO_SHADER_AUTO);
     std::cerr << "CWD: " << std::filesystem::current_path() << "\n";
@@ -745,6 +748,8 @@ void PlayScene::Draw() const {
     int halfW = w / 2;
 
     if (maptp) {
+        al_draw_scaled_bitmap(mapBitmap, 0, 0, w, h, 0, 0, w, h, 0);
+
         MapGroup->Draw();
         return;
     }

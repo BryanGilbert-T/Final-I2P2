@@ -153,6 +153,8 @@ public:
     bool pause = false;
     bool maptp = false;
 
+    ALLEGRO_BITMAP* mapBitmap;
+
     void findTeleport();
 };
 #endif   // PLAYSCENE_HPP
