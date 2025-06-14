@@ -17,10 +17,12 @@
 #include "UI/Component/ImageButton.hpp"
 #include "UI/Component/Label.hpp"
 #include "UI/Component/Slider.hpp"
-const std::string filename = "Resource/images/stage-select/start-sheet.png";
 
 const int ANIM_FRAME_COUNT = 2;
 const float ANIM_FRAME_RATE = 1.0f;
+
+const int START_FRAME_COUNT = 6;
+const float START_FRAME_RATE = 0.35f;
 
 void BoardingScene::Initialize() {
     int w = Engine::GameEngine::GetInstance().getVirtW();
@@ -28,18 +30,20 @@ void BoardingScene::Initialize() {
     int halfW = w / 2;
     int halfH = h / 2;
     Engine::ImageButton *btn;
+    playing = false;
+    delayingSceneChange = false;
 
     PlayFont = al_load_font("Resource/fonts/imfell.ttf", 45, ALLEGRO_ALIGN_CENTER);
 
     Logo = al_load_bitmap("Resource/images/stage-select/logo-white.png");
     smallFont = al_load_font("Resource/fonts/imfell.ttf", 24, ALLEGRO_ALIGN_CENTER);
 
-    start_sheet = al_load_bitmap(filename.c_str());
+    start_sheet = al_load_bitmap("Resource/images/stage-select/start-sheet.png");
     if (!start_sheet) {
         std::cerr << "Failed to load start bitmap" << std::endl;
     }
     int frameW = al_get_bitmap_width(start_sheet)/ANIM_FRAME_COUNT;
-    int frameH = al_get_bitmap_height(start_sheet)/ANIM_FRAME_COUNT;
+    int frameH = al_get_bitmap_height(start_sheet);
     Animation Anim(ANIM_FRAME_RATE);
     for (int i = 0; i < ANIM_FRAME_COUNT; ++i) {
         ALLEGRO_BITMAP* f = al_create_sub_bitmap(
@@ -47,7 +51,19 @@ void BoardingScene::Initialize() {
             );
         Anim.frames.push_back(f);
     }
-    animation = std::move(Anim);
+    startAnimation = std::move(Anim);
+
+    start_sheet = al_load_bitmap("Resource/images/stage-select/play-sheet.png");
+    frameW = al_get_bitmap_width(start_sheet)/START_FRAME_COUNT;
+    frameH = al_get_bitmap_height(start_sheet);
+    Animation playAnim(START_FRAME_RATE);
+    for (int i = 0; i < START_FRAME_COUNT; ++i) {
+        ALLEGRO_BITMAP* f = al_create_sub_bitmap(
+            start_sheet, i * frameW, 0, frameW, frameH
+            );
+        playAnim.frames.push_back(f);
+    }
+    playAnimation = std::move(playAnim);
 
     btn = new Engine::ImageButton("stage-select/back-btn.png", "stage-select/back-btn-hov.png", 274, 777, 286, 105);
     btn->SetOnClickCallback(std::bind(&BoardingScene::BackOnClick, this, 1));
@@ -113,26 +129,27 @@ void BoardingScene::Draw() const {
     int halfW = w / 2;
     int halfH = h / 2;
 
-    ALLEGRO_BITMAP* bmp = animation.frames[animation.current];
+    if (playing) {
+        // Draw play animation when game is playing
+        ALLEGRO_BITMAP* bmp = playAnimation.frames[playAnimation.current];
+        al_draw_scaled_bitmap(bmp, 0, 0, w, h, 0, 0, w, h, 0);
+    } else {
+        // Draw start animation when in menu
+        ALLEGRO_BITMAP* bmp = startAnimation.frames[startAnimation.current];
+        al_draw_scaled_bitmap(bmp, 0, 0, w, h, 0, 0, w, h, 0);
+        Group::Draw();
+        int sw = al_get_bitmap_width(Logo);
+        int sh = al_get_bitmap_height(Logo);
 
-    al_draw_scaled_bitmap(bmp,
-        0, 0, w,h,
-        0, 0, w, h,
-        0);
 
+        al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
+            0, 0, sw, sh,
+            w * 0.145, h * 0.2, sw, sh, 0);
 
-    Group::Draw();
+        al_draw_text(smallFont, al_map_rgb(255, 255, 255),
+            w * 0.9, h * 0.93, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
+    }
 
-    int sw = al_get_bitmap_width(Logo);
-    int sh = al_get_bitmap_height(Logo);
-
-
-    al_draw_tinted_scaled_bitmap(Logo, al_map_rgb_f(1, 1, 1),
-        0, 0, sw, sh,
-        w * 0.145, h * 0.2, sw, sh, 0);
-
-    al_draw_text(smallFont, al_map_rgb(0, 0, 0),
-        w * 0.98, h * 0.95, ALLEGRO_ALIGN_RIGHT, ("user: " + curUser).c_str());
 
 }
 static bool mouseIn(int mx, int my, int x, int y, int w, int h)  {
@@ -156,12 +173,33 @@ void BoardingScene::Update(float deltatime) {
 
     int sw = al_get_bitmap_width(Logo);
     int sh = al_get_font_line_height(PlayFont) * 2 + offset;
+\
+    if (playing) {
+        auto &A = playAnimation;
+        A.timer += deltatime;
+        if (A.timer >= A.frame_time) {
+            A.timer -= A.frame_time;
+            A.current = (A.current + 1);
+            if (A.current == A.frames.size() - 1) {
+                Engine::GameEngine::GetInstance().ChangeScene("play");
+                return;
+            }
+        }
+    }else {
+        auto &A = startAnimation;
+        A.timer += deltatime;
+        if (A.timer >= A.frame_time) {
+            A.timer -= A.frame_time;
+            A.current = (A.current + 1) % A.frames.size();
+        }
+    }
 
-    auto &A = animation;
-    A.timer += deltatime;
-    if (A.timer >= A.frame_time) {
-        A.timer -= A.frame_time;
-        A.current = (A.current + 1) % A.frames.size();
+    if (delayingSceneChange) {
+        sceneChangeDelay -= deltatime;
+        if (sceneChangeDelay <= 0) {
+            Engine::GameEngine::GetInstance().ChangeScene("play");
+            delayingSceneChange = false;
+        }
     }
 }
 
@@ -170,8 +208,11 @@ void BoardingScene::BackOnClick(int stage) {
 }
 void BoardingScene::PlayOnClick(int stage) {
     AudioHelper::PlayAudio("sfx/dungtak.mp3");
-    PlayScene *scene = dynamic_cast<PlayScene *>(Engine::GameEngine::GetInstance().GetScene("play"));
-    Engine::GameEngine::GetInstance().ChangeScene("play");
+    playing = true;
+    playAnimation.current = 0;
+    playAnimation.timer = 0;
+    sceneChangeDelay = 5.0f;
+    delayingSceneChange = true;
 }
 void BoardingScene::ScoreboardOnClick(int stage) {
     Engine::GameEngine::GetInstance().ChangeScene("leaderboard");
