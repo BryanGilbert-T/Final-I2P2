@@ -245,6 +245,7 @@ void PlayScene::Initialize() {
         updateUser(player.username, dx, dy, money, player.hp, MapBefore);
     }
     DrawLoading(10);
+    chatDone = std::vector<bool>(4, false);
 }
 void PlayScene::Pause(int stage) {
     pause = !pause;
@@ -601,7 +602,7 @@ void PlayScene::Update(float deltaTime) {
         }
     }
 
-    if (chatDone[3] == true && !chatBox.isActive()) {
+    if (chatDone[3] == true && !chatBox.isActive() && MapId == 3 && enemyGroup.empty()) {
         changeScene = true;
         DrawLoading(1);
         std::ofstream file("Resource/account.txt"); // truncate mode by default
